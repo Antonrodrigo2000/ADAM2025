@@ -62,3 +62,98 @@
     background-position: 0% 50%;
   }
 }
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes content-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes silhouette-in {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes sun-glow {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 80px 25px rgba(234, 88, 12, 0.4), 0 0 120px 50px rgba(234, 88, 12, 0.2), inset 0 0 40px 20px
+      rgba(253, 186, 116, 0.5);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 100px 35px rgba(234, 88, 12, 0.5), 0 0 160px 70px rgba(234, 88, 12, 0.3), inset 0 0 50px 25px
+      rgba(253, 186, 116, 0.6);
+  }
+}
+
+@keyframes subtle-pan {
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+  100% {
+    transform: translate(-1%, -2%) scale(1.15);
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 2s ease-out forwards;
+  }
+  .animate-content-in {
+    animation: content-in 1.5s 1s ease-out forwards;
+    opacity: 0;
+  }
+  .animate-silhouette-in {
+    animation: silhouette-in 2s 0.5s ease-out forwards;
+    opacity: 0;
+  }
+  .animate-subtle-pan {
+    animation: subtle-pan 20s ease-in-out infinite alternate;
+  }
+  .techno-grid {
+    background-image: linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: var(--grid-size) var(--grid-size);
+    animation: fade-in 3s 1.5s ease-out forwards;
+    opacity: 0;
+  }
+  .sun {
+    width: 40vw;
+    height: 40vw;
+    max-width: 600px;
+    max-height: 600px;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(251, 146, 60, 1) 0%,
+      rgba(234, 88, 12, 1) 40%,
+      rgba(39, 14, 0, 1) 75%,
+      transparent 100%
+    );
+    border-radius: 50%;
+    position: absolute;
+    animation: sun-glow 8s ease-in-out infinite, fade-in 3s ease-out forwards;
+    filter: blur(10px);
+  }
+}
