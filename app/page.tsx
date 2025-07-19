@@ -1,6 +1,7 @@
 import type React from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { ArrowRight, Zap, Shield, Heart, TrendingUp } from "lucide-react"
 import { Header } from "@/components/layout/header"
@@ -110,32 +111,36 @@ const services = [
 
 function ServicesSection() {
   return (
-    <section id="services" className="py-20 md:py-28 bg-secondary">
-      <div className="container mx-auto">
-        <h2 className="text-4xl md:text-5xl font-bold font-display text-center tracking-tighter mb-12">
+    <section id="services" className="relative py-20 md:py-28 bg-black">
+      <div className="absolute inset-0 z-0">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: "url('/boxing-ring-background.png')",
+            backgroundAttachment: "fixed",
+          }}
+        />
+        <div className="absolute inset-0 bg-black/80" />
+      </div>
+
+      <div className="container mx-auto relative z-10">
+        <h2 className="text-4xl md:text-5xl font-bold font-display text-center tracking-tighter mb-12 text-white drop-shadow-lg">
           Focus On What Matters
         </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((service) => (
-            <Card
-              key={service.id}
-              id={service.id}
-              className="bg-black border-2 border-neutral-800 rounded-2xl overflow-hidden group hover:border-primary transition-all duration-300 transform hover:-translate-y-2"
-            >
-              <CardHeader className="p-8">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 border-2 border-primary/20 group-hover:bg-primary/20 transition-colors">
-                  <service.icon className="w-8 h-8 text-primary" />
+            <Link href={`#${service.id}`} key={service.id} className="group block h-full">
+              <div className="relative flex flex-col justify-between p-6 overflow-hidden rounded-xl h-full bg-white/5 backdrop-blur-md border border-white/10 transition-all duration-300 group-hover:border-primary/60 group-hover:bg-white/10 group-hover:-translate-y-2">
+                <div className="flex-1">
+                  <h3 className="font-display text-xl font-bold text-white">{service.title}</h3>
+                  <p className="text-neutral-300 mt-2 text-sm leading-relaxed">{service.description}</p>
                 </div>
-                <CardTitle className="text-2xl font-bold font-display">{service.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="p-8 pt-0">
-                <p className="text-muted-foreground mb-8">{service.description}</p>
-                <Button variant="outline" className="rounded-full w-full group/button bg-transparent">
-                  {service.cta}
-                  <ArrowRight className="ml-2 h-4 w-4 transform group-hover/button:translate-x-1 transition-transform" />
-                </Button>
-              </CardContent>
-            </Card>
+                <div className="mt-6 flex items-center text-sm font-medium text-neutral-400 transition-colors duration-300 group-hover:text-primary">
+                  <span>{service.cta}</span>
+                  <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
       </div>

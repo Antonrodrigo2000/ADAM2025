@@ -176,3 +176,45 @@
 .animate-mobile-halo {
   animation: mobile-halo-pulse 4s ease-in-out infinite;
 }
+
+/* Optimized background image loading */
+@layer utilities {
+  .bg-boxing-ring {
+    background-image: url("/boxing-ring-background.png");
+    background-size: cover;
+    background-position: center 40%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  /* Mobile-specific background positioning */
+  @media (max-width: 768px) {
+    .bg-boxing-ring {
+      background-position: center 35%;
+      background-attachment: scroll; /* Better performance on mobile */
+    }
+  }
+
+  /* Tablet-specific positioning */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .bg-boxing-ring {
+      background-position: center 38%;
+    }
+  }
+
+  /* Large screen positioning */
+  @media (min-width: 1025px) {
+    .bg-boxing-ring {
+      background-position: center 42%;
+    }
+  }
+}
+
+/* Preload critical images for better performance */
+.preload-boxing-bg {
+  content: "";
+  position: absolute;
+  left: -9999px;
+  background: url("/boxing-ring-background.png") no-repeat;
+  background-size: 1px 1px;
+}
