@@ -52,14 +52,21 @@ function HeroSection() {
 
       <div className="container mx-auto relative z-10 h-full flex flex-col justify-between py-20">
         <div className="flex-1 flex flex-col justify-center">
-          <div className="animate-content-in opacity-0" style={{ animationFillMode: "forwards" }}>
-            <h1 className="text-5xl md:text-7xl font-bold font-display tracking-tighter mb-6">
-              Men's Health, Redefined.
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
-              Discreet, convenient, and personalized care for hair loss, skincare, and sexual health. Delivered to your
-              door.
-            </p>
+          <div className="animate-content-in opacity-0 relative" style={{ animationFillMode: "forwards" }}>
+            {/* Mobile Orange Halo Effect */}
+            <div className="absolute inset-0 flex items-center justify-center md:hidden">
+              <div className="w-80 h-80 sm:w-96 sm:h-96 bg-gradient-radial from-orange-500/20 via-orange-600/10 to-transparent rounded-full blur-3xl animate-mobile-halo" />
+            </div>
+
+            <div className="relative z-10">
+              <h1 className="text-5xl md:text-7xl font-bold font-display tracking-tighter mb-6">
+                Men's Health, Redefined.
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
+                Discreet, convenient, and personalized care for hair loss, skincare, and sexual health. Delivered to
+                your door.
+              </p>
+            </div>
           </div>
         </div>
         <div className="flex-shrink-0">
