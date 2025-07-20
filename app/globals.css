@@ -83,17 +83,6 @@
   }
 }
 
-@keyframes silhouette-in {
-  from {
-    opacity: 0;
-    transform: translateY(40px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 @keyframes sun-glow {
   0%,
   100% {
@@ -123,10 +112,6 @@
   }
   .animate-content-in {
     animation: content-in 1.5s 1s ease-out forwards;
-    opacity: 0;
-  }
-  .animate-silhouette-in {
-    animation: silhouette-in 2s 0.5s ease-out forwards;
     opacity: 0;
   }
   .animate-subtle-pan {

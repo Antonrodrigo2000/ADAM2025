@@ -40,13 +40,6 @@ function HeroSection() {
         <div className="absolute inset-0 flex items-center justify-center animate-subtle-pan">
           <div className="sun" />
           <div className="absolute bottom-0 w-full h-2/3 bg-gradient-to-t from-black via-black to-transparent" />
-          <div className="absolute bottom-0 w-full h-full">
-            <img
-              src="/man-silhouette.png"
-              alt="Silhouette of a man"
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] max-w-[600px] md:w-[50%] md:max-w-[800px] object-contain object-bottom animate-silhouette-in"
-            />
-          </div>
         </div>
       </div>
 
@@ -112,13 +105,7 @@ function ServicesSection() {
   return (
     <section id="services" className="relative py-20 md:py-28 bg-black">
       <div className="absolute inset-0 z-0">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: "url('/boxing-ring-background.png')",
-            backgroundAttachment: "fixed",
-          }}
-        />
+        <div className="absolute inset-0 bg-boxing-ring" />
         <div className="absolute inset-0 bg-black/80" />
       </div>
 
