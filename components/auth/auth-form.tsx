@@ -4,15 +4,12 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Lock, Mail } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { ArrowRight, Lock, Mail, Eye, EyeOff } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" {...props}>
       <path
         fill="#4285F4"
         d="M21.35 11.1h-9.2v2.7h5.3c-.2 1.1-.8 2-1.7 2.7v2.1h2.7c1.6-1.5 2.5-3.7 2.5-6.2 0-.6-.1-1.1-.2-1.6z"
@@ -35,110 +32,127 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export function AuthForm() {
   const [isSignUp, setIsSignUp] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <div className="w-full max-w-md mx-auto bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl shadow-orange-500/10">
-      <div className="p-8 md:p-12">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold font-display tracking-tight text-white">
-            {isSignUp ? "Create Your Account" : "Welcome Back"}
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {isSignUp ? "Join the movement. Take control." : "Continue your journey to excellence."}
+    <div className="w-full max-w-lg mx-auto">
+      {/* Main container with neomorphic styling */}
+      <div className="neomorphic-container p-8 md:p-12">
+        {/* Header section */}
+        <div className="text-center mb-10">
+          <div className="mb-4">
+            <h1 className="text-3xl md:text-4xl font-bold font-display tracking-tight text-neutral-800">
+              {isSignUp ? "Join Adam" : "Welcome Back"}
+            </h1>
+          </div>
+          <p className="text-neutral-600 text-lg">
+            {isSignUp ? "Take control of your health journey" : "Continue your path to excellence"}
           </p>
         </div>
 
-        <div className="flex bg-neutral-900/50 p-1 rounded-lg mb-8">
-          <button
-            onClick={() => setIsSignUp(false)}
-            className={cn(
-              "w-1/2 py-2.5 text-sm font-medium rounded-md transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-              !isSignUp ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-white",
-            )}
-          >
-            Sign In
-          </button>
-          <button
-            onClick={() => setIsSignUp(true)}
-            className={cn(
-              "w-1/2 py-2.5 text-sm font-medium rounded-md transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-              isSignUp ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-white",
-            )}
-          >
-            Sign Up
-          </button>
+        {/* Toggle buttons with neomorphic styling */}
+        <div className="neomorphic-toggle-container mb-8">
+          <div className="neomorphic-toggle-track">
+            <button
+              onClick={() => setIsSignUp(false)}
+              className={cn("neomorphic-toggle-button", !isSignUp && "neomorphic-toggle-active")}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => setIsSignUp(true)}
+              className={cn("neomorphic-toggle-button", isSignUp && "neomorphic-toggle-active")}
+            >
+              Sign Up
+            </button>
+          </div>
         </div>
 
+        {/* Form */}
         <form className="space-y-6">
-          <div className="space-y-4">
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
+          {/* Email input */}
+          <div className="neomorphic-input-container">
+            <div className="neomorphic-input-wrapper">
+              <Mail className="neomorphic-input-icon" />
+              <input
                 id="email"
                 name="email"
                 type="email"
                 placeholder="Email address"
                 required
-                className="pl-12 h-14 bg-neutral-900/50 border-neutral-700 focus:border-primary focus:ring-primary"
-              />
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Password"
-                required
-                className="pl-12 h-14 bg-neutral-900/50 border-neutral-700 focus:border-primary focus:ring-primary"
+                className="neomorphic-input"
               />
             </div>
           </div>
 
+          {/* Password input */}
+          <div className="neomorphic-input-container">
+            <div className="neomorphic-input-wrapper">
+              <Lock className="neomorphic-input-icon" />
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                required
+                className="neomorphic-input"
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="neomorphic-eye-button">
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5 text-neutral-500" />
+                ) : (
+                  <Eye className="w-5 h-5 text-neutral-500" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Forgot password link */}
           {!isSignUp && (
             <div className="text-right">
-              <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              <Link href="#" className="neomorphic-link">
                 Forgot password?
               </Link>
             </div>
           )}
 
-          <Button
-            type="submit"
-            className="w-full h-14 text-lg font-bold group bg-primary hover:bg-primary/90 text-primary-foreground"
-          >
-            {isSignUp ? "Create Account" : "Sign In"}
-            <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-          </Button>
+          {/* Submit button */}
+          <div className="neomorphic-button-container">
+            <button type="submit" className="neomorphic-primary-button group">
+              <span className="relative z-10 flex items-center justify-center">
+                {isSignUp ? "Create Account" : "Sign In"}
+                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </span>
+            </button>
+          </div>
         </form>
 
-        <div className="relative my-8">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-neutral-700" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-neutral-800 px-2 text-muted-foreground">Or continue with</span>
-          </div>
+        {/* Divider */}
+        <div className="neomorphic-divider">
+          <div className="neomorphic-divider-line" />
+          <span className="px-4 text-sm font-medium text-neutral-500 bg-neutral-100 rounded-full py-2">
+            Or continue with
+          </span>
+          <div className="neomorphic-divider-line" />
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
-          <Button
-            variant="outline"
-            className="h-14 border-neutral-700 hover:bg-neutral-800 hover:border-primary bg-transparent"
-          >
-            <GoogleIcon className="mr-2" />
-            Sign in with Google
-          </Button>
+        {/* Social login */}
+        <div className="neomorphic-button-container">
+          <button className="neomorphic-social-button group">
+            <GoogleIcon />
+            <span>Continue with Google</span>
+          </button>
         </div>
 
+        {/* Terms */}
         {isSignUp && (
-          <p className="mt-8 text-xs text-center text-muted-foreground">
+          <p className="mt-8 text-xs text-center text-neutral-500 leading-relaxed">
             By creating an account, you agree to our{" "}
-            <Link href="/terms" className="underline hover:text-white">
+            <Link href="/terms" className="neomorphic-link">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="underline hover:text-white">
+            <Link href="/privacy" className="neomorphic-link">
               Privacy Policy
             </Link>
             .
