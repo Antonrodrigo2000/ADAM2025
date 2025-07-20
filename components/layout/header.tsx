@@ -38,8 +38,8 @@ export function Header() {
             Sexual Health
           </Link>
         </nav>
-        <Button variant="ghost" className="rounded-full">
-          Get Started
+        <Button asChild variant="ghost" className="rounded-full">
+          <Link href="/auth">Get Started</Link>
         </Button>
       </div>
     </header>
