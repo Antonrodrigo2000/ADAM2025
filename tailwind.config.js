@@ -23,6 +23,7 @@ module.exports = {
       fontFamily: {
         sans: ["var(--font-inter)", ...fontFamily.sans],
         display: ["var(--font-space-grotesk)", ...fontFamily.sans],
+        logo: ["var(--font-museo-moderno)", ...fontFamily.sans],
       },
       colors: {
         border: "hsl(var(--border))",

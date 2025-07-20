@@ -5,9 +5,10 @@ import type React from "react"
 import { useRef } from "react"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import { cn } from "@/lib/utils"
 import type { Category } from "./category-cards"
 
-export function CategoryCard({ category }: { category: Category }) {
+export function CategoryCard({ category, isFeatured = false }: { category: Category; isFeatured?: boolean }) {
   const ref = useRef<HTMLAnchorElement>(null)
 
   const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -26,7 +27,7 @@ export function CategoryCard({ category }: { category: Category }) {
       href={category.href}
       ref={ref}
       onMouseMove={handleMouseMove}
-      className="group relative block p-px overflow-hidden rounded-2xl"
+      className={cn("group relative block p-px overflow-hidden rounded-2xl", isFeatured && "featured-glow")}
     >
       <div
         className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -36,9 +37,10 @@ export function CategoryCard({ category }: { category: Category }) {
       />
 
       <div className="relative h-40 w-full rounded-[15px] p-6 flex flex-col justify-between overflow-hidden bg-neutral-950/80 backdrop-blur-sm border border-white/10 group-hover:border-white/20 transition-colors duration-300">
-        <div className="absolute inset-0 opacity-50 group-hover:opacity-100 transition-opacity duration-500 scale-125 group-hover:scale-100 ease-in-out">
-          {category.pattern}
-        </div>
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity duration-500"
+          style={{ backgroundImage: "url('/carbon-noise-bg.png')" }}
+        />
 
         <div className="relative z-10">
           <h3 className="text-xl font-bold font-display text-white">{category.title}</h3>

@@ -24,8 +24,8 @@ export function Header() {
       )}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-        <Link href="#" className="text-2xl font-bold font-display tracking-tighter">
-          Adam
+        <Link href="#" className="text-2xl font-extrabold font-logo tracking-tighter uppercase">
+          ADAM
         </Link>
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           <Link href="#hair" className="hover:text-primary transition-colors">

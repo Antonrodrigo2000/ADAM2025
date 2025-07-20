@@ -1,7 +1,6 @@
 import type React from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { ArrowRight, Zap, Shield, Heart, TrendingUp } from "lucide-react"
 import { Header } from "@/components/layout/header"
@@ -192,7 +191,7 @@ function HowItWorksSection() {
               <h3 className="text-xl font-bold font-display">Discreet Delivery</h3>
             </div>
             <p className="text-muted-foreground">
-              Your treatment is shipped directly to your door in discreet packaging. Free shipping, always.
+              Your treatment is shipped directly to your door in discreet packaging by a licensed pharmacy.
             </p>
           </div>
         </div>
@@ -202,41 +201,54 @@ function HowItWorksSection() {
 }
 
 function TestimonialsSection() {
+  const commitments = [
+    {
+      title: "Uncompromising Quality.",
+      description:
+        "We partner with leading physicians and pharmacies to provide only clinically-proven, effective treatments. No snake oil, no shortcuts.",
+    },
+    {
+      title: "Radical Discretion.",
+      description:
+        "Your health is your business. Our platform ensures complete privacy with discreet packaging and secure, HIPAA-compliant communication.",
+    },
+    {
+      title: "Effortless Experience.",
+      description:
+        "From online consultation to at-home delivery, we've streamlined every step. Care that fits your life, not the other way around.",
+    },
+  ]
+
   return (
-    <section className="py-20 md:py-28 bg-secondary">
+    <section className="py-20 md:py-28 bg-black">
       <div className="container mx-auto">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <div>
             <h2 className="text-4xl md:text-5xl font-bold font-display tracking-tighter mb-6">
-              Don't just take our word for it.
+              Engineered for Excellence.
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Thousands of men are taking control of their health with Adam. See what they have to say.
+              We're building the future of men's health on a foundation of trust, quality, and discretion. This is our
+              promise to you.
             </p>
-            <Button size="lg" className="rounded-full group text-lg px-8 py-6">
-              Read More Reviews
+            <Button
+              size="lg"
+              className="rounded-full group text-lg px-8 py-6 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Get Started
               <ArrowRight className="ml-2 h-5 w-5 transform group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
           <div className="space-y-8">
-            <Card className="bg-black border-neutral-800 rounded-xl">
-              <CardContent className="p-6">
-                <p className="mb-4">
-                  "I was skeptical at first, but the results are undeniable. My hair hasn't looked this good in years.
-                  The process was so simple."
-                </p>
-                <p className="font-semibold">- Mark S, California</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-black border-neutral-800 rounded-xl">
-              <CardContent className="p-6">
-                <p className="mb-4">
-                  "Finally, a skincare routine that actually works for me. My skin is clearer and feels healthier.
-                  Highly recommend."
-                </p>
-                <p className="font-semibold">- David L, New York</p>
-              </CardContent>
-            </Card>
+            {commitments.map((commitment, index) => (
+              <div
+                key={index}
+                className="border-l-2 border-primary pl-6 py-4 transition-all duration-300 hover:bg-neutral-900/50"
+              >
+                <h3 className="text-xl font-bold font-display text-white">{commitment.title}</h3>
+                <p className="mt-2 text-neutral-400">{commitment.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -296,7 +308,7 @@ function Footer() {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-xl font-bold font-display mb-4">Adam</h3>
-            <p className="text-sm text-muted-foreground">© 2025 Adam Health. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">© 2025 BASKR Health (Private) Limited. All rights reserved.</p>
           </div>
           <div>
             <h4 className="font-semibold mb-4">Treatments</h4>

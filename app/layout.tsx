@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Space_Grotesk } from "next/font/google"
+import { Inter, Space_Grotesk, MuseoModerno } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 
@@ -15,10 +15,16 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
 })
 
+const museoModerno = MuseoModerno({
+  subsets: ["latin"],
+  weight: ["800"], // ExtraBold
+  variable: "--font-museo-moderno",
+})
+
 export const metadata: Metadata = {
   title: "Adam - Men's Telehealth",
   description: "Modern telehealth for men. Hair loss, skincare, and sexual health.",
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
@@ -28,7 +34,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={cn("bg-black text-white font-sans", inter.variable, spaceGrotesk.variable)}>{children}</body>
+      <body
+        className={cn("bg-black text-white font-sans", inter.variable, spaceGrotesk.variable, museoModerno.variable)}
+      >
+        {children}
+      </body>
     </html>
   )
 }
