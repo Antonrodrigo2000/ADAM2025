@@ -248,6 +248,154 @@
   }
 }
 
+/* Premium Dashboard Neomorphic Styles */
+@layer components {
+  .neomorphic-card {
+    @apply rounded-3xl bg-white/90 backdrop-blur-sm;
+    box-shadow:
+      20px 20px 40px rgba(0, 0, 0, 0.1),
+      -20px -20px 40px rgba(255, 255, 255, 0.8),
+      inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .neomorphic-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      25px 25px 50px rgba(0, 0, 0, 0.15),
+      -25px -25px 50px rgba(255, 255, 255, 0.9),
+      inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .neomorphic-avatar {
+    @apply rounded-2xl p-1;
+    background: linear-gradient(145deg, #f0f0f0, #ffffff);
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.1), -8px -8px 16px rgba(255, 255, 255, 0.8);
+  }
+
+  .neomorphic-icon-button {
+    @apply w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300;
+    background: linear-gradient(145deg, #f0f0f0, #ffffff);
+    box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.1), -6px -6px 12px rgba(255, 255, 255, 0.8);
+  }
+
+  .neomorphic-icon-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.9);
+  }
+
+  .neomorphic-icon-button:active {
+    transform: translateY(1px);
+    box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.1), inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  }
+
+  .neomorphic-icon-container {
+    @apply w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0;
+    box-shadow:
+      8px 8px 16px rgba(0, 0, 0, 0.1),
+      -8px -8px 16px rgba(255, 255, 255, 0.8),
+      inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .neomorphic-treatment-card {
+    @apply rounded-2xl bg-white/60 backdrop-blur-sm transition-all duration-300;
+    box-shadow:
+      12px 12px 24px rgba(0, 0, 0, 0.08),
+      -12px -12px 24px rgba(255, 255, 255, 0.8),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.9),
+      inset -1px -1px 2px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .neomorphic-treatment-card:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      16px 16px 32px rgba(0, 0, 0, 0.12),
+      -16px -16px 32px rgba(255, 255, 255, 0.9),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.9),
+      inset -1px -1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .neomorphic-product-image {
+    @apply w-14 h-14 rounded-xl flex items-center justify-center bg-white/80 flex-shrink-0;
+    box-shadow:
+      6px 6px 12px rgba(0, 0, 0, 0.08),
+      -6px -6px 12px rgba(255, 255, 255, 0.8),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.9),
+      inset -1px -1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .neomorphic-status-badge {
+    @apply px-3 py-1 rounded-full text-xs font-bold;
+    box-shadow:
+      4px 4px 8px rgba(0, 0, 0, 0.1),
+      -4px -4px 8px rgba(255, 255, 255, 0.8),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.3),
+      inset -1px -1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .neomorphic-empty-state {
+    @apply w-16 h-16 rounded-2xl flex items-center justify-center;
+    background: linear-gradient(145deg, #f0f0f0, #ffffff);
+    box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.1), -12px -12px 24px rgba(255, 255, 255, 0.8);
+  }
+
+  .neomorphic-progress-container {
+    @apply rounded-full p-1;
+    background: linear-gradient(145deg, #e0e0e0, #ffffff);
+    box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.1), inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  }
+
+  .neomorphic-task-item {
+    @apply rounded-2xl bg-white/60 backdrop-blur-sm;
+    box-shadow:
+      8px 8px 16px rgba(0, 0, 0, 0.08),
+      -8px -8px 16px rgba(255, 255, 255, 0.8),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.9),
+      inset -1px -1px 2px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .neomorphic-stat-item {
+    @apply rounded-xl bg-white/60 backdrop-blur-sm;
+    box-shadow:
+      6px 6px 12px rgba(0, 0, 0, 0.08),
+      -6px -6px 12px rgba(255, 255, 255, 0.8),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.9),
+      inset -1px -1px 2px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .neomorphic-primary-button {
+    @apply py-3 px-6 rounded-2xl font-bold text-white transition-all duration-300 relative overflow-hidden;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    box-shadow:
+      8px 8px 16px rgba(0, 0, 0, 0.15),
+      -4px -4px 8px rgba(255, 255, 255, 0.7),
+      inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .neomorphic-primary-button:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow:
+      12px 12px 24px rgba(0, 0, 0, 0.2),
+      -6px -6px 12px rgba(255, 255, 255, 0.8),
+      inset 3px 3px 6px rgba(255, 255, 255, 0.4),
+      inset -3px -3px 6px rgba(0, 0, 0, 0.15),
+      0 0 20px rgba(249, 115, 22, 0.3);
+  }
+
+  .neomorphic-primary-button:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: inset 6px 6px 12px rgba(0, 0, 0, 0.2), inset -6px -6px 12px rgba(255, 255, 255, 0.8);
+  }
+}
+
 /* Neomorphic Auth Styles */
 @layer components {
   .neomorphic-container {
@@ -344,31 +492,6 @@
     @apply relative;
   }
 
-  .neomorphic-primary-button {
-    animation: button-pulse 2s ease-in-out infinite;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    @apply w-full h-14 rounded-2xl font-bold text-lg transition-all duration-300 relative overflow-hidden;
-    background: linear-gradient(135deg, #f97316, #ea580c);
-    color: white;
-    border: none;
-    cursor: pointer;
-    box-shadow:
-      8px 8px 16px rgba(0, 0, 0, 0.15),
-      -4px -4px 8px rgba(255, 255, 255, 0.7),
-      inset 2px 2px 4px rgba(255, 255, 255, 0.3),
-      inset -2px -2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .neomorphic-primary-button:hover {
-    animation: button-glow 1.5s ease-in-out infinite;
-    transform: translateY(-2px) scale(1.02);
-  }
-
-  .neomorphic-primary-button:active {
-    animation: none;
-    transform: translateY(1px) scale(0.98);
-  }
-
   .neomorphic-social-button {
     @apply w-full h-14 rounded-2xl font-medium text-base transition-all duration-300 flex items-center justify-center gap-3;
     background: #f5f5f5;
@@ -411,5 +534,13 @@
       -15px -15px 30px rgba(255, 255, 255, 0.8),
       inset 1px 1px 2px rgba(0, 0, 0, 0.05),
       inset -1px -1px 2px rgba(255, 255, 255, 0.9);
+  }
+
+  .neomorphic-card {
+    box-shadow:
+      15px 15px 30px rgba(0, 0, 0, 0.08),
+      -15px -15px 30px rgba(255, 255, 255, 0.8),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.9),
+      inset -1px -1px 2px rgba(0, 0, 0, 0.05);
   }
 }
