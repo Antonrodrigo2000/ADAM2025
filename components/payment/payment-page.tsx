@@ -262,8 +262,108 @@ export function PaymentPage() {
           }
         }
         
+        @keyframes gradient-shift {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+        
         .glow-animation {
           animation: subtle-glow 2s ease-in-out infinite;
+        }
+        
+        .neomorphic-button {
+          background: linear-gradient(145deg, #1f1f1f, #0a0a0a);
+          background-size: 200% 200%;
+          animation: gradient-shift 4s ease-in-out infinite;
+          box-shadow: 
+            8px 8px 16px rgba(0, 0, 0, 0.3),
+            -8px -8px 16px rgba(255, 255, 255, 0.05),
+            inset 2px 2px 4px rgba(255, 255, 255, 0.1),
+            inset -2px -2px 4px rgba(0, 0, 0, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .neomorphic-button:hover {
+          background: linear-gradient(145deg, #2a2a2a, #151515);
+          box-shadow: 
+            12px 12px 24px rgba(0, 0, 0, 0.4),
+            -12px -12px 24px rgba(255, 255, 255, 0.08),
+            inset 3px 3px 6px rgba(255, 255, 255, 0.15),
+            inset -3px -3px 6px rgba(0, 0, 0, 0.4);
+        }
+        
+        .neomorphic-button:active {
+          box-shadow: 
+            inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+            inset -8px -8px 16px rgba(255, 255, 255, 0.05);
+        }
+        
+        .neomorphic-button::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+          transition: left 0.5s;
+        }
+        
+        .neomorphic-button:hover::before {
+          left: 100%;
+        }
+        
+        .neomorphic-green-button {
+          background: linear-gradient(145deg, #16a34a, #15803d);
+          background-size: 200% 200%;
+          animation: gradient-shift 4s ease-in-out infinite;
+          box-shadow: 
+            8px 8px 16px rgba(0, 0, 0, 0.2),
+            -8px -8px 16px rgba(255, 255, 255, 0.1),
+            inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+            inset -2px -2px 4px rgba(0, 0, 0, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .neomorphic-green-button:hover {
+          background: linear-gradient(145deg, #22c55e, #16a34a);
+          box-shadow: 
+            12px 12px 24px rgba(0, 0, 0, 0.3),
+            -12px -12px 24px rgba(255, 255, 255, 0.15),
+            inset 3px 3px 6px rgba(255, 255, 255, 0.25),
+            inset -3px -3px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .neomorphic-green-button:active {
+          box-shadow: 
+            inset 8px 8px 16px rgba(0, 0, 0, 0.3),
+            inset -8px -8px 16px rgba(255, 255, 255, 0.1);
+        }
+        
+        .neomorphic-green-button::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.5s;
+        }
+        
+        .neomorphic-green-button:hover::before {
+          left: 100%;
         }
       `}</style>
 
@@ -347,21 +447,21 @@ export function PaymentPage() {
                         placeholder="Full name"
                         value={newAddress.fullName}
                         onChange={(e) => handleAddressChange("fullName", e.target.value)}
-                        className="neomorphic-input-wrapper h-10 px-3 text-sm"
+                        className="neomorphic-input-wrapper h-10 px-3 text-sm text-neutral-800 placeholder-neutral-500"
                       />
                       <input
                         type="text"
                         placeholder="Address line 1"
                         value={newAddress.addressLine1}
                         onChange={(e) => handleAddressChange("addressLine1", e.target.value)}
-                        className="neomorphic-input-wrapper h-10 px-3 text-sm"
+                        className="neomorphic-input-wrapper h-10 px-3 text-sm text-neutral-800 placeholder-neutral-500"
                       />
                       <input
                         type="text"
                         placeholder="Address line 2 (optional)"
                         value={newAddress.addressLine2}
                         onChange={(e) => handleAddressChange("addressLine2", e.target.value)}
-                        className="neomorphic-input-wrapper h-10 px-3 text-sm"
+                        className="neomorphic-input-wrapper h-10 px-3 text-sm text-neutral-800 placeholder-neutral-500"
                       />
                       <div className="grid grid-cols-2 gap-3">
                         <input
@@ -369,14 +469,14 @@ export function PaymentPage() {
                           placeholder="City"
                           value={newAddress.city}
                           onChange={(e) => handleAddressChange("city", e.target.value)}
-                          className="neomorphic-input-wrapper h-10 px-3 text-sm"
+                          className="neomorphic-input-wrapper h-10 px-3 text-sm text-neutral-800 placeholder-neutral-500"
                         />
                         <input
                           type="text"
                           placeholder="Postcode"
                           value={newAddress.postcode}
                           onChange={(e) => handleAddressChange("postcode", e.target.value)}
-                          className="neomorphic-input-wrapper h-10 px-3 text-sm"
+                          className="neomorphic-input-wrapper h-10 px-3 text-sm text-neutral-800 placeholder-neutral-500"
                         />
                       </div>
                     </div>
@@ -456,10 +556,10 @@ export function PaymentPage() {
                 {!showPaymentForm ? (
                   <button
                     onClick={handleAddPaymentMethod}
-                    className={`w-full bg-black hover:bg-neutral-800 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm ${savedCards.length === 0 ? "glow-animation" : ""}`}
+                    className={`w-full neomorphic-button text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center text-sm relative z-10 ${savedCards.length === 0 ? "glow-animation" : ""}`}
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add payment method
+                    <Plus className="w-4 h-4 mr-2 relative z-10" />
+                    <span className="relative z-10">Add payment method</span>
                   </button>
                 ) : (
                   <div className="space-y-3">
@@ -477,7 +577,7 @@ export function PaymentPage() {
                           placeholder="Cardholder name"
                           value={cardDetails.cardholderName}
                           onChange={(e) => handleCardDetailsChange("cardholderName", e.target.value)}
-                          className="neomorphic-input-wrapper h-10 px-3 text-sm w-full"
+                          className="neomorphic-input-wrapper h-10 px-3 text-sm w-full text-neutral-800 placeholder-neutral-500"
                         />
                       </div>
 
@@ -488,7 +588,7 @@ export function PaymentPage() {
                           value={cardDetails.cardNumber}
                           onChange={(e) => handleCardDetailsChange("cardNumber", formatCardNumber(e.target.value))}
                           maxLength={19}
-                          className="neomorphic-input-wrapper h-10 px-3 pr-10 text-sm w-full"
+                          className="neomorphic-input-wrapper h-10 px-3 pr-10 text-sm w-full text-neutral-800 placeholder-neutral-500"
                         />
                         <CreditCard className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
                       </div>
@@ -501,7 +601,7 @@ export function PaymentPage() {
                             value={cardDetails.expiryDate}
                             onChange={(e) => handleCardDetailsChange("expiryDate", formatExpiryDate(e.target.value))}
                             maxLength={5}
-                            className="neomorphic-input-wrapper h-10 px-3 pr-10 text-sm w-full"
+                            className="neomorphic-input-wrapper h-10 px-3 pr-10 text-sm w-full text-neutral-800 placeholder-neutral-500"
                           />
                           <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
                         </div>
@@ -515,7 +615,7 @@ export function PaymentPage() {
                               handleCardDetailsChange("cvc", e.target.value.replace(/\D/g, "").slice(0, 4))
                             }
                             maxLength={4}
-                            className="neomorphic-input-wrapper h-10 px-3 pr-10 text-sm w-full"
+                            className="neomorphic-input-wrapper h-10 px-3 pr-10 text-sm w-full text-neutral-800 placeholder-neutral-500"
                           />
                           <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
                         </div>
@@ -553,9 +653,9 @@ export function PaymentPage() {
                 <div className="mt-4">
                   <button
                     onClick={handleConfirmTreatment}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 text-base glow-animation"
+                    className="w-full neomorphic-green-button text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 text-base glow-animation relative z-10"
                   >
-                    Confirm Treatment
+                    <span className="relative z-10">Confirm Treatment</span>
                   </button>
                 </div>
               )}
