@@ -64,9 +64,9 @@ export function ProductPage({ product }: ProductPageProps) {
       </header>
 
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-61px)]">
+      <div className="flex h-[calc(100vh-61px)] justify-center">
         {/* Left Side - Product Image */}
-        <div className="flex-1 bg-gray-100 flex flex-col">
+        <div className="flex-1 max-w-2xl bg-gray-100 flex flex-col">
           <div className="flex-1 flex items-center justify-center p-4">
             <div className="max-w-md w-full h-full flex items-center justify-center">
               <Image
@@ -102,7 +102,7 @@ export function ProductPage({ product }: ProductPageProps) {
         </div>
 
         {/* Right Side - Product Info */}
-        <div className="w-80 bg-white p-6 flex flex-col overflow-y-auto">
+        <div className="w-72 bg-white p-6 flex flex-col overflow-y-auto mx-auto">
           {/* Badge */}
           <div className="text-xs text-gray-600 mb-3 flex items-center gap-1">
             <span className="text-orange-500">★</span>
