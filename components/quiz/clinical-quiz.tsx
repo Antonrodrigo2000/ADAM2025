@@ -21,6 +21,7 @@ export function ClinicalQuiz() {
   const [isRecommendationsMode, setIsRecommendationsMode] = useState(false)
   const [questionFlow, setQuestionFlow] = useState<string[]>([])
   const [recommendations, setRecommendations] = useState<RecommendationResult | null>(null)
+  const [showDisclaimer, setShowDisclaimer] = useState(true)
 
   // Load saved answers from localStorage
   useEffect(() => {
@@ -71,7 +72,7 @@ export function ClinicalQuiz() {
   }
 
   const currentQuestion = hairLossQuestions.find((q) => q.id === questionFlow[currentQuestionIndex])
-  const totalSteps = questionFlow.length + 1 // +1 for review screen
+  const totalSteps = questionFlow.length + 2 // +1 for disclaimer, +1 for review screen
 
   const validateQuestion = (question: Question, answer: any): string | null => {
     if (answer === undefined || answer === null || answer === "") {
@@ -184,6 +185,107 @@ export function ClinicalQuiz() {
     return true
   }
 
+  const DisclaimerScreen = () => (
+    <div className="bg-white rounded-2xl p-8 shadow-sm border border-neutral-100">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-4 leading-tight">
+            The really important bit
+          </h1>
+          <p className="text-lg text-neutral-700 font-medium">By clicking "Next", you are confirming that you:</p>
+        </div>
+
+        {/* Disclaimer List */}
+        <div className="space-y-4 mb-8">
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 mt-1">
+              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+            </div>
+            <p className="text-neutral-700 leading-relaxed">
+              Are completing this consultation for yourself and to the best of your knowledge.
+            </p>
+          </div>
+
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 mt-1">
+              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+            </div>
+            <p className="text-neutral-700 leading-relaxed">Were assigned male at birth.</p>
+          </div>
+
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 mt-1">
+              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+            </div>
+            <p className="text-neutral-700 leading-relaxed">
+              Will disclose any serious illnesses or operations you have had or any prescription medication you
+              currently take.
+            </p>
+          </div>
+
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 mt-1">
+              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+            </div>
+            <p className="text-neutral-700 leading-relaxed">
+              Will only use one method of hair loss treatment at a time and will not combine more than one different
+              medication for the condition.
+            </p>
+          </div>
+
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 mt-1">
+              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+            </div>
+            <p className="text-neutral-700 leading-relaxed">
+              Are aware that taking finasteride may cause mood changes. If this happens you should contact your GP
+              immediately.
+            </p>
+          </div>
+
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 mt-1">
+              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+            </div>
+            <p className="text-neutral-700 leading-relaxed">
+              Are aware that you should not take finasteride if you're trying for a baby.
+            </p>
+          </div>
+
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 mt-1">
+              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+            </div>
+            <p className="text-neutral-700 leading-relaxed">
+              Are aware that you may be prescribed an{" "}
+              <span className="text-teal-600 underline">unlicensed treatment</span>.
+            </p>
+          </div>
+
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 mt-1">
+              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+            </div>
+            <p className="text-neutral-700 leading-relaxed">
+              Are accepting our <span className="text-teal-600 underline cursor-pointer">Terms & Conditions</span> and{" "}
+              <span className="text-teal-600 underline cursor-pointer">Terms of Sale</span>.
+            </p>
+          </div>
+        </div>
+
+        {/* Next Button */}
+        <button
+          onClick={() => setShowDisclaimer(false)}
+          className="w-full hover:bg-teal-600 text-white font-bold text-lg py-4 px-6 rounded-xl transition-colors duration-200 flex items-center justify-center group bg-black"
+        >
+          Next
+          <ChevronRight className="w-6 h-6 ml-2 transform group-hover:translate-x-1 transition-transform" />
+        </button>
+      </div>
+    </div>
+  )
+
   if (isRecommendationsMode && recommendations) {
     return <RecommendationsScreen recommendations={recommendations} patientData={answers} onBack={handleBack} />
   }
@@ -214,6 +316,16 @@ export function ClinicalQuiz() {
     )
   }
 
+  if (showDisclaimer) {
+    return (
+      <div className="min-h-screen bg-neutral-50 py-8 px-4">
+        <div className="max-w-3xl mx-auto">
+          <DisclaimerScreen />
+        </div>
+      </div>
+    )
+  }
+
   if (!currentQuestion) {
     return <div>Loading...</div>
   }
@@ -221,7 +333,7 @@ export function ClinicalQuiz() {
   return (
     <div className="min-h-screen bg-neutral-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
-        <ProgressBar currentStep={currentQuestionIndex + 1} totalSteps={totalSteps} />
+        <ProgressBar currentStep={currentQuestionIndex + 2} totalSteps={totalSteps} />
 
         <QuestionCard
           question={currentQuestion}
