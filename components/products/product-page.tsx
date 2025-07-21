@@ -103,7 +103,7 @@ export function ProductPage({ product }: ProductPageProps) {
 
         {/* Right Side - Centered Text Container */}
         <div className="flex-1 bg-white flex items-center justify-center">
-          <div className="w-full max-w-sm mx-auto p-6 h-full overflow-y-auto flex flex-col">
+          <div className="w-full max-w-sm mx-auto p-6 min-h-full flex flex-col">
             {/* Badge */}
             <div className="text-xs text-gray-600 mb-3 flex items-center gap-1">
               <span className="text-orange-500">★</span>
