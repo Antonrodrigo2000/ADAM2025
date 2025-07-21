@@ -1,5 +1,5 @@
 import { PaymentPage } from "@/components/payment/payment-page"
 
-export default function Payment() {
+export default function Page() {
   return <PaymentPage />
 }

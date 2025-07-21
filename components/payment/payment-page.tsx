@@ -413,7 +413,7 @@ export function PaymentPage() {
                             <div className="flex items-center space-x-2">
                               <span className="text-sm font-medium text-neutral-800">{address.fullName}</span>
                               {address.isDefault && (
-                                <span className="text-xs bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded">
+                                <span className="text-xs bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded-full">
                                   Default
                                 </span>
                               )}
@@ -426,7 +426,7 @@ export function PaymentPage() {
 
                     <button
                       onClick={handleUseNewAddress}
-                      className="w-full h-10 flex items-center justify-center text-neutral-700 text-sm font-medium hover:bg-neutral-50 transition-colors bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200"
+                      className="w-full h-10 flex items-center justify-center text-neutral-700 text-sm font-medium hover:bg-neutral-50 transition-colors bg-white rounded-full shadow-md hover:shadow-lg border border-neutral-200"
                     >
                       <Plus className="w-3 h-3 mr-1" />
                       Use new address
@@ -436,7 +436,10 @@ export function PaymentPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-sm font-medium text-neutral-700">Add new address</span>
-                      <button onClick={handleCancelNewAddress} className="text-neutral-500 hover:text-neutral-700">
+                      <button
+                        onClick={handleCancelNewAddress}
+                        className="text-neutral-500 hover:text-neutral-700 rounded-full p-1"
+                      >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
@@ -484,13 +487,13 @@ export function PaymentPage() {
                     <div className="flex gap-2 mt-3">
                       <button
                         onClick={handleSaveNewAddress}
-                        className="flex-1 bg-black hover:bg-neutral-800 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-sm"
+                        className="flex-1 bg-black hover:bg-neutral-800 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm"
                       >
                         Save address
                       </button>
                       <button
                         onClick={handleCancelNewAddress}
-                        className="flex-1 bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200 py-2 px-4 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors text-sm"
+                        className="flex-1 bg-white rounded-full shadow-md hover:shadow-lg border border-neutral-200 py-2 px-4 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors text-sm"
                       >
                         Cancel
                       </button>
@@ -556,7 +559,7 @@ export function PaymentPage() {
                 {!showPaymentForm ? (
                   <button
                     onClick={handleAddPaymentMethod}
-                    className={`w-full neomorphic-button text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center text-sm relative z-10 ${savedCards.length === 0 ? "glow-animation" : ""}`}
+                    className={`w-full neomorphic-button text-white font-bold py-3 px-4 rounded-full transition-all duration-300 flex items-center justify-center text-sm relative z-10 ${savedCards.length === 0 ? "glow-animation" : ""}`}
                   >
                     <Plus className="w-4 h-4 mr-2 relative z-10" />
                     <span className="relative z-10">Add payment method</span>
@@ -565,7 +568,10 @@ export function PaymentPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-sm font-medium text-neutral-700">Add payment method</span>
-                      <button onClick={handleCancelPayment} className="text-neutral-500 hover:text-neutral-700">
+                      <button
+                        onClick={handleCancelPayment}
+                        className="text-neutral-500 hover:text-neutral-700 rounded-full p-1"
+                      >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
@@ -625,13 +631,13 @@ export function PaymentPage() {
                     <div className="flex gap-2 mt-3">
                       <button
                         onClick={handleSavePaymentMethod}
-                        className="flex-1 bg-black hover:bg-neutral-800 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-sm"
+                        className="flex-1 bg-black hover:bg-neutral-800 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 text-sm"
                       >
                         Save payment method
                       </button>
                       <button
                         onClick={handleCancelPayment}
-                        className="flex-1 bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200 py-2 px-4 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors text-sm"
+                        className="flex-1 bg-white rounded-full shadow-md hover:shadow-lg border border-neutral-200 py-2 px-4 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors text-sm"
                       >
                         Cancel
                       </button>
@@ -653,7 +659,7 @@ export function PaymentPage() {
                 <div className="mt-4">
                   <button
                     onClick={handleConfirmTreatment}
-                    className="w-full neomorphic-green-button text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 text-base glow-animation relative z-10"
+                    className="w-full neomorphic-green-button text-white font-bold py-4 px-6 rounded-full transition-all duration-300 text-base glow-animation relative z-10"
                   >
                     <span className="relative z-10">Confirm Treatment</span>
                   </button>
@@ -688,7 +694,7 @@ export function PaymentPage() {
                             <span className="text-xs text-neutral-600">{item.subscription}</span>
                             <button
                               onClick={() => removeItem(item.id)}
-                              className="text-xs text-neutral-500 hover:text-red-600 underline transition-colors"
+                              className="text-xs text-neutral-500 hover:text-red-600 underline transition-colors rounded-full p-1"
                             >
                               Remove
                             </button>
@@ -717,7 +723,9 @@ export function PaymentPage() {
                     <div className="flex justify-between text-sm text-neutral-700">
                       <div>
                         <div>Promo discount</div>
-                        <button className="text-xs text-neutral-500 hover:text-neutral-700 underline">Remove</button>
+                        <button className="text-xs text-neutral-500 hover:text-neutral-700 underline rounded-full p-1">
+                          Remove
+                        </button>
                       </div>
                       <div className="text-right">
                         <div>-£{orderData.discount.toFixed(2)}</div>
