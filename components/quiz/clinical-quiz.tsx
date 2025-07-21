@@ -186,101 +186,111 @@ export function ClinicalQuiz() {
   }
 
   const DisclaimerScreen = () => (
-    <div className="bg-white rounded-2xl p-8 shadow-sm border border-neutral-100">
-      <div className="max-w-2xl mx-auto">
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-100">
+      {" "}
+      {/* Scaled p-8 to p-6, rounded-2xl to rounded-xl */}
+      <div className="max-w-xl mx-auto">
+        {" "}
+        {/* Scaled max-w-2xl to max-w-xl */}
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-4 leading-tight">
+        <div className="text-center mb-6">
+          {" "}
+          {/* Scaled mb-8 to mb-6 */}
+          <h1 className="text-2xl md:text-3xl font-bold text-neutral-800 mb-3 leading-tight">
+            {" "}
+            {/* Scaled text-3xl to text-2xl, text-4xl to text-3xl, mb-4 to mb-3 */}
             The really important bit
           </h1>
-          <p className="text-lg text-neutral-700 font-medium">By clicking "Next", you are confirming that you:</p>
+          <p className="text-base text-neutral-700 font-medium">By clicking "Next", you are confirming that you:</p>{" "}
+          {/* Scaled text-lg to text-base */}
         </div>
-
         {/* Disclaimer List */}
-        <div className="space-y-4 mb-8">
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+        <div className="space-y-3 mb-6">
+          {" "}
+          {/* Scaled space-y-4 to space-y-3, mb-8 to mb-6 */}
+          <div className="flex items-start space-x-3">
+            {" "}
+            {/* Scaled space-x-4 to space-x-3 */}
+            <div className="flex-shrink-0 mt-0.5">
+              {" "}
+              {/* Scaled mt-1 to mt-0.5 */}
+              <div className="w-1.5 h-1.5 bg-neutral-800 transform rotate-45"></div>{" "}
+              {/* Scaled w-2 h-2 to w-1.5 h-1.5 */}
             </div>
-            <p className="text-neutral-700 leading-relaxed">
+            <p className="text-neutral-700 leading-relaxed text-sm">
+              {" "}
+              {/* Scaled text-base to text-sm */}
               Are completing this consultation for yourself and to the best of your knowledge.
             </p>
           </div>
-
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-1.5 h-1.5 bg-neutral-800 transform rotate-45"></div>
             </div>
-            <p className="text-neutral-700 leading-relaxed">Were assigned male at birth.</p>
+            <p className="text-neutral-700 leading-relaxed text-sm">Were assigned male at birth.</p>
           </div>
-
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-1.5 h-1.5 bg-neutral-800 transform rotate-45"></div>
             </div>
-            <p className="text-neutral-700 leading-relaxed">
+            <p className="text-neutral-700 leading-relaxed text-sm">
               Will disclose any serious illnesses or operations you have had or any prescription medication you
               currently take.
             </p>
           </div>
-
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-1.5 h-1.5 bg-neutral-800 transform rotate-45"></div>
             </div>
-            <p className="text-neutral-700 leading-relaxed">
+            <p className="text-neutral-700 leading-relaxed text-sm">
               Will only use one method of hair loss treatment at a time and will not combine more than one different
               medication for the condition.
             </p>
           </div>
-
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-1.5 h-1.5 bg-neutral-800 transform rotate-45"></div>
             </div>
-            <p className="text-neutral-700 leading-relaxed">
+            <p className="text-neutral-700 leading-relaxed text-sm">
               Are aware that taking finasteride may cause mood changes. If this happens you should contact your GP
               immediately.
             </p>
           </div>
-
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-1.5 h-1.5 bg-neutral-800 transform rotate-45"></div>
             </div>
-            <p className="text-neutral-700 leading-relaxed">
+            <p className="text-neutral-700 leading-relaxed text-sm">
               Are aware that you should not take finasteride if you're trying for a baby.
             </p>
           </div>
-
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-1.5 h-1.5 bg-neutral-800 transform rotate-45"></div>
             </div>
-            <p className="text-neutral-700 leading-relaxed">
+            <p className="text-neutral-700 leading-relaxed text-sm">
               Are aware that you may be prescribed an{" "}
               <span className="text-teal-600 underline">unlicensed treatment</span>.
             </p>
           </div>
-
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-2 h-2 bg-neutral-800 transform rotate-45"></div>
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-1.5 h-1.5 bg-neutral-800 transform rotate-45"></div>
             </div>
-            <p className="text-neutral-700 leading-relaxed">
+            <p className="text-neutral-700 leading-relaxed text-sm">
               Are accepting our <span className="text-teal-600 underline cursor-pointer">Terms & Conditions</span> and{" "}
               <span className="text-teal-600 underline cursor-pointer">Terms of Sale</span>.
             </p>
           </div>
         </div>
-
         {/* Next Button */}
         <button
           onClick={() => setShowDisclaimer(false)}
-          className="w-full hover:bg-teal-600 text-white font-bold text-lg py-4 px-6 rounded-xl transition-colors duration-200 flex items-center justify-center group bg-black"
+          className="w-full hover:bg-teal-600 text-white font-bold text-base py-3 px-5 rounded-xl transition-colors duration-200 flex items-center justify-center group bg-black" // Scaled text-lg to text-base, py-4 px-6 to py-3 px-5
         >
           Next
-          <ChevronRight className="w-6 h-6 ml-2 transform group-hover:translate-x-1 transition-transform" />
+          <ChevronRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" />{" "}
+          {/* Scaled w-6 h-6 to w-5 h-5 */}
         </button>
       </div>
     </div>
@@ -318,8 +328,12 @@ export function ClinicalQuiz() {
 
   if (showDisclaimer) {
     return (
-      <div className="min-h-screen bg-neutral-50 py-8 px-4">
-        <div className="max-w-3xl mx-auto">
+      <div className="min-h-screen bg-neutral-50 py-4 px-2">
+        {" "}
+        {/* Scaled py-8 to py-4, px-4 to px-2 */}
+        <div className="max-w-2xl mx-auto">
+          {" "}
+          {/* Scaled max-w-3xl to max-w-2xl */}
           <DisclaimerScreen />
         </div>
       </div>
