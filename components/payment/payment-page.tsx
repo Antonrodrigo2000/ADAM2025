@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Plus, Info, X } from "lucide-react"
+import { Check, Plus, Info, X, CreditCard, Calendar, Lock } from "lucide-react"
 
 interface OrderItem {
   id: string
@@ -30,19 +30,32 @@ interface AddressForm {
   addressLine2: string
   city: string
   postcode: string
-  country: string
+}
+
+interface CardDetails {
+  cardNumber: string
+  expiryDate: string
+  cvc: string
+  cardholderName: string
 }
 
 export function PaymentPage() {
   const [sameAsDelivery, setSameAsDelivery] = useState(true)
   const [showNewAddressForm, setShowNewAddressForm] = useState(false)
+  const [showPaymentForm, setShowPaymentForm] = useState(false)
   const [newAddress, setNewAddress] = useState<AddressForm>({
     fullName: "",
     addressLine1: "",
     addressLine2: "",
     city: "",
     postcode: "",
-    country: "United Kingdom",
+  })
+
+  const [cardDetails, setCardDetails] = useState<CardDetails>({
+    cardNumber: "",
+    expiryDate: "",
+    cvc: "",
+    cardholderName: "",
   })
 
   const [orderData] = useState<OrderData>({
@@ -79,6 +92,10 @@ export function PaymentPage() {
     setNewAddress((prev) => ({ ...prev, [field]: value }))
   }
 
+  const handleCardDetailsChange = (field: keyof CardDetails, value: string) => {
+    setCardDetails((prev) => ({ ...prev, [field]: value }))
+  }
+
   const handleUseNewAddress = () => {
     setShowNewAddressForm(true)
   }
@@ -91,14 +108,54 @@ export function PaymentPage() {
       addressLine2: "",
       city: "",
       postcode: "",
-      country: "United Kingdom",
     })
   }
 
   const handleSaveNewAddress = () => {
-    // Handle saving new address logic here
     console.log("Save new address:", newAddress)
     setShowNewAddressForm(false)
+  }
+
+  const handleAddPaymentMethod = () => {
+    setShowPaymentForm(true)
+  }
+
+  const handleCancelPayment = () => {
+    setShowPaymentForm(false)
+    setCardDetails({
+      cardNumber: "",
+      expiryDate: "",
+      cvc: "",
+      cardholderName: "",
+    })
+  }
+
+  const handleSavePaymentMethod = () => {
+    console.log("Save payment method:", cardDetails)
+    setShowPaymentForm(false)
+  }
+
+  const formatCardNumber = (value: string) => {
+    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "")
+    const matches = v.match(/\d{4,16}/g)
+    const match = (matches && matches[0]) || ""
+    const parts = []
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4))
+    }
+    if (parts.length) {
+      return parts.join(" ")
+    } else {
+      return v
+    }
+  }
+
+  const formatExpiryDate = (value: string) => {
+    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "")
+    if (v.length >= 2) {
+      return v.substring(0, 2) + "/" + v.substring(2, 4)
+    }
+    return v
   }
 
   return (
@@ -137,7 +194,7 @@ export function PaymentPage() {
 
                     <button
                       onClick={handleUseNewAddress}
-                      className="w-full neomorphic-input-wrapper h-9 flex items-center justify-center text-neutral-700 text-sm font-medium hover:bg-neutral-50 transition-colors"
+                      className="w-full h-10 flex items-center justify-center text-neutral-700 text-sm font-medium hover:bg-neutral-50 transition-colors bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200"
                     >
                       <Plus className="w-3 h-3 mr-1" />
                       Use new address
@@ -158,21 +215,21 @@ export function PaymentPage() {
                         placeholder="Full name"
                         value={newAddress.fullName}
                         onChange={(e) => handleAddressChange("fullName", e.target.value)}
-                        className="neomorphic-input-wrapper h-9 px-3 text-sm"
+                        className="neomorphic-input-wrapper h-10 px-3 text-sm"
                       />
                       <input
                         type="text"
                         placeholder="Address line 1"
                         value={newAddress.addressLine1}
                         onChange={(e) => handleAddressChange("addressLine1", e.target.value)}
-                        className="neomorphic-input-wrapper h-9 px-3 text-sm"
+                        className="neomorphic-input-wrapper h-10 px-3 text-sm"
                       />
                       <input
                         type="text"
                         placeholder="Address line 2 (optional)"
                         value={newAddress.addressLine2}
                         onChange={(e) => handleAddressChange("addressLine2", e.target.value)}
-                        className="neomorphic-input-wrapper h-9 px-3 text-sm"
+                        className="neomorphic-input-wrapper h-10 px-3 text-sm"
                       />
                       <div className="grid grid-cols-2 gap-3">
                         <input
@@ -180,27 +237,16 @@ export function PaymentPage() {
                           placeholder="City"
                           value={newAddress.city}
                           onChange={(e) => handleAddressChange("city", e.target.value)}
-                          className="neomorphic-input-wrapper h-9 px-3 text-sm"
+                          className="neomorphic-input-wrapper h-10 px-3 text-sm"
                         />
                         <input
                           type="text"
                           placeholder="Postcode"
                           value={newAddress.postcode}
                           onChange={(e) => handleAddressChange("postcode", e.target.value)}
-                          className="neomorphic-input-wrapper h-9 px-3 text-sm"
+                          className="neomorphic-input-wrapper h-10 px-3 text-sm"
                         />
                       </div>
-                      <select
-                        value={newAddress.country}
-                        onChange={(e) => handleAddressChange("country", e.target.value)}
-                        className="neomorphic-input-wrapper h-9 px-3 text-sm"
-                      >
-                        <option value="United Kingdom">United Kingdom</option>
-                        <option value="Ireland">Ireland</option>
-                        <option value="United States">United States</option>
-                        <option value="Canada">Canada</option>
-                        <option value="Australia">Australia</option>
-                      </select>
                     </div>
 
                     <div className="flex gap-2 mt-3">
@@ -212,7 +258,7 @@ export function PaymentPage() {
                       </button>
                       <button
                         onClick={handleCancelNewAddress}
-                        className="flex-1 neomorphic-input-wrapper py-2 px-4 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors text-sm"
+                        className="flex-1 bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200 py-2 px-4 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors text-sm"
                       >
                         Cancel
                       </button>
@@ -245,10 +291,91 @@ export function PaymentPage() {
               <div className="mb-4">
                 <h3 className="text-base font-semibold text-neutral-800 mb-3">How would you like to pay?</h3>
 
-                <button className="w-full bg-black hover:bg-neutral-800 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add payment method
-                </button>
+                {!showPaymentForm ? (
+                  <button
+                    onClick={handleAddPaymentMethod}
+                    className="w-full bg-black hover:bg-neutral-800 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add payment method
+                  </button>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm font-medium text-neutral-700">Add payment method</span>
+                      <button onClick={handleCancelPayment} className="text-neutral-500 hover:text-neutral-700">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Cardholder name"
+                          value={cardDetails.cardholderName}
+                          onChange={(e) => handleCardDetailsChange("cardholderName", e.target.value)}
+                          className="neomorphic-input-wrapper h-10 px-3 text-sm w-full"
+                        />
+                      </div>
+
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Card number"
+                          value={cardDetails.cardNumber}
+                          onChange={(e) => handleCardDetailsChange("cardNumber", formatCardNumber(e.target.value))}
+                          maxLength={19}
+                          className="neomorphic-input-wrapper h-10 px-3 pr-10 text-sm w-full"
+                        />
+                        <CreditCard className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="MM/YY"
+                            value={cardDetails.expiryDate}
+                            onChange={(e) => handleCardDetailsChange("expiryDate", formatExpiryDate(e.target.value))}
+                            maxLength={5}
+                            className="neomorphic-input-wrapper h-10 px-3 pr-10 text-sm w-full"
+                          />
+                          <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                        </div>
+
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="CVC"
+                            value={cardDetails.cvc}
+                            onChange={(e) =>
+                              handleCardDetailsChange("cvc", e.target.value.replace(/\D/g, "").slice(0, 4))
+                            }
+                            maxLength={4}
+                            className="neomorphic-input-wrapper h-10 px-3 pr-10 text-sm w-full"
+                          />
+                          <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={handleSavePaymentMethod}
+                        className="flex-1 bg-black hover:bg-neutral-800 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-sm"
+                      >
+                        Save payment method
+                      </button>
+                      <button
+                        onClick={handleCancelPayment}
+                        className="flex-1 bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200 py-2 px-4 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Payment Notice */}
