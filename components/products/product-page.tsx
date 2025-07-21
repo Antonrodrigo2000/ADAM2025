@@ -64,11 +64,11 @@ export function ProductPage({ product }: ProductPageProps) {
       </header>
 
       {/* Main Content */}
-      <div className="h-[calc(100vh-61px)] flex">
+      <div className="min-h-[calc(100vh-61px)] flex">
         {/* Left Side - Product Image */}
         <div className="flex-1 bg-gray-100 flex flex-col">
           <div className="flex-1 flex items-center justify-center p-4">
-            <div className="max-w-md w-full h-full flex items-center justify-center">
+            <div className="max-w-md w-full flex items-center justify-center">
               <Image
                 src={selectedImage || "/placeholder.svg"}
                 alt={product.name}
@@ -103,7 +103,7 @@ export function ProductPage({ product }: ProductPageProps) {
 
         {/* Right Side - Centered Text Container */}
         <div className="flex-1 bg-white flex items-center justify-center">
-          <div className="w-full max-w-sm mx-auto p-6 min-h-full flex flex-col">
+          <div className="w-full max-w-sm mx-auto p-6 flex flex-col">
             {/* Badge */}
             <div className="text-xs text-gray-600 mb-3 flex items-center gap-1">
               <span className="text-orange-500">★</span>
@@ -136,7 +136,7 @@ export function ProductPage({ product }: ProductPageProps) {
             </Link>
 
             {/* Expandable Sections */}
-            <div className="space-y-3 flex-1">
+            <div className="space-y-3">
               {product.sections.map((section) => (
                 <div key={section.id} className="border-b border-gray-100 pb-3">
                   <button
