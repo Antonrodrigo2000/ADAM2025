@@ -44,31 +44,47 @@ export function ReviewScreen({ questions, answers, onSubmit }: ReviewScreenProps
   const answeredQuestions = questions.filter((q) => answers[q.id] !== undefined)
 
   return (
-    <div className="bg-white rounded-2xl p-8 shadow-sm border border-neutral-100">
-      <div className="mb-8">
-        <h2 className="text-3xl font-semibold text-neutral-800 mb-2">Review Your Answers</h2>
-        <p className="text-neutral-600">
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-100">
+      {" "}
+      {/* Reduced p-8 to p-6, rounded-2xl to rounded-xl */}
+      <div className="mb-6">
+        {" "}
+        {/* Reduced mb-8 to mb-6 */}
+        <h2 className="text-2xl font-semibold text-neutral-800 mb-1.5">Review Your Answers</h2>{" "}
+        {/* Reduced text-3xl to text-2xl, mb-2 to mb-1.5 */}
+        <p className="text-neutral-600 text-sm">
+          {" "}
+          {/* Reduced text-base to text-sm */}
           Please review your responses before submitting. You can go back to make changes if needed.
         </p>
       </div>
-
-      <div className="space-y-6 mb-8">
+      <div className="space-y-4 mb-6">
+        {" "}
+        {/* Reduced space-y-6 to space-y-4, mb-8 to mb-6 */}
         {answeredQuestions.map((question) => (
-          <div key={question.id} className="border-b border-neutral-100 pb-6 last:border-b-0">
-            <h3 className="font-medium text-neutral-800 mb-2">{question.prompt}</h3>
-            <p className="text-neutral-600">{formatAnswer(question, answers[question.id])}</p>
+          <div key={question.id} className="border-b border-neutral-100 pb-4 last:border-b-0">
+            {" "}
+            {/* Reduced pb-6 to pb-4 */}
+            <h3 className="font-medium text-neutral-800 mb-1.5 text-base">{question.prompt}</h3>{" "}
+            {/* Reduced text-lg to text-base, mb-2 to mb-1.5 */}
+            <p className="text-neutral-600 text-sm">{formatAnswer(question, answers[question.id])}</p>{" "}
+            {/* Reduced text-base to text-sm */}
           </div>
         ))}
       </div>
-
-      <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
-        <h3 className="font-semibold text-orange-800 mb-2">Ready to Submit?</h3>
-        <p className="text-orange-700 text-sm mb-4">
+      <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+        {" "}
+        {/* Reduced p-6 to p-4, rounded-xl to rounded-lg */}
+        <h3 className="font-semibold text-orange-800 mb-1.5 text-base">Ready to Submit?</h3>{" "}
+        {/* Reduced text-lg to text-base, mb-2 to mb-1.5 */}
+        <p className="text-orange-700 text-xs mb-3">
+          {" "}
+          {/* Reduced text-sm to text-xs, mb-4 to mb-3 */}
           By submitting this assessment, you confirm that all information provided is accurate and complete.
         </p>
         <button
           onClick={onSubmit}
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-200"
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-5 rounded-lg transition-colors duration-200 text-sm" // Reduced py-4 px-6 to py-3 px-5, rounded-xl to rounded-lg, text-base to text-sm
         >
           Submit Assessment
         </button>
