@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Plus, Info, X, CreditCard, Calendar, Lock } from "lucide-react"
+import { Plus, Info, X, CreditCard, Calendar, Lock } from "lucide-react"
 
 interface OrderItem {
   id: string
@@ -24,6 +24,25 @@ interface OrderData {
   total: number
 }
 
+interface Address {
+  id: string
+  fullName: string
+  addressLine1: string
+  addressLine2: string
+  city: string
+  postcode: string
+  isDefault?: boolean
+}
+
+interface SavedCard {
+  id: string
+  last4: string
+  brand: string
+  expiryMonth: string
+  expiryYear: string
+  cardholderName: string
+}
+
 interface AddressForm {
   fullName: string
   addressLine1: string
@@ -43,6 +62,23 @@ export function PaymentPage() {
   const [sameAsDelivery, setSameAsDelivery] = useState(true)
   const [showNewAddressForm, setShowNewAddressForm] = useState(false)
   const [showPaymentForm, setShowPaymentForm] = useState(false)
+  const [selectedAddressId, setSelectedAddressId] = useState("default")
+  const [selectedCardId, setSelectedCardId] = useState("")
+
+  const [addresses, setAddresses] = useState<Address[]>([
+    {
+      id: "default",
+      fullName: "Ejf Traffic Ltd",
+      addressLine1: "14 Temple Road",
+      addressLine2: "",
+      city: "Norwich",
+      postcode: "NR31ED",
+      isDefault: true,
+    },
+  ])
+
+  const [savedCards, setSavedCards] = useState<SavedCard[]>([])
+
   const [newAddress, setNewAddress] = useState<AddressForm>({
     fullName: "",
     addressLine1: "",
@@ -112,8 +148,22 @@ export function PaymentPage() {
   }
 
   const handleSaveNewAddress = () => {
-    console.log("Save new address:", newAddress)
-    setShowNewAddressForm(false)
+    if (newAddress.fullName && newAddress.addressLine1 && newAddress.city && newAddress.postcode) {
+      const newAddressWithId: Address = {
+        id: `address-${Date.now()}`,
+        ...newAddress,
+      }
+      setAddresses((prev) => [...prev, newAddressWithId])
+      setSelectedAddressId(newAddressWithId.id)
+      setShowNewAddressForm(false)
+      setNewAddress({
+        fullName: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        postcode: "",
+      })
+    }
   }
 
   const handleAddPaymentMethod = () => {
@@ -131,8 +181,43 @@ export function PaymentPage() {
   }
 
   const handleSavePaymentMethod = () => {
-    console.log("Save payment method:", cardDetails)
-    setShowPaymentForm(false)
+    if (cardDetails.cardNumber && cardDetails.expiryDate && cardDetails.cvc && cardDetails.cardholderName) {
+      // Simulate card authorization
+      const cardNumber = cardDetails.cardNumber.replace(/\s/g, "")
+      const [month, year] = cardDetails.expiryDate.split("/")
+
+      const newCard: SavedCard = {
+        id: `card-${Date.now()}`,
+        last4: cardNumber.slice(-4),
+        brand: getBrandFromCardNumber(cardNumber),
+        expiryMonth: month,
+        expiryYear: year,
+        cardholderName: cardDetails.cardholderName,
+      }
+
+      setSavedCards((prev) => [...prev, newCard])
+      setSelectedCardId(newCard.id)
+      setShowPaymentForm(false)
+      setCardDetails({
+        cardNumber: "",
+        expiryDate: "",
+        cvc: "",
+        cardholderName: "",
+      })
+    }
+  }
+
+  const getBrandFromCardNumber = (cardNumber: string): string => {
+    const firstDigit = cardNumber.charAt(0)
+    if (firstDigit === "4") return "Visa"
+    if (firstDigit === "5") return "Mastercard"
+    if (firstDigit === "3") return "Amex"
+    return "Card"
+  }
+
+  const handleConfirmTreatment = () => {
+    console.log("Treatment confirmed!")
+    // Handle treatment confirmation logic
   }
 
   const formatCardNumber = (value: string) => {
@@ -158,8 +243,30 @@ export function PaymentPage() {
     return v
   }
 
+  const formatAddress = (address: Address) => {
+    const parts = [address.addressLine1, address.addressLine2, address.city, address.postcode].filter(Boolean)
+    return parts.join(", ")
+  }
+
+  const isPaymentComplete = savedCards.length > 0 && selectedCardId
+
   return (
     <div className="min-h-screen bg-neutral-100">
+      <style jsx>{`
+        @keyframes subtle-glow {
+          0%, 100% {
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1), 0 0 10px rgba(0, 0, 0, 0.05), 0 0 15px rgba(0, 0, 0, 0.02);
+          }
+          50% {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15), 0 0 20px rgba(0, 0, 0, 0.1), 0 0 30px rgba(0, 0, 0, 0.05);
+          }
+        }
+        
+        .glow-animation {
+          animation: subtle-glow 2s ease-in-out infinite;
+        }
+      `}</style>
+
       <div className="container mx-auto px-2 py-4 max-w-5xl">
         {/* Page Header */}
         <div className="mb-4">
@@ -187,9 +294,34 @@ export function PaymentPage() {
 
                 {!showNewAddressForm ? (
                   <>
-                    <div className="flex items-center mb-3">
-                      <Check className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
-                      <span className="text-sm text-neutral-700">Ejf Traffic Ltd, 14 Temple Road, Norwich, NR31ED</span>
+                    {/* Address List */}
+                    <div className="space-y-2 mb-3">
+                      {addresses.map((address) => (
+                        <label
+                          key={address.id}
+                          className="flex items-start space-x-3 cursor-pointer p-2 rounded-lg hover:bg-neutral-50"
+                        >
+                          <input
+                            type="radio"
+                            name="selectedAddress"
+                            value={address.id}
+                            checked={selectedAddressId === address.id}
+                            onChange={(e) => setSelectedAddressId(e.target.value)}
+                            className="w-4 h-4 text-purple-600 border-2 border-neutral-300 rounded-full focus:ring-purple-500 focus:ring-2 mt-0.5"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm font-medium text-neutral-800">{address.fullName}</span>
+                              {address.isDefault && (
+                                <span className="text-xs bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-neutral-600 mt-0.5">{formatAddress(address)}</div>
+                          </div>
+                        </label>
+                      ))}
                     </div>
 
                     <button
@@ -291,10 +423,40 @@ export function PaymentPage() {
               <div className="mb-4">
                 <h3 className="text-base font-semibold text-neutral-800 mb-3">How would you like to pay?</h3>
 
+                {/* Saved Cards List */}
+                {savedCards.length > 0 && (
+                  <div className="space-y-2 mb-3">
+                    {savedCards.map((card) => (
+                      <label
+                        key={card.id}
+                        className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-neutral-50 border border-neutral-200"
+                      >
+                        <input
+                          type="radio"
+                          name="selectedCard"
+                          value={card.id}
+                          checked={selectedCardId === card.id}
+                          onChange={(e) => setSelectedCardId(e.target.value)}
+                          className="w-4 h-4 text-purple-600 border-2 border-neutral-300 rounded-full focus:ring-purple-500 focus:ring-2"
+                        />
+                        <CreditCard className="w-5 h-5 text-neutral-600" />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-neutral-800">
+                            {card.brand} ending in {card.last4}
+                          </div>
+                          <div className="text-xs text-neutral-600">
+                            Expires {card.expiryMonth}/{card.expiryYear} • {card.cardholderName}
+                          </div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
+
                 {!showPaymentForm ? (
                   <button
                     onClick={handleAddPaymentMethod}
-                    className="w-full bg-black hover:bg-neutral-800 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm"
+                    className={`w-full bg-black hover:bg-neutral-800 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm ${savedCards.length === 0 ? "glow-animation" : ""}`}
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add payment method
@@ -385,6 +547,18 @@ export function PaymentPage() {
                   You won't be charged until our clinical team have reviewed and confirmed your order.
                 </p>
               </div>
+
+              {/* Confirm Treatment Button */}
+              {isPaymentComplete && (
+                <div className="mt-4">
+                  <button
+                    onClick={handleConfirmTreatment}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 text-base glow-animation"
+                  >
+                    Confirm Treatment
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
