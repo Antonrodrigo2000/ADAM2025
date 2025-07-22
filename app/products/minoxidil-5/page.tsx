@@ -1,53 +1,51 @@
 import { ProductPage } from "@/components/products/product-page"
 
+// RestoreRx Minoxidil Product Data
 const minoxidilProduct = {
-  id: 1,
+  id: 2,
   slug: "minoxidil-5",
-  name: "Topical Finasteride & Minoxidil Spray",
-  badge: "#1 customer favorite",
+  name: "Clinical Strength Minoxidil 5% Topical Solution",
+  badge: "#1 Dermatologist Recommended",
   description:
-    "A 2-in-1 spray to treat hair loss and regrow new hair, made with two clinically proven ingredients. It's a no pill option to treat hair loss and our best selling treatment for a reason.",
-  mainImage: "/placeholder.svg?height=600&width=600",
+    "A powerful 5% minoxidil formula designed to stimulate hair follicles and promote new hair growth. FDA-approved active ingredient with visible results in as little as 12 weeks. Our easy-application dropper delivers precise dosing for maximum effectiveness with minimal scalp irritation.",
+  mainImage: "/placeholder.svg?height=400&width=400",
   thumbnails: [
-    "/placeholder.svg?height=100&width=100",
-    "/placeholder.svg?height=100&width=100",
-    "/placeholder.svg?height=100&width=100",
-    "/placeholder.svg?height=100&width=100",
-    "/placeholder.svg?height=100&width=100",
+    "/placeholder.svg?height=56&width=56",
+    "/placeholder.svg?height=56&width=56",
+    "/placeholder.svg?height=56&width=56",
+    "/placeholder.svg?height=56&width=56",
+    "/placeholder.svg?height=56&width=56",
   ],
   sections: [
     {
-      id: "meet-spray",
-      title: "Meet the 2-in-1 spray",
+      id: "meet-minoxidil",
+      title: "Meet the 5% Minoxidil Solution",
       content:
-        "Our topical spray combines finasteride and minoxidil in one easy-to-use formula. Finasteride blocks DHT production to prevent further hair loss, while minoxidil stimulates blood flow to hair follicles to promote regrowth. Together, they provide comprehensive hair loss treatment without the need for daily pills.",
-      expanded: false,
+        "Our clinical-strength 5% minoxidil formula represents the optimal concentration for hair regrowth, delivering 2.5x more active ingredient than over-the-counter 2% versions. This FDA-approved topical solution works by increasing blood flow to hair follicles and extending the anagen (growth) phase of your hair cycle. Suitable for both male and female pattern baldness, most users begin seeing initial results within 12-16 weeks, with full results typically visible after 6-12 months of consistent use. The precision dropper applicator ensures accurate dosing while minimizing waste and scalp irritation.",
     },
     {
       id: "how-it-works",
       title: "How it works",
       content:
-        "Apply 6 sprays to affected areas of your scalp twice daily. The topical formula is absorbed directly into the scalp, targeting hair follicles where it's needed most. Most customers see initial results within 3-4 months of consistent use, with continued improvement over time.",
-      expanded: false,
+        "Minoxidil works through vasodilation, widening blood vessels to increase nutrient and oxygen delivery to hair follicles. This enhanced blood flow awakens dormant follicles and extends the active growth phase of existing hair. The solution penetrates directly into the scalp, targeting the root cause of hair thinning at the follicular level. Consistent daily application is crucial because minoxidil's effects are temporary - stopping treatment will gradually return hair to its previous state. The alcohol-based formula ensures rapid absorption and optimal bioavailability of the active ingredient.",
     },
     {
       id: "ingredients",
       title: "Ingredients",
       content:
-        "Active ingredients: Finasteride 0.25%, Minoxidil 6%. Inactive ingredients: Propylene glycol, ethanol, purified water. This compounded formulation is made in FDA-registered facilities following strict quality standards.",
-      expanded: false,
+        "Active Ingredient: Minoxidil 5% (hair regrowth stimulant) - the only FDA-approved topical ingredient clinically proven to regrow hair. Inactive Ingredients: Alcohol (enhances absorption and acts as a preservative), Propylene Glycol (improves drug penetration and stability), Purified Water (pharmaceutical-grade solvent). This hypoallergenic formula is dermatologist-tested and free from sulfates, parabens, and artificial fragrances. Note: The alcohol content may cause temporary scalp dryness or irritation in sensitive individuals.",
     },
     {
-      id: "shipping-restrictions",
-      title: "Shipping restrictions",
+      id: "usage-precautions",
+      title: "Usage & Precautions",
       content:
-        "Due to U.S. Department of Transportation regulations, certain items, including alcohol-based products have shipping restrictions to military addresses. We regret that we are not able to offer shipping to APO, FPO, DPO, or Military addresses on orders with restricted items.",
-      expanded: true,
+        "Application: Apply 1ml (approximately 6 drops) twice daily to affected scalp areas. Use only on completely dry scalp and hair. Allow 4 hours before washing hair after application. Wash hands thoroughly after each use. Side Effects: Possible scalp irritation, itching, or unwanted facial hair growth in women. Contraindications: Do not use if pregnant, breastfeeding, under 18, or have scalp conditions/injuries. Consult your healthcare provider if you have heart conditions, take blood pressure medications, or experience chest pain, dizziness, or rapid heartbeat. Discontinue use if severe irritation occurs.",
     },
   ],
-  disclaimer:
-    "Topical Finasteride & Minoxidil Spray is a compounded product and has not been approved by the FDA. The FDA does not verify the safety or effectiveness of compounded drugs. Only available if prescribed after an online consultation with a healthcare provider.",
-  footnote: "*Based on separate individual studies of oral minoxidil and oral finasteride.",
+  shippingNotice:
+    "Due to alcohol content, this product cannot be shipped to APO/FPO addresses or internationally. Available for domestic shipping only. Some state restrictions may apply. Standard shipping with discreet packaging included.",
+  fdaDisclaimer:
+    "This product contains the FDA-approved active ingredient minoxidil for hair regrowth. Individual results may vary. Most users see initial results within 12-16 weeks of consistent use. This product is for external use only. Consult your healthcare provider before use if you have heart conditions, are pregnant or nursing, or are under 18 years of age. Discontinue use if irritation occurs.",
 }
 
 export default function MinoxidilProductPage() {
