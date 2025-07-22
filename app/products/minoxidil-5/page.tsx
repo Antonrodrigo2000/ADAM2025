@@ -1,4 +1,5 @@
 import ProductPage from "@/components/products/product-page"
+import ProductInfoSection from "@/components/products/product-info-section"
 
 export default function MinoxidilProductPage() {
   const productData = {
@@ -69,7 +70,23 @@ export default function MinoxidilProductPage() {
       "Minoxidil USP 5% is the only FDA-approved over-the-counter treatment for androgenetic alopecia (male pattern baldness). Originally developed as a blood pressure medication, researchers discovered its hair growth properties as a side effect. Clinical studies show that 5% minoxidil is significantly more effective than 2% concentration, with 45% of men experiencing moderate to dense hair regrowth after one year of use. The treatment works by widening blood vessels and opening potassium channels, which allows more oxygen, blood, and nutrients to reach hair follicles. This process can reverse the miniaturization of hair follicles and extend the growth phase of the hair cycle.",
   }
 
-  return <ProductPage {...productData} />
+  const infoSectionData = {
+    title: "On minoxidil for men's hair loss",
+    image: "/placeholder.svg?height=600&width=600",
+    formatsTitle: "Solution, foam, or spray?",
+    formatsDescription:
+      "Topical minoxidil is available in three different formulations. It's available in a dropper solution, or a light and airy topical foam as the single ingredient, and in a 2-in-1 treatment spray that also contains finasteride.",
+    benefitsTitle: "Better together",
+    benefitsDescription:
+      "Minoxidil is a clinically proven hair regrowth treatment for men that can regrow hair on the vertex or crown in as little as 3-6 months. When paired with finasteride, it is proven to give even better results. Connect with a provider, 100% online, to see which treatments might be best for you.",
+  }
+
+  return (
+    <>
+      <ProductPage {...productData} />
+      <ProductInfoSection {...infoSectionData} />
+    </>
+  )
 }
 
 export const metadata = {
