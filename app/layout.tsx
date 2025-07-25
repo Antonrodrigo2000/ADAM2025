@@ -3,6 +3,8 @@ import type { Metadata } from "next"
 import { Inter, Space_Grotesk, MuseoModerno } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
+import { AppProviders } from "@/lib/contexts"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,7 +39,10 @@ export default function RootLayout({
       <body
         className={cn("bg-black text-white font-sans", inter.variable, spaceGrotesk.variable, museoModerno.variable)}
       >
-        {children}
+        <AppProviders>
+          {children}
+          <Toaster />
+        </AppProviders>
       </body>
     </html>
   )
