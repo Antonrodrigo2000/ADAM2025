@@ -14,6 +14,7 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ question, value, onChange, error }: QuestionCardProps) {
+  console.log("Question name:", question);
   const [dragActive, setDragActive] = useState(false)
 
   const handleFileUpload = (files: FileList | null) => {
@@ -47,7 +48,7 @@ export function QuestionCard({ question, value, onChange, error }: QuestionCardP
   }
 
   const renderInput = () => {
-    switch (question.type) {
+    switch (question.question_type) {
       case "radio":
         return (
           <div className="space-y-3">
@@ -99,6 +100,7 @@ export function QuestionCard({ question, value, onChange, error }: QuestionCardP
         )
 
       case "select":
+        console.log("select from gender or some");
         return (
           <div className="space-y-3">
             {question.options?.map((option) => (

@@ -9,6 +9,11 @@ export interface QuizState {
   sessionId: string
   startedAt: Date | null
   completedAt: Date | null
+  questionnaireId: string | null
+  responseId: string | null
+  questions: any[] // Array of questions from Supabase
+  isLoading: boolean // Loading state for async operations
+  error: string | null // Error state
 }
 
 export interface QuizActions {
@@ -18,9 +23,11 @@ export interface QuizActions {
   goToQuestion: (index: number) => void
   enterReviewMode: () => void
   exitReviewMode: () => void
-  submitQuiz: () => void
+  submitQuiz: () => Promise<void>
   resetQuiz: () => void
   loadSavedQuiz: () => void
+  saveCurrentState: () => Promise<void>
+  loadQuestionnaire: () => Promise<void>
 }
 
 // Cart State Types

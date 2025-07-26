@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { hairLossQuestions } from "@/data/hairlossquestions"
 import { ProgressBar } from "./progress-bar"
 import { QuestionCard } from "./question-card"
 import { ReviewScreen } from "./review-screen"
@@ -17,7 +16,8 @@ export function ClinicalQuiz() {
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [showDisclaimer, setShowDisclaimer] = useState(true)
 
-    const currentQuestion = hairLossQuestions.find((q) => q.id === state.questionFlow[state.currentQuestionIndex])
+    const currentQuestion = state.questions.find((q) => q.id === state.questionFlow[state.currentQuestionIndex])
+    //console.log("Current Question:", currentQuestion);
     const totalSteps = state.questionFlow.length + 2 // +1 for disclaimer, +1 for review screen
 
     const [healthVerticals, setHealthVerticals] = useState<any[]>([])
@@ -44,17 +44,17 @@ export function ClinicalQuiz() {
             return "This field is required."
         }
 
-        if (question.type === "checkbox" && Array.isArray(answer) && answer.length === 0) {
+        if (question.question_type === "checkbox" && Array.isArray(answer) && answer.length === 0) {
             return "Please select at least one option."
         }
 
-        if (question.type === "file") {
+        if (question.question_type === "file") {
             if (!Array.isArray(answer) || answer.length === 0) {
                 return "Please upload the required photos."
             }
         }
 
-        if (question.type === "number" && (isNaN(answer) || answer <= 0)) {
+        if (question.question_type === "number" && (isNaN(answer) || answer <= 0)) {
             return "Please enter a valid number."
         }
 
@@ -92,9 +92,9 @@ export function ClinicalQuiz() {
         }
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         try {
-            actions.submitQuiz()
+            await actions.submitQuiz()
         } catch (error) {
             console.error("Error generating recommendations:", error)
             alert("There was an error processing your assessment. Please try again.")
@@ -224,6 +224,85 @@ export function ClinicalQuiz() {
         </div>
     )
 
+    // Loading state
+    if (state.isLoading) {
+        return (
+            <div className="min-h-screen bg-neutral-50 py-8 px-4 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900 mx-auto mb-4"></div>
+                    <p className="text-neutral-600">Loading questionnaire...</p>
+                </div>
+            </div>
+        )
+    }
+
+    // Error state
+    if (state.error) {
+        return (
+            <div className="min-h-screen bg-neutral-50 py-8 px-4 flex items-center justify-center">
+                <div className="text-center max-w-md">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                        <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Questionnaire</h2>
+                        <p className="text-red-600 mb-4">{state.error}</p>
+                        <button
+                            onClick={() => actions.loadQuestionnaire()}
+                            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    // Show loading state while questionnaire is being loaded
+    if (state.isLoading) {
+        return (
+            <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+                    <p className="text-neutral-600">Loading questionnaire...</p>
+                </div>
+            </div>
+        )
+    }
+
+    // Show error state if questionnaire failed to load
+    if (state.error) {
+        return (
+            <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+                <div className="text-center max-w-md mx-auto p-6">
+                    <div className="text-red-500 mb-4">
+                        <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-xl font-semibold text-neutral-800 mb-2">Failed to Load Questionnaire</h2>
+                    <p className="text-neutral-600 mb-4">{state.error}</p>
+                    <button
+                        onClick={() => actions.loadQuestionnaire()}
+                        className="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700 transition-colors"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
+    // Show loading if questions haven't been loaded yet
+    if (state.questions.length === 0) {
+        return (
+            <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+                    <p className="text-neutral-600">Preparing questionnaire...</p>
+                </div>
+            </div>
+        )
+    }
+
     if (state.isCompleted && state.recommendations) {
         return <RecommendationsScreen recommendations={state.recommendations} patientData={state.answers} onBack={handleBack} />
     }
@@ -235,7 +314,7 @@ export function ClinicalQuiz() {
                     <ProgressBar currentStep={totalSteps} totalSteps={totalSteps} />
 
                     <ReviewScreen
-                        questions={hairLossQuestions.filter((q) => state.questionFlow.includes(q.id))}
+                        questions={state.questions.filter((q: any) => state.questionFlow.includes(q.id))}
                         answers={state.answers}
                         onSubmit={handleSubmit}
                     />

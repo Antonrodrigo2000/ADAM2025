@@ -21,6 +21,7 @@ interface PatientData {
 interface RecommendationResult {
   recommendation: string
   message: string
+  riskScore?: number
 }
 
 const absoluteContraindications = ["Allergy to minoxidil", "Heart conditions", "Scalp wounds or infections"]
@@ -69,6 +70,37 @@ function determineNorwoodScale(data: PatientData): number {
     return 3 // Mild to moderate hair loss
   }
   return 1 // Minimal hair loss
+}
+
+function calculateRiskScore(data: PatientData): number {
+  let score = 0
+
+  // Age factor (higher age = higher risk)
+  if (data.age >= 40) score += 2
+  else if (data.age >= 30) score += 1
+
+  // Family history
+  if (data.familyHistory === "Yes") score += 2
+
+  // Hair loss progression
+  if (data.hairLossProgression === "Quickly") score += 3
+  else if (data.hairLossProgression === "Moderately") score += 2
+  else score += 1
+
+  // Hair loss onset
+  if (data.hairLossOnset === "More than 5 years ago") score += 2
+  else if (data.hairLossOnset === "1 to 5 years ago") score += 1
+
+  // Number of areas affected
+  score += data.hairLossAreas.length
+
+  // Medical conditions (contraindications increase risk)
+  if (data.medicalConditions.length > 0) score += 1
+
+  // Commitment level (lower commitment = higher risk of failure)
+  if (data.commitment === "No") score += 3
+
+  return Math.min(score, 10) // Cap at 10
 }
 
 function recommendTreatment(data: PatientData): RecommendationResult {
@@ -145,7 +177,10 @@ function recommendTreatment(data: PatientData): RecommendationResult {
       " Note: Patient has scalp sensitivity. Consider starting with a lower frequency or concentration to assess tolerance."
   }
 
-  return { recommendation, message }
+  // Calculate risk score
+  const riskScore = calculateRiskScore(data)
+
+  return { recommendation, message, riskScore }
 }
 
 export default recommendTreatment
