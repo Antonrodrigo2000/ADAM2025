@@ -3,8 +3,6 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { ShoppingCart, Heart, Share2, Plus, Minus } from "lucide-react"
 
 interface Tax {
@@ -226,52 +224,6 @@ export default function JsonProductPage({ product }: JsonProductPageProps) {
                 </Button>
               )}
             </div>
-
-            {/* Additional Details */}
-            {product.showDetailView && product.detailViewContent && (
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-lg mb-3 font-['Smooch_Sans']">Product Details</h3>
-                  <Separator className="mb-4" />
-                  <div className="prose prose-sm max-w-none">
-                    <p className="text-gray-700">{product.detailViewContent}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Category Information */}
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="p-4">
-                <h4 className="font-medium text-blue-900 mb-2 font-['Smooch_Sans']">From {product.category.name}</h4>
-                <p className="text-sm text-blue-800 mb-3">{product.category.description}</p>
-                <div className="text-xs text-blue-700">{product.category.productCount} products in this category</div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Related Products Section */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 font-['Smooch_Sans']">You might also like</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i} className="group cursor-pointer hover:shadow-lg transition-shadow">
-                <CardContent className="p-4">
-                  <div className="aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden">
-                    <img
-                      src="/placeholder.svg?height=200&width=200"
-                      alt="Related product"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                  </div>
-                  <h3 className="font-medium text-sm mb-1">Related Product {i + 1}</h3>
-                  <p className="text-orange-600 font-bold">
-                    {product.currency} {(product.price * 0.8).toFixed(2)}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
       </div>

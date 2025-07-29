@@ -1,98 +1,129 @@
 import Link from "next/link"
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
 
-export function Footer() {
+export default function Footer() {
   return (
-    <footer className="bg-black text-white py-16">
-      <div className="container mx-auto px-4 md:px-6">
+    <footer className="bg-gray-900 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
+          {/* Company Info */}
           <div className="space-y-4">
-            <Link href="/" className="text-2xl font-extrabold font-logo tracking-tighter uppercase">
-              ADAM
-            </Link>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Professional telehealth solutions for men's health, delivered with discretion and care.
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">A</span>
+              </div>
+              <span className="text-xl font-bold">ADAM</span>
+            </div>
+            <p className="text-gray-400 text-sm">
+              Personalized telehealth solutions for men's health, delivered with care and discretion.
             </p>
+            <div className="flex space-x-4">
+              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Facebook className="w-5 h-5" />
+              </Link>
+              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Twitter className="w-5 h-5" />
+              </Link>
+              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Instagram className="w-5 h-5" />
+              </Link>
+              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Linkedin className="w-5 h-5" />
+              </Link>
+            </div>
           </div>
 
-          {/* Products */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Products</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
+          {/* Services */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Services</h3>
+            <ul className="space-y-2">
               <li>
-                <Link href="#hair" className="hover:text-white transition-colors">
+                <Link href="/hair-loss" className="text-gray-400 hover:text-white transition-colors">
                   Hair Loss Treatment
                 </Link>
               </li>
               <li>
-                <Link href="#skin" className="hover:text-white transition-colors">
+                <Link href="/skincare" className="text-gray-400 hover:text-white transition-colors">
                   Skincare Solutions
                 </Link>
               </li>
               <li>
-                <Link href="#sexual-health" className="hover:text-white transition-colors">
+                <Link href="/sexual-health" className="text-gray-400 hover:text-white transition-colors">
                   Sexual Health
+                </Link>
+              </li>
+              <li>
+                <Link href="/consultation" className="text-gray-400 hover:text-white transition-colors">
+                  Online Consultation
                 </Link>
               </li>
             </ul>
           </div>
 
           {/* Support */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Support</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Support</h3>
+            <ul className="space-y-2">
               <li>
-                <Link href="/help" className="hover:text-white transition-colors">
+                <Link href="/help" className="text-gray-400 hover:text-white transition-colors">
                   Help Center
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-white transition-colors">
+                <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-white transition-colors">
+                <Link href="/faq" className="text-gray-400 hover:text-white transition-colors">
                   FAQ
+                </Link>
+              </li>
+              <li>
+                <Link href="/shipping" className="text-gray-400 hover:text-white transition-colors">
+                  Shipping Info
                 </Link>
               </li>
             </ul>
           </div>
 
           {/* Legal */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Legal</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Legal</h3>
+            <ul className="space-y-2">
               <li>
-                <Link href="/privacy" className="hover:text-white transition-colors">
+                <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:text-white transition-colors">
+                <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link href="/medical" className="hover:text-white transition-colors">
+                <Link href="/medical" className="text-gray-400 hover:text-white transition-colors">
                   Medical Disclaimer
+                </Link>
+              </li>
+              <li>
+                <Link href="/cookies" className="text-gray-400 hover:text-white transition-colors">
+                  Cookie Policy
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-sm text-gray-400">© 2024 ADAM. All rights reserved.</p>
-            <div className="flex space-x-6 text-sm text-gray-400">
-              <Link href="/accessibility" className="hover:text-white transition-colors">
-                Accessibility
-              </Link>
-              <Link href="/sitemap" className="hover:text-white transition-colors">
-                Sitemap
-              </Link>
-            </div>
+        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-gray-400 text-sm">© 2024 ADAM Telehealth. All rights reserved.</p>
+          <div className="flex space-x-6 mt-4 md:mt-0">
+            <Link href="/accessibility" className="text-gray-400 hover:text-white text-sm transition-colors">
+              Accessibility
+            </Link>
+            <Link href="/sitemap" className="text-gray-400 hover:text-white text-sm transition-colors">
+              Sitemap
+            </Link>
           </div>
         </div>
       </div>
