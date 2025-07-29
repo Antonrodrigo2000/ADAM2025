@@ -1,4 +1,4 @@
-import { Shield, Truck, Clock, Award } from "lucide-react"
+import { Shield, Package, Clock, Star } from "lucide-react"
 
 export function TrustBadges() {
   const badges = [
@@ -8,34 +8,43 @@ export function TrustBadges() {
       description: "Prescribed by qualified doctors",
     },
     {
-      icon: Truck,
+      icon: Package,
       title: "Discreet Packaging",
-      description: "Private and confidential delivery",
+      description: "Private & confidential delivery",
     },
     {
       icon: Clock,
-      title: "2-Day Consultation",
-      description: "Quick response guarantee",
+      title: "2-Day Consultation SLA",
+      description: "Quick medical review process",
     },
     {
-      icon: Award,
-      title: "Quality Assured",
-      description: "Pharmacy-grade medications",
+      icon: Star,
+      title: "4.8/5 Rating",
+      description: "From 2,847 verified customers",
     },
   ]
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {badges.map((badge, index) => (
-        <div
-          key={index}
-          className="flex flex-col items-center text-center p-4 bg-blue-50 rounded-lg border border-blue-100"
-        >
-          <badge.icon className="w-8 h-8 text-blue-600 mb-2" />
-          <h4 className="font-semibold text-gray-900 text-sm mb-1">{badge.title}</h4>
-          <p className="text-xs text-gray-600 leading-tight">{badge.description}</p>
-        </div>
-      ))}
+    <div className="grid grid-cols-2 gap-4">
+      {badges.map((badge, index) => {
+        const IconComponent = badge.icon
+        return (
+          <div
+            key={index}
+            className="bg-gray-100 rounded-2xl p-4 shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.8)] hover:shadow-[4px_4px_8px_rgba(0,0,0,0.15),-4px_-4px_8px_rgba(255,255,255,0.9)] transition-all duration-300"
+          >
+            <div className="flex items-start space-x-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shadow-[4px_4px_8px_rgba(0,0,0,0.1),-4px_-4px_8px_rgba(255,255,255,0.8)] flex-shrink-0">
+                <IconComponent className="w-5 h-5 text-blue-600" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-medium text-gray-900 text-sm mb-1">{badge.title}</div>
+                <div className="text-xs text-gray-600 leading-tight">{badge.description}</div>
+              </div>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

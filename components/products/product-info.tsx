@@ -3,7 +3,6 @@
 import { useState } from "react"
 import type { Product } from "@/types/product"
 import { Star, Shield, Clock, Truck } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 interface ProductInfoProps {
   product: Product
@@ -25,73 +24,81 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
   const handleAddToCart = async () => {
     setIsAddingToCart(true)
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000))
     setIsAddingToCart(false)
-    // Handle cart logic here
   }
 
   return (
     <div className="space-y-6">
-      {/* Product Title & Category */}
-      <div>
+      {/* Product Title & Category - Neumorphic Card */}
+      <div className="bg-gray-100 rounded-3xl p-6 shadow-[8px_8px_16px_rgba(0,0,0,0.1),-8px_-8px_16px_rgba(255,255,255,0.8)]">
         <div className="text-sm text-blue-600 font-medium mb-2">{product.health_vertical.name}</div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
         <p className="text-gray-600 leading-relaxed">{product.description}</p>
       </div>
 
-      {/* Rating & Reviews */}
-      <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-1">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className={`w-5 h-5 ${i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
-            />
-          ))}
-          <span className="text-sm font-medium text-gray-900 ml-2">{product.rating}</span>
+      {/* Rating & Reviews - Neumorphic Card */}
+      <div className="bg-gray-100 rounded-2xl p-4 shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.8)]">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={`w-5 h-5 ${i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+              />
+            ))}
+            <span className="text-sm font-medium text-gray-900 ml-2">{product.rating}</span>
+          </div>
+          <div className="text-sm text-gray-600">({product.review_count.toLocaleString()} reviews)</div>
         </div>
-        <div className="text-sm text-gray-600">({product.review_count.toLocaleString()} reviews)</div>
       </div>
 
-      {/* Prescription Badge */}
+      {/* Prescription Badge - Neumorphic */}
       {product.prescription_required && (
-        <div className="flex items-center space-x-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <Shield className="w-5 h-5 text-blue-600" />
-          <span className="text-sm font-medium text-blue-800">Prescription Required - Consultation Needed</span>
+        <div className="bg-blue-50 rounded-2xl p-4 shadow-[inset_4px_4px_8px_rgba(0,0,0,0.05),inset_-4px_-4px_8px_rgba(255,255,255,0.9)] border border-blue-100/50">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shadow-[4px_4px_8px_rgba(0,0,0,0.1),-4px_-4px_8px_rgba(255,255,255,0.8)]">
+              <Shield className="w-5 h-5 text-blue-600" />
+            </div>
+            <span className="text-sm font-medium text-blue-800">Prescription Required - Consultation Needed</span>
+          </div>
         </div>
       )}
 
-      {/* Price Breakdown */}
-      <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600">Product price:</span>
-          <span className="font-semibold">LKR {monthlyPrice.toLocaleString()}/month</span>
-        </div>
-        {product.prescription_required && (
+      {/* Price Breakdown - Neumorphic Card */}
+      <div className="bg-gray-100 rounded-3xl p-6 shadow-[8px_8px_16px_rgba(0,0,0,0.1),-8px_-8px_16px_rgba(255,255,255,0.8)]">
+        <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <span className="text-gray-600">Consultation fee:</span>
-            <span className="font-semibold">LKR {product.consultation_fee.toLocaleString()} (one-time)</span>
+            <span className="text-gray-600">Product price:</span>
+            <span className="font-semibold">LKR {monthlyPrice.toLocaleString()}/month</span>
           </div>
-        )}
-        <div className="border-t border-gray-200 pt-3">
-          <div className="flex justify-between items-center">
-            <span className="font-semibold text-gray-900">Total first order:</span>
-            <span className="text-xl font-bold text-blue-600">LKR {totalFirstOrder.toLocaleString()}</span>
+          {product.prescription_required && (
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Consultation fee:</span>
+              <span className="font-semibold">LKR {product.consultation_fee.toLocaleString()} (one-time)</span>
+            </div>
+          )}
+          <div className="border-t border-gray-200/50 pt-4">
+            <div className="flex justify-between items-center">
+              <span className="font-semibold text-gray-900">Total first order:</span>
+              <span className="text-xl font-bold text-blue-600">LKR {totalFirstOrder.toLocaleString()}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Quantity Selector */}
-      <div className="space-y-3">
+      {/* Quantity Selector - Neumorphic Cards */}
+      <div className="space-y-4">
         <label className="text-sm font-medium text-gray-900">Select Quantity:</label>
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-4">
           {quantityOptions.map((option, index) => (
             <button
               key={index}
               onClick={() => setSelectedQuantity(index + 1)}
-              className={`relative p-4 border-2 rounded-lg text-left transition-colors ${
-                selectedQuantity === index + 1 ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
+              className={`relative p-5 bg-gray-100 rounded-2xl text-left transition-all duration-300 ${
+                selectedQuantity === index + 1
+                  ? "shadow-[inset_6px_6px_12px_rgba(0,0,0,0.15),inset_-6px_-6px_12px_rgba(255,255,255,0.9)] border border-blue-200/50"
+                  : "shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.8)] hover:shadow-[4px_4px_8px_rgba(0,0,0,0.15),-4px_-4px_8px_rgba(255,255,255,0.9)]"
               }`}
             >
               <div className="flex justify-between items-start">
@@ -109,7 +116,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 </div>
               </div>
               {option.savings > 0 && (
-                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-3 py-1 rounded-full shadow-[4px_4px_8px_rgba(0,0,0,0.2),-2px_-2px_4px_rgba(255,255,255,0.1)]">
                   SAVE {option.savings}%
                 </div>
               )}
@@ -118,35 +125,38 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="space-y-3">
-        <Button
+      {/* Action Buttons - Neumorphic */}
+      <div className="space-y-4">
+        <button
           onClick={handleAddToCart}
           disabled={isAddingToCart}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-semibold"
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-4 text-lg font-semibold rounded-2xl transition-all duration-300 shadow-[6px_6px_12px_rgba(0,0,0,0.2),-6px_-6px_12px_rgba(255,255,255,0.1)] hover:shadow-[4px_4px_8px_rgba(0,0,0,0.25),-4px_-4px_8px_rgba(255,255,255,0.15)] active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.3),inset_-4px_-4px_8px_rgba(255,255,255,0.1)]"
         >
           {isAddingToCart ? "Adding to Cart..." : "Add to Cart"}
-        </Button>
+        </button>
 
         {product.prescription_required && (
-          <Button
-            variant="outline"
-            className="w-full border-blue-600 text-blue-600 hover:bg-blue-50 py-3 bg-transparent"
-          >
+          <button className="w-full bg-gray-100 text-blue-600 hover:text-blue-700 py-4 font-semibold rounded-2xl transition-all duration-300 shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.8)] hover:shadow-[4px_4px_8px_rgba(0,0,0,0.15),-4px_-4px_8px_rgba(255,255,255,0.9)] active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)]">
             Book Consultation First
-          </Button>
+          </button>
         )}
       </div>
 
-      {/* Delivery Info */}
-      <div className="flex items-center space-x-4 text-sm text-gray-600 pt-4 border-t border-gray-200">
-        <div className="flex items-center space-x-2">
-          <Truck className="w-4 h-4" />
-          <span>Free delivery</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Clock className="w-4 h-4" />
-          <span>2-3 day delivery</span>
+      {/* Delivery Info - Neumorphic Card */}
+      <div className="bg-gray-100 rounded-2xl p-4 shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.8)]">
+        <div className="flex items-center space-x-6 text-sm text-gray-600">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center shadow-[2px_2px_4px_rgba(0,0,0,0.1),-2px_-2px_4px_rgba(255,255,255,0.8)]">
+              <Truck className="w-4 h-4" />
+            </div>
+            <span>Free delivery</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center shadow-[2px_2px_4px_rgba(0,0,0,0.1),-2px_-2px_4px_rgba(255,255,255,0.8)]">
+              <Clock className="w-4 h-4" />
+            </div>
+            <span>2-3 day delivery</span>
+          </div>
         </div>
       </div>
     </div>
