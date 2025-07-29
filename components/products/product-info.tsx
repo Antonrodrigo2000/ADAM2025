@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import type { Product } from "@/types/product"
-import { Star, Shield, Clock, Truck } from "lucide-react"
 
 interface ProductInfoProps {
   product: Product
@@ -37,19 +36,40 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <p className="text-gray-600 leading-relaxed">{product.description}</p>
       </div>
 
-      {/* Rating & Reviews - Neumorphic Card */}
-      <div className="bg-gray-100 rounded-2xl p-4 shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.8)]">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`w-5 h-5 ${i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
-              />
-            ))}
-            <span className="text-sm font-medium text-gray-900 ml-2">{product.rating}</span>
-          </div>
-          <div className="text-sm text-gray-600">({product.review_count.toLocaleString()} reviews)</div>
+      {/* Trust Elements - Simple Text */}
+      <div className="space-y-2 text-sm text-gray-600">
+        <div className="flex items-center space-x-2">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+            />
+          </svg>
+          <span>Licensed physicians</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+            />
+          </svg>
+          <span>Discreet packaging</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>2-day consultation SLA</span>
         </div>
       </div>
 
@@ -58,7 +78,14 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <div className="bg-blue-50 rounded-2xl p-4 shadow-[inset_4px_4px_8px_rgba(0,0,0,0.05),inset_-4px_-4px_8px_rgba(255,255,255,0.9)] border border-blue-100/50">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shadow-[4px_4px_8px_rgba(0,0,0,0.1),-4px_-4px_8px_rgba(255,255,255,0.8)]">
-              <Shield className="w-5 h-5 text-blue-600" />
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
             </div>
             <span className="text-sm font-medium text-blue-800">Prescription Required - Consultation Needed</span>
           </div>
@@ -147,13 +174,27 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <div className="flex items-center space-x-6 text-sm text-gray-600">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center shadow-[2px_2px_4px_rgba(0,0,0,0.1),-2px_-2px_4px_rgba(255,255,255,0.8)]">
-              <Truck className="w-4 h-4" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                />
+              </svg>
             </div>
             <span>Free delivery</span>
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center shadow-[2px_2px_4px_rgba(0,0,0,0.1),-2px_-2px_4px_rgba(255,255,255,0.8)]">
-              <Clock className="w-4 h-4" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
             </div>
             <span>2-3 day delivery</span>
           </div>
