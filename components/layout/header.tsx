@@ -5,7 +5,11 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-export function Header({ darkText = false }: { darkText?: boolean }) {
+interface HeaderProps {
+  variant?: "default" | "dark"
+}
+
+export function Header({ variant = "default" }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -16,36 +20,50 @@ export function Header({ darkText = false }: { darkText?: boolean }) {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const textColor = darkText ? "text-black" : "text-white"
-  const hoverColor = darkText ? "hover:text-primary" : "hover:text-primary"
+  const isDark = variant === "dark"
 
   return (
     <header
       className={cn(
         "fixed top-0 w-full z-50 transition-colors duration-300",
-        scrolled ? (darkText ? "bg-white/80 backdrop-blur-sm" : "bg-black/80 backdrop-blur-sm") : "bg-transparent",
+        isDark
+          ? "bg-white/95 backdrop-blur-sm border-b border-gray-200"
+          : scrolled
+            ? "bg-black/80 backdrop-blur-sm"
+            : "bg-transparent",
       )}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-        <Link href="/" className={cn("text-2xl font-extrabold font-logo tracking-tighter uppercase", textColor)}>
+        <Link
+          href="/"
+          className={cn(
+            "text-2xl font-extrabold font-logo tracking-tighter uppercase",
+            isDark ? "text-black" : "text-white",
+          )}
+        >
           ADAM
         </Link>
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-          <Link href="/products/minoxidil-5" className={cn("transition-colors", textColor, hoverColor)}>
+          <Link
+            href="/products/minoxidil-5"
+            className={cn("hover:text-primary transition-colors", isDark ? "text-gray-700" : "text-white")}
+          >
             Hair Loss
           </Link>
-          <Link href="#skin" className={cn("transition-colors", textColor, hoverColor)}>
+          <Link
+            href="#skin"
+            className={cn("hover:text-primary transition-colors", isDark ? "text-gray-700" : "text-white")}
+          >
             Skincare
           </Link>
-          <Link href="#sexual-health" className={cn("transition-colors", textColor, hoverColor)}>
+          <Link
+            href="#sexual-health"
+            className={cn("hover:text-primary transition-colors", isDark ? "text-gray-700" : "text-white")}
+          >
             Sexual Health
           </Link>
         </nav>
-        <Button
-          asChild
-          variant="ghost"
-          className={cn("rounded-full", darkText ? "text-black hover:text-primary" : "text-white hover:text-primary")}
-        >
+        <Button asChild variant={isDark ? "default" : "ghost"} className="rounded-full">
           <Link href="/auth">Get Started</Link>
         </Button>
       </div>

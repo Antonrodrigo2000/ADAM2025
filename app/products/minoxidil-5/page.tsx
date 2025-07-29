@@ -1,7 +1,6 @@
 import ProductPage from "@/components/products/product-page"
 import ProductInfoSection from "@/components/products/product-info-section"
 import { Header } from "@/components/layout/header"
-import Link from "next/link"
 
 export default function MinoxidilProductPage() {
   const productData = {
@@ -85,7 +84,7 @@ export default function MinoxidilProductPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Header darkText={true} />
+      <Header variant="dark" />
       <main className="flex-1 pt-20">
         <ProductPage {...productData} />
         <ProductInfoSection {...infoSectionData} />
@@ -97,68 +96,68 @@ export default function MinoxidilProductPage() {
 
 function Footer() {
   return (
-    <footer className="bg-neutral-900 text-white">
+    <footer className="bg-gray-50 border-t border-gray-200">
       <div className="container mx-auto py-12 px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-1">
-            <h3 className="text-xl font-bold font-display mb-4">Adam</h3>
-            <p className="text-sm text-neutral-400">© 2025 BASKR Health (Private) Limited. All rights reserved.</p>
+          <div>
+            <h3 className="text-xl font-bold font-display mb-4 text-black">Adam</h3>
+            <p className="text-sm text-gray-600">© 2025 BASKR Health (Private) Limited. All rights reserved.</p>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">Treatments</h4>
-            <ul className="space-y-2 text-sm text-neutral-400">
+            <h4 className="font-semibold mb-4 text-black">Treatments</h4>
+            <ul className="space-y-2 text-sm text-gray-600">
               <li>
-                <Link href="/products/minoxidil-5" className="hover:text-primary transition-colors">
+                <a href="/products/minoxidil-5" className="hover:text-primary">
                   Hair Loss
-                </Link>
+                </a>
               </li>
               <li>
-                <a href="#skin" className="hover:text-primary transition-colors">
+                <a href="#skin" className="hover:text-primary">
                   Skincare
                 </a>
               </li>
               <li>
-                <a href="#sexual-health" className="hover:text-primary transition-colors">
+                <a href="#sexual-health" className="hover:text-primary">
                   Sexual Health
                 </a>
               </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">Company</h4>
-            <ul className="space-y-2 text-sm text-neutral-400">
+            <h4 className="font-semibold mb-4 text-black">Company</h4>
+            <ul className="space-y-2 text-sm text-gray-600">
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <a href="#" className="hover:text-primary">
                   About Us
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <a href="#" className="hover:text-primary">
                   Blog
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <a href="#" className="hover:text-primary">
                   Careers
                 </a>
               </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">Support</h4>
-            <ul className="space-y-2 text-sm text-neutral-400">
+            <h4 className="font-semibold mb-4 text-black">Support</h4>
+            <ul className="space-y-2 text-sm text-gray-600">
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <a href="#" className="hover:text-primary">
                   Contact Us
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <a href="#" className="hover:text-primary">
                   FAQ
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <a href="#" className="hover:text-primary">
                   Terms of Service
                 </a>
               </li>
