@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Heart, Share2, Plus, Minus } from "lucide-react"
+import { Minus, Plus, Heart, Share2 } from "lucide-react"
 
 interface Tax {
   id: string
@@ -55,12 +56,9 @@ interface JsonProductPageProps {
 }
 
 export default function JsonProductPage({ product }: JsonProductPageProps) {
+  const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const [isFavorited, setIsFavorited] = useState(false)
-
-  const isInStock = product.stockLevel > 0
-  const isLowStock = product.stockLevel <= 5 && product.stockLevel > 0
+  const [isWishlisted, setIsWishlisted] = useState(false)
 
   const handleQuantityChange = (change: number) => {
     const newQuantity = quantity + change
@@ -69,45 +67,44 @@ export default function JsonProductPage({ product }: JsonProductPageProps) {
     }
   }
 
-  return (
-    <div className="bg-gray-50 pt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Breadcrumb */}
-        <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-          <span>Home</span>
-          <span>/</span>
-          <span>{product.category.name}</span>
-          <span>/</span>
-          <span className="text-gray-900 font-medium">{product.name}</span>
-        </nav>
+  const handleAddToCart = () => {
+    // Add to cart logic here
+    console.log(`Added ${quantity} of ${product.name} to cart`)
+  }
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+  return (
+    <div className="min-h-screen bg-white pt-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="aspect-square bg-white rounded-2xl overflow-hidden shadow-sm border">
-              <img
-                src={product.image[selectedImageIndex] || "/placeholder.svg?height=600&width=600"}
+            {/* Main Image */}
+            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+              <Image
+                src={product.image[selectedImage] || "/placeholder.svg"}
                 alt={product.name}
+                width={600}
+                height={600}
                 className="w-full h-full object-cover"
               />
             </div>
 
-            {/* Image Thumbnails */}
+            {/* Thumbnail Images */}
             {product.image.length > 1 && (
-              <div className="flex space-x-3 overflow-x-auto pb-2">
+              <div className="flex space-x-2">
                 {product.image.map((img, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                      index === selectedImageIndex
-                        ? "border-orange-500 shadow-md"
-                        : "border-gray-200 hover:border-gray-300"
+                    onClick={() => setSelectedImage(index)}
+                    className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
+                      selectedImage === index ? "border-orange-500" : "border-gray-200"
                     }`}
                   >
-                    <img
+                    <Image
                       src={img || "/placeholder.svg"}
-                      alt={`${product.name} ${index + 1}`}
+                      alt={`${product.name} view ${index + 1}`}
+                      width={80}
+                      height={80}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -118,20 +115,12 @@ export default function JsonProductPage({ product }: JsonProductPageProps) {
 
           {/* Product Information */}
           <div className="space-y-6">
-            {/* Category Badge */}
-            <Badge variant="secondary" className="text-xs font-medium">
-              {product.category.name}
-            </Badge>
-
-            {/* Product Title */}
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 font-['Smooch_Sans']">{product.name}</h1>
-              <p className="text-gray-600 text-sm">SKU: {product.sku}</p>
-            </div>
-
-            {/* Price */}
+            {/* Product Title and Price */}
             <div className="space-y-2">
-              <div className="flex items-baseline space-x-2">
+              <h1 className="text-3xl font-bold text-gray-900" style={{ fontFamily: "Smooch Sans, cursive" }}>
+                {product.name}
+              </h1>
+              <div className="flex items-center space-x-4">
                 <span className="text-3xl font-bold text-gray-900">
                   {product.currency}
                   {product.price.toFixed(2)}
@@ -140,89 +129,89 @@ export default function JsonProductPage({ product }: JsonProductPageProps) {
             </div>
 
             {/* Stock Status */}
-            <div className="space-y-2">
-              {isInStock ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-green-700 font-medium">
-                    {isLowStock ? `Only ${product.stockLevel} left in stock` : "In Stock"}
-                  </span>
-                </div>
+            <div className="flex items-center space-x-2">
+              {product.stockLevel > 0 ? (
+                <>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    In Stock
+                  </Badge>
+                  <span className="text-sm text-gray-600">{product.stockLevel} items available</span>
+                </>
               ) : (
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span className="text-red-700 font-medium">Out of Stock</span>
-                </div>
+                <Badge variant="destructive">Out of Stock</Badge>
               )}
             </div>
 
-            {/* Description */}
-            <div className="prose prose-sm max-w-none">
+            {/* Product Description */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900" style={{ fontFamily: "Smooch Sans, cursive" }}>
+                Description
+              </h2>
               <p className="text-gray-700 leading-relaxed">{product.description}</p>
             </div>
 
-            {/* Quantity Selector */}
-            {isInStock && (
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-900">Quantity</label>
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center border border-gray-300 rounded-lg">
-                    <button
-                      onClick={() => handleQuantityChange(-1)}
-                      disabled={quantity <= 1}
-                      className="p-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="px-4 py-2 font-medium min-w-[3rem] text-center">{quantity}</span>
-                    <button
-                      onClick={() => handleQuantityChange(1)}
-                      disabled={quantity >= product.stockLevel}
-                      className="p-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <span className="text-sm text-gray-600">{product.stockLevel} available</span>
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
+            {/* Quantity Selector and Add to Cart */}
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  className="flex-1 bg-gradient-to-r from-black to-gray-800 hover:from-gray-800 hover:to-black text-white py-4 px-8 text-xl font-bold rounded-xl shadow-lg border-2 border-transparent hover:border-gray-300 hover:shadow-2xl transition-all duration-300 animate-pulse"
-                  disabled={!isInStock}
-                  style={{
-                    boxShadow: "0 0 20px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1)",
-                  }}
-                >
-                  <ShoppingCart className="w-6 h-6 mr-3" />
-                  Add to Cart
-                </Button>
-
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-xl bg-transparent"
-                    onClick={() => setIsFavorited(!isFavorited)}
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-medium text-gray-700">Quantity:</span>
+                <div className="flex items-center border border-gray-300 rounded-lg">
+                  <button
+                    onClick={() => handleQuantityChange(-1)}
+                    disabled={quantity <= 1}
+                    className="p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Heart className={`w-5 h-5 ${isFavorited ? "fill-red-500 text-red-500" : ""}`} />
-                  </Button>
-
-                  <Button variant="outline" size="icon" className="rounded-xl bg-transparent">
-                    <Share2 className="w-5 h-5" />
-                  </Button>
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="px-4 py-2 font-medium">{quantity}</span>
+                  <button
+                    onClick={() => handleQuantityChange(1)}
+                    disabled={quantity >= product.stockLevel}
+                    className="p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
-              {!isInStock && (
-                <Button variant="outline" className="w-full py-3 rounded-xl bg-transparent">
-                  Notify When Available
+              {/* Add to Cart Button */}
+              <Button
+                onClick={handleAddToCart}
+                disabled={product.stockLevel === 0}
+                className="w-full py-4 px-8 text-xl font-semibold bg-gradient-to-r from-black to-gray-800 hover:from-gray-800 hover:to-black text-white rounded-lg transition-all duration-300 shadow-lg hover:shadow-2xl border-2 border-transparent hover:border-gray-300 animate-pulse hover:animate-none"
+                style={{
+                  boxShadow: "0 0 20px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                Add to Cart
+              </Button>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsWishlisted(!isWishlisted)}
+                  className="flex-1 flex items-center justify-center space-x-2"
+                >
+                  <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+                  <span>{isWishlisted ? "Wishlisted" : "Add to Wishlist"}</span>
                 </Button>
-              )}
+                <Button variant="outline" className="flex items-center space-x-2 bg-transparent">
+                  <Share2 className="w-4 h-4" />
+                  <span>Share</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Product Meta Information */}
+            <div className="border-t pt-6 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">SKU:</span>
+                <span className="font-medium">{product.sku}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Category:</span>
+                <span className="font-medium">{product.category.name}</span>
+              </div>
             </div>
           </div>
         </div>

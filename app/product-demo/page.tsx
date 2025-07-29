@@ -1,63 +1,55 @@
-import Header from "@/components/layout/header"
-import Footer from "@/components/layout/footer"
 import JsonProductPage from "@/components/products/json-product-page"
+import { Header } from "@/components/layout/header"
+import { Footer } from "@/components/layout/footer"
 
-// Mock product data based on the JSON structure
-const mockProduct = {
-  id: "60d2b403db100b00098cd7d1",
+// Sample product data based on your JSON structure
+const sampleProduct = {
+  id: "60d2baeb0fdbd800082e6f2a",
   created: "2021-06-23T04:09:39.371Z",
   updated: "2021-06-23T04:10:14.288Z",
-  name: "Minoxidil 5% Hair Growth Solution",
+  name: "Premium Hair Growth Treatment Kit",
   image: [
-    "/placeholder.svg?height=600&width=600&text=Minoxidil+5%+Solution",
-    "/placeholder.svg?height=600&width=600&text=Product+Back+View",
-    "/placeholder.svg?height=600&width=600&text=Product+Side+View",
+    "/placeholder.svg?height=600&width=600&text=Main+Product",
+    "/placeholder.svg?height=600&width=600&text=Side+View",
+    "/placeholder.svg?height=600&width=600&text=Contents",
   ],
   categoryId: "60d2b403db100b00098cd7cf",
   description:
-    "Clinically proven hair regrowth treatment with 5% Minoxidil. FDA-approved formula that helps stimulate hair follicles and promote new hair growth. Suitable for male pattern baldness and thinning hair.",
-  price: 49.99,
+    "Advanced hair growth treatment kit containing clinically proven ingredients. This comprehensive solution includes topical treatments, supplements, and detailed usage instructions to help you achieve optimal results.",
+  price: 89.99,
   locationId: "60d2b403db100b00098cd7ce",
   companyId: "5df00bbd8f0931da1d096769",
   currency: "$",
-  taxes: [
-    {
-      id: "60d2baeb0fdbd800082e6f2a",
-      name: "VAT",
-      code: "VAT",
-      percentage: 20,
-      applyOn: "PRODUCT",
-    },
-  ],
+  taxes: [],
   stockLevel: 15,
   showDetailView: true,
   detailViewContent:
-    "This advanced hair growth solution contains 5% Minoxidil, the only FDA-approved ingredient for hair regrowth. Apply twice daily to affected areas for best results. Visible improvements typically seen within 3-4 months of consistent use.",
-  productUrl: "https://example.com/products/minoxidil-5",
-  sku: "MIN-5-100ML",
-  productSlug: "minoxidil-5-hair-growth-solution",
+    "This premium hair growth treatment kit has been formulated by leading dermatologists and contains FDA-approved ingredients. The kit includes a 3-month supply of topical treatment, daily supplements, and a comprehensive guide to maximize your results. Clinical studies show 85% of users see visible improvement within 12 weeks.",
+  productUrl: "/products/hair-growth-kit",
+  sku: "HGK-001-PRE",
+  productSlug: "premium-hair-growth-kit",
   deductFromStockLevel: true,
   category: {
     id: "60d2b403db100b00098cd7cf",
     created: "2021-06-23T04:09:39.371Z",
     updated: "2021-06-23T04:10:14.288Z",
-    name: "Hair Loss",
+    name: "Hair Care",
     locationId: "60d2b403db100b00098cd7ce",
     companyId: "5df00bbd8f0931da1d096769",
     canDelete: false,
     default: true,
     productOrder: ["60d2b403db100b00098cd7c1", "60d2b403db100b00098cd7c2"],
-    description: "Professional hair loss treatments and solutions",
-    productCount: 8,
+    description: "Professional-grade hair care treatments and solutions",
+    productCount: 12,
   },
 }
 
 export default function ProductDemoPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header textColor="text-black" />
+    <div className="flex flex-col min-h-screen">
+      <Header textColor="black" />
       <main className="flex-1">
-        <JsonProductPage product={mockProduct} />
+        <JsonProductPage product={sampleProduct} />
       </main>
       <Footer />
     </div>
