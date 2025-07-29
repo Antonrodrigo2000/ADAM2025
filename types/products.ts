@@ -3,16 +3,10 @@ export interface HealthVertical {
   name: string
   slug: string
   description: string
-  basePrice: number
+  icon: string
   productCount: number
-  icon: string
+  startingPrice: number
   gradient: string
-}
-
-export interface TrustBadge {
-  icon: string
-  title: string
-  description: string
 }
 
 export interface Product {
@@ -23,16 +17,31 @@ export interface Product {
   price: number
   consultationFee?: number
   prescriptionRequired: boolean
+  healthVerticalId: string
   activeIngredient?: string
   dosage?: string
-  healthVerticalId: string
   images: string[]
   rating: number
   reviewCount: number
-  inStock: boolean
+  benefits: string[]
+  ingredients: Ingredient[]
+  sideEffects: string[]
+  contraindications: string[]
+  faqs: FAQ[]
 }
 
-export interface ProductReview {
+export interface Ingredient {
+  name: string
+  concentration: string
+  purpose: string
+}
+
+export interface FAQ {
+  question: string
+  answer: string
+}
+
+export interface Review {
   id: string
   userId: string
   userName: string
@@ -40,10 +49,4 @@ export interface ProductReview {
   comment: string
   verifiedPurchase: boolean
   createdAt: string
-}
-
-export interface FAQ {
-  id: string
-  question: string
-  answer: string
 }

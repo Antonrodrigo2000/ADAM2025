@@ -12,49 +12,46 @@ interface ProductImageGalleryProps {
 export default function ProductImageGallery({ images, productName }: ProductImageGalleryProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
-  const primaryImage = images.find((img) => img.is_primary) || images[0]
-  const allImages = images.length > 0 ? images : [primaryImage].filter(Boolean)
+  if (!images || images.length === 0) {
+    return (
+      <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+        <span className="text-gray-400">No image available</span>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="aspect-square bg-white border border-gray-200 rounded-lg overflow-hidden">
-        {allImages[selectedImageIndex] ? (
-          <Image
-            src={allImages[selectedImageIndex].url || "/placeholder.svg"}
-            alt={allImages[selectedImageIndex].alt}
-            width={600}
-            height={600}
-            className="w-full h-full object-cover"
-            priority
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100">
-            <div className="text-gray-400 text-center">
-              <div className="w-16 h-16 mx-auto mb-2 bg-gray-200 rounded-lg"></div>
-              <p className="text-sm">No image available</p>
-            </div>
-          </div>
-        )}
+      <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+        <Image
+          src={images[selectedImageIndex]?.url || "/placeholder.svg?height=500&width=500"}
+          alt={images[selectedImageIndex]?.alt || productName}
+          width={500}
+          height={500}
+          className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
+        />
       </div>
 
-      {/* Thumbnail Images */}
-      {allImages.length > 1 && (
-        <div className="flex space-x-2 overflow-x-auto">
-          {allImages.map((image, index) => (
+      {/* Thumbnail Gallery */}
+      {images.length > 1 && (
+        <div className="grid grid-cols-4 gap-2">
+          {images.map((image, index) => (
             <button
               key={image.id}
               onClick={() => setSelectedImageIndex(index)}
-              className={`flex-shrink-0 w-20 h-20 border-2 rounded-lg overflow-hidden transition-colors ${
-                selectedImageIndex === index ? "border-blue-500" : "border-gray-200 hover:border-gray-300"
+              className={`aspect-square bg-gray-50 rounded-lg overflow-hidden border-2 transition-all ${
+                selectedImageIndex === index
+                  ? "border-blue-500 ring-2 ring-blue-200"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <Image
                 src={image.url || "/placeholder.svg"}
                 alt={image.alt}
-                width={80}
-                height={80}
-                className="w-full h-full object-cover"
+                width={120}
+                height={120}
+                className="w-full h-full object-contain"
               />
             </button>
           ))}
