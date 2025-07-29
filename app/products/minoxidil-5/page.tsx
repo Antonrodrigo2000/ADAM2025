@@ -1,5 +1,7 @@
 import ProductPage from "@/components/products/product-page"
 import ProductInfoSection from "@/components/products/product-info-section"
+import { Header } from "@/components/layout/header"
+import Link from "next/link"
 
 export default function MinoxidilProductPage() {
   const productData = {
@@ -82,10 +84,89 @@ export default function MinoxidilProductPage() {
   }
 
   return (
-    <>
-      <ProductPage {...productData} />
-      <ProductInfoSection {...infoSectionData} />
-    </>
+    <div className="flex flex-col min-h-screen bg-white">
+      <Header darkText={true} />
+      <main className="flex-1 pt-20">
+        <ProductPage {...productData} />
+        <ProductInfoSection {...infoSectionData} />
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+function Footer() {
+  return (
+    <footer className="bg-neutral-900 text-white">
+      <div className="container mx-auto py-12 px-4 md:px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="col-span-1 md:col-span-1">
+            <h3 className="text-xl font-bold font-display mb-4">Adam</h3>
+            <p className="text-sm text-neutral-400">© 2025 BASKR Health (Private) Limited. All rights reserved.</p>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-4">Treatments</h4>
+            <ul className="space-y-2 text-sm text-neutral-400">
+              <li>
+                <Link href="/products/minoxidil-5" className="hover:text-primary transition-colors">
+                  Hair Loss
+                </Link>
+              </li>
+              <li>
+                <a href="#skin" className="hover:text-primary transition-colors">
+                  Skincare
+                </a>
+              </li>
+              <li>
+                <a href="#sexual-health" className="hover:text-primary transition-colors">
+                  Sexual Health
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-4">Company</h4>
+            <ul className="space-y-2 text-sm text-neutral-400">
+              <li>
+                <a href="#" className="hover:text-primary transition-colors">
+                  About Us
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary transition-colors">
+                  Blog
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary transition-colors">
+                  Careers
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-4">Support</h4>
+            <ul className="space-y-2 text-sm text-neutral-400">
+              <li>
+                <a href="#" className="hover:text-primary transition-colors">
+                  Contact Us
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary transition-colors">
+                  FAQ
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary transition-colors">
+                  Terms of Service
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
   )
 }
 

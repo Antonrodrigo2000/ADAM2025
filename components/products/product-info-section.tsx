@@ -1,62 +1,53 @@
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
+import { View, Text, Image, StyleSheet } from "react-native"
 
-interface ProductInfoSectionProps {
-  title: string
-  image: string
-  formatsTitle: string
-  formatsDescription: string
-  benefitsTitle: string
-  benefitsDescription: string
-}
-
-export default function ProductInfoSection({
-  title,
-  image,
-  formatsTitle,
-  formatsDescription,
-  benefitsTitle,
-  benefitsDescription,
-}: ProductInfoSectionProps) {
+const ProductInfoSection = ({ product }) => {
   return (
-    <section className="w-full py-16 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
-          <div className="w-full md:w-1/2 space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">{title}</h2>
-            <div className="relative w-full aspect-square md:aspect-auto md:h-[400px]">
-              <Image
-                src={image || "/placeholder.svg"}
-                alt="Minoxidil dropper application"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
-          </div>
-
-          <div className="w-full md:w-1/2 space-y-8">
-            <div className="space-y-3">
-              <h3 className="text-2xl font-semibold text-gray-900">{formatsTitle}</h3>
-              <p className="text-gray-700 leading-relaxed">{formatsDescription}</p>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-2xl font-semibold text-gray-900">{benefitsTitle}</h3>
-              <p className="text-gray-700 leading-relaxed">{benefitsDescription}</p>
-            </div>
-
-            <div className="flex flex-wrap gap-4 pt-4">
-              <Button className="bg-black hover:bg-gray-800 text-white rounded-full px-8 py-6 h-auto">
-                Add to cart
-              </Button>
-              <Button variant="link" className="text-gray-900 hover:text-gray-700 h-auto py-6">
-                Explore Rx options
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <View style={styles.container}>
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: product.imageUrl }} style={styles.image} />
+      </View>
+      <View style={styles.infoContainer}>
+        <Text style={styles.title}>{product.title}</Text>
+        <Text style={styles.description}>{product.description}</Text>
+        <Text style={styles.price}>${product.price}</Text>
+      </View>
+    </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+  },
+  imageContainer: {
+    flex: 1,
+    maxWidth: 150,
+  },
+  image: {
+    width: "100%",
+    height: 150,
+    resizeMode: "contain",
+  },
+  infoContainer: {
+    flex: 2,
+    marginLeft: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  description: {
+    fontSize: 16,
+    marginTop: 8,
+  },
+  price: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 16,
+  },
+})
+
+export default ProductInfoSection
