@@ -2,13 +2,12 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Star, Shield, Truck, ChevronRight } from "lucide-react"
+import { Star, Shield, Truck, ChevronRight, Clock, Award } from "lucide-react"
 import type { Product } from "@/types/product"
 import ProductImageGallery from "./product-image-gallery"
 import ProductTabs from "./product-tabs"
 import ProductFAQ from "./product-faq"
 import RelatedProducts from "./related-products"
-import TrustBadges from "./trust-badges"
 
 interface ProductDetailViewProps {
   product: Product
@@ -33,6 +32,29 @@ export default function ProductDetailView({ product }: ProductDetailViewProps) {
     await new Promise((resolve) => setTimeout(resolve, 1000))
     setIsAddingToCart(false)
   }
+
+  const trustBadges = [
+    {
+      icon: Shield,
+      title: "Licensed Physicians",
+      description: "Prescribed by qualified doctors",
+    },
+    {
+      icon: Truck,
+      title: "Discreet Packaging",
+      description: "Private and secure delivery",
+    },
+    {
+      icon: Clock,
+      title: "2-Day Consultation",
+      description: "Quick response guarantee",
+    },
+    {
+      icon: Award,
+      title: "90-Day Guarantee",
+      description: "Money back if not satisfied",
+    },
+  ]
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -61,8 +83,23 @@ export default function ProductDetailView({ product }: ProductDetailViewProps) {
         {/* Left Column - Images (60%) */}
         <div className="lg:col-span-3">
           <ProductImageGallery images={product.images} productName={product.name} />
+
+          {/* Trust Badges */}
           <div className="mt-6">
-            <TrustBadges />
+            <div className="grid grid-cols-2 gap-4">
+              {trustBadges.map((badge, index) => (
+                <div
+                  key={index}
+                  className="flex items-center space-x-3 p-3 bg-blue-50 border border-blue-100 rounded-lg"
+                >
+                  <badge.icon className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900">{badge.title}</h4>
+                    <p className="text-xs text-gray-600">{badge.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

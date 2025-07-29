@@ -1,32 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import type { Product, ProductReview } from "@/types/product"
-import { Star, CheckCircle } from "lucide-react"
+import { Star } from "lucide-react"
+import type { Product } from "@/types/product"
 
 interface ProductTabsProps {
   product: Product
 }
-
-// Mock reviews data
-const mockReviews: ProductReview[] = [
-  {
-    id: "1",
-    user_name: "Kamal P.",
-    rating: 5,
-    comment: "Great results after 4 months of use. Highly recommend!",
-    verified_purchase: true,
-    created_at: "2024-01-15",
-  },
-  {
-    id: "2",
-    user_name: "Nimal S.",
-    rating: 4,
-    comment: "Good product, saw some improvement. Takes patience but works.",
-    verified_purchase: true,
-    created_at: "2024-01-10",
-  },
-]
 
 export default function ProductTabs({ product }: ProductTabsProps) {
   const [activeTab, setActiveTab] = useState("overview")
@@ -39,18 +19,18 @@ export default function ProductTabs({ product }: ProductTabsProps) {
   ]
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden mb-16">
+    <div className="bg-white border border-gray-200 rounded-lg mb-16">
       {/* Tab Navigation */}
       <div className="border-b border-gray-200">
-        <nav className="flex">
+        <nav className="flex space-x-8 px-6">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === tab.id
                   ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               {tab.label}
@@ -68,7 +48,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
               <ul className="space-y-2">
                 {product.benefits.map((benefit, index) => (
                   <li key={index} className="flex items-start">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                     <span className="text-gray-700">{benefit}</span>
                   </li>
                 ))}
@@ -87,7 +67,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
 
             {product.clinical_studies && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Clinical efficacy</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Clinical studies</h3>
                 <p className="text-gray-700">{product.clinical_studies}</p>
               </div>
             )}
@@ -101,7 +81,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
               <div className="space-y-4">
                 {product.ingredients.map((ingredient, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-gray-900">{ingredient.name}</h4>
                       <span className="text-sm font-medium text-blue-600">{ingredient.dosage}</span>
                     </div>
@@ -121,11 +101,12 @@ export default function ProductTabs({ product }: ProductTabsProps) {
         {activeTab === "safety" && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Possible side effects</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Side effects</h3>
               <ul className="space-y-2">
                 {product.side_effects.map((effect, index) => (
-                  <li key={index} className="text-gray-700">
-                    • {effect}
+                  <li key={index} className="flex items-start">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <span className="text-gray-700">{effect}</span>
                   </li>
                 ))}
               </ul>
@@ -135,19 +116,21 @@ export default function ProductTabs({ product }: ProductTabsProps) {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Contraindications</h3>
               <ul className="space-y-2">
                 {product.contraindications.map((contraindication, index) => (
-                  <li key={index} className="text-gray-700">
-                    • {contraindication}
+                  <li key={index} className="flex items-start">
+                    <div className="w-2 h-2 bg-red-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <span className="text-gray-700">{contraindication}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Important warnings</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Warnings</h3>
               <ul className="space-y-2">
                 {product.warnings.map((warning, index) => (
-                  <li key={index} className="text-gray-700">
-                    • {warning}
+                  <li key={index} className="flex items-start">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <span className="text-gray-700">{warning}</span>
                   </li>
                 ))}
               </ul>
@@ -158,7 +141,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
         {activeTab === "reviews" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Customer Reviews</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Customer reviews</h3>
               <div className="flex items-center space-x-2">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
@@ -176,30 +159,52 @@ export default function ProductTabs({ product }: ProductTabsProps) {
               </div>
             </div>
 
+            {/* Mock Reviews */}
             <div className="space-y-4">
-              {mockReviews.map((review) => (
-                <div key={review.id} className="border border-gray-200 rounded-lg p-4">
+              {[
+                {
+                  name: "Rajesh K.",
+                  rating: 5,
+                  date: "2 weeks ago",
+                  comment: "Great product! Started seeing results after 3 months of consistent use.",
+                  verified: true,
+                },
+                {
+                  name: "Pradeep S.",
+                  rating: 4,
+                  date: "1 month ago",
+                  comment: "Good quality and fast delivery. Customer service was helpful.",
+                  verified: true,
+                },
+                {
+                  name: "Chaminda L.",
+                  rating: 5,
+                  date: "6 weeks ago",
+                  comment: "Excellent results and very discreet packaging. Highly recommend!",
+                  verified: true,
+                },
+              ].map((review, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-gray-900">{review.user_name}</span>
-                      {review.verified_purchase && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <CheckCircle className="w-3 h-3 mr-1" />
+                      <span className="font-medium text-gray-900">{review.name}</span>
+                      {review.verified && (
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
                           Verified Purchase
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${i < review.rating ? "text-yellow-400 fill-current" : "text-gray-300"}`}
-                        />
-                      ))}
-                    </div>
+                    <span className="text-sm text-gray-500">{review.date}</span>
+                  </div>
+                  <div className="flex items-center mb-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${i < review.rating ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+                      />
+                    ))}
                   </div>
                   <p className="text-gray-700">{review.comment}</p>
-                  <p className="text-sm text-gray-500 mt-2">{new Date(review.created_at).toLocaleDateString()}</p>
                 </div>
               ))}
             </div>
