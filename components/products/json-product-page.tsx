@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { ShoppingCart, Heart, Share2, Star, Truck, Shield, RotateCcw, Plus, Minus, Info } from "lucide-react"
+import { ShoppingCart, Heart, Share2, Plus, Minus } from "lucide-react"
 
 interface Tax {
   id: string
@@ -61,18 +61,6 @@ export default function JsonProductPage({ product }: JsonProductPageProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [isFavorited, setIsFavorited] = useState(false)
 
-  // Calculate total price including taxes
-  const calculateTotalPrice = () => {
-    let totalPrice = product.price * quantity
-    product.taxes.forEach((tax) => {
-      if (tax.applyOn === "PRODUCT") {
-        totalPrice += (totalPrice * tax.percentage) / 100
-      }
-    })
-    return totalPrice
-  }
-
-  const totalPrice = calculateTotalPrice()
   const isInStock = product.stockLevel > 0
   const isLowStock = product.stockLevel <= 5 && product.stockLevel > 0
 
@@ -139,41 +127,18 @@ export default function JsonProductPage({ product }: JsonProductPageProps) {
 
             {/* Product Title */}
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{product.name}</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 font-['Smooch_Sans']">{product.name}</h1>
               <p className="text-gray-600 text-sm">SKU: {product.sku}</p>
-            </div>
-
-            {/* Rating (Mock) */}
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
-              <span className="text-sm text-gray-600">(4.8) • 127 reviews</span>
             </div>
 
             {/* Price */}
             <div className="space-y-2">
               <div className="flex items-baseline space-x-2">
                 <span className="text-3xl font-bold text-gray-900">
-                  {product.currency} {product.price.toFixed(2)}
+                  {product.currency}
+                  {product.price.toFixed(2)}
                 </span>
-                {product.taxes.length > 0 && <span className="text-sm text-gray-500">+ taxes</span>}
               </div>
-
-              {/* Tax Information */}
-              {product.taxes.length > 0 && (
-                <div className="text-sm text-gray-600">
-                  <div className="flex items-center space-x-1">
-                    <Info className="w-4 h-4" />
-                    <span>Includes {product.taxes.map((tax) => `${tax.name} (${tax.percentage}%)`).join(", ")}</span>
-                  </div>
-                  <div className="font-medium text-gray-900 mt-1">
-                    Total: {product.currency} {totalPrice.toFixed(2)}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Stock Status */}
@@ -229,10 +194,13 @@ export default function JsonProductPage({ product }: JsonProductPageProps) {
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
-                  className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-3 text-lg font-semibold rounded-xl"
+                  className="flex-1 bg-gradient-to-r from-black to-gray-800 hover:from-gray-800 hover:to-black text-white py-4 px-8 text-xl font-bold rounded-xl shadow-lg border-2 border-transparent hover:border-gray-300 hover:shadow-2xl transition-all duration-300 animate-pulse"
                   disabled={!isInStock}
+                  style={{
+                    boxShadow: "0 0 20px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1)",
+                  }}
                 >
-                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  <ShoppingCart className="w-6 h-6 mr-3" />
                   Add to Cart
                 </Button>
 
@@ -259,48 +227,11 @@ export default function JsonProductPage({ product }: JsonProductPageProps) {
               )}
             </div>
 
-            {/* Features */}
-            <Card className="bg-gray-50 border-0">
-              <CardContent className="p-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-orange-100 p-2 rounded-lg">
-                      <Truck className="w-5 h-5 text-orange-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-sm">Free Shipping</div>
-                      <div className="text-xs text-gray-600">On orders over $50</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-orange-100 p-2 rounded-lg">
-                      <Shield className="w-5 h-5 text-orange-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-sm">Secure Payment</div>
-                      <div className="text-xs text-gray-600">SSL encrypted</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-orange-100 p-2 rounded-lg">
-                      <RotateCcw className="w-5 h-5 text-orange-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-sm">Easy Returns</div>
-                      <div className="text-xs text-gray-600">30-day policy</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Additional Details */}
             {product.showDetailView && product.detailViewContent && (
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="font-semibold text-lg mb-3">Product Details</h3>
+                  <h3 className="font-semibold text-lg mb-3 font-['Smooch_Sans']">Product Details</h3>
                   <Separator className="mb-4" />
                   <div className="prose prose-sm max-w-none">
                     <p className="text-gray-700">{product.detailViewContent}</p>
@@ -312,7 +243,7 @@ export default function JsonProductPage({ product }: JsonProductPageProps) {
             {/* Category Information */}
             <Card className="bg-blue-50 border-blue-200">
               <CardContent className="p-4">
-                <h4 className="font-medium text-blue-900 mb-2">From {product.category.name}</h4>
+                <h4 className="font-medium text-blue-900 mb-2 font-['Smooch_Sans']">From {product.category.name}</h4>
                 <p className="text-sm text-blue-800 mb-3">{product.category.description}</p>
                 <div className="text-xs text-blue-700">{product.category.productCount} products in this category</div>
               </CardContent>
@@ -322,7 +253,7 @@ export default function JsonProductPage({ product }: JsonProductPageProps) {
 
         {/* Related Products Section */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">You might also like</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 font-['Smooch_Sans']">You might also like</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
               <Card key={i} className="group cursor-pointer hover:shadow-lg transition-shadow">

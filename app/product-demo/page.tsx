@@ -1,5 +1,6 @@
 import JsonProductPage from "@/components/products/json-product-page"
 import { Header } from "@/components/layout/header"
+import { Footer } from "@/components/layout/footer"
 
 // Sample product data based on your JSON structure
 const sampleProduct = {
@@ -19,15 +20,7 @@ const sampleProduct = {
   locationId: "60d2b403db100b00098cd7ce",
   companyId: "5df00bbd8f0931da1d096769",
   currency: "$",
-  taxes: [
-    {
-      id: "60d2baeb0fdbd800082e6f2a",
-      name: "VAT",
-      code: "VAT",
-      percentage: 20,
-      applyOn: "PRODUCT",
-    },
-  ],
+  taxes: [],
   stockLevel: 15,
   showDetailView: true,
   detailViewContent:
@@ -54,10 +47,11 @@ const sampleProduct = {
 export default function ProductDemoPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header textColor="black" />
       <main className="flex-1">
         <JsonProductPage product={sampleProduct} />
       </main>
+      <Footer />
     </div>
   )
 }
