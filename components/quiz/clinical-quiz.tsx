@@ -1,60 +1,46 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { hairLossQuestions } from "@/data/hairlossquestions"
 import { ProgressBar } from "./progress-bar"
 import { QuestionCard } from "./question-card"
 import { ReviewScreen } from "./review-screen"
 import { RecommendationsScreen } from "./recommendations-screen"
-import type { Question } from "@/data/hairlossquestions"
 import { useQuiz } from "@/lib/contexts"
-import type { PatientData } from "@/lib/hairloss-recommendations"
-import { createClient } from "@/app/utils/supabase/client"
+import type { Question } from "@/data/hairlossquestions"
 
 export function ClinicalQuiz() {
-    const { state, actions } = useQuiz()
+    const { state, actions, questions } = useQuiz() // get questions from context
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [showDisclaimer, setShowDisclaimer] = useState(true)
 
-    const currentQuestion = hairLossQuestions.find((q) => q.id === state.questionFlow[state.currentQuestionIndex])
+    const currentQuestion = (
+        questions.length > 0 &&
+        state.questionFlow.length > 0 &&
+        state.currentQuestionIndex >= 0 &&
+        state.currentQuestionIndex < state.questionFlow.length
+    )
+        ? questions.find((q) => q.id === state.questionFlow[state.currentQuestionIndex])
+        : undefined
+
     const totalSteps = state.questionFlow.length + 2 // +1 for disclaimer, +1 for review screen
-
-    const [healthVerticals, setHealthVerticals] = useState<any[]>([])
-
-    useEffect(() => {
-        const fetchHealthVerticals = async () => {
-            const supabase = await createClient()
-            const { data, error } = await supabase
-                .from("health_verticals")
-                .select("*")
-            if (error) {
-                console.error("Error fetching health verticals:", error)
-            } else {
-                setHealthVerticals(data || [])
-            }
-
-            console.log("Health Verticals:", data)
-        }
-        fetchHealthVerticals()
-    }, [])
 
     const validateQuestion = (question: Question, answer: any): string | null => {
         if (answer === undefined || answer === null || answer === "") {
             return "This field is required."
         }
 
-        if (question.type === "checkbox" && Array.isArray(answer) && answer.length === 0) {
+        if (question.question_type === "checkbox" && Array.isArray(answer) && answer.length === 0) {
             return "Please select at least one option."
         }
 
-        if (question.type === "file") {
+        if (question.question_type === "file") {
             if (!Array.isArray(answer) || answer.length === 0) {
                 return "Please upload the required photos."
             }
         }
 
-        if (question.type === "number" && (isNaN(answer) || answer <= 0)) {
+        if (question.question_type === "number" && (isNaN(answer) || answer <= 0)) {
             return "Please enter a valid number."
         }
 
@@ -94,7 +80,7 @@ export function ClinicalQuiz() {
 
     const handleSubmit = () => {
         try {
-            actions.submitQuiz()
+            actions.submitQuiz(questions)
         } catch (error) {
             console.error("Error generating recommendations:", error)
             alert("There was an error processing your assessment. Please try again.")
@@ -106,9 +92,9 @@ export function ClinicalQuiz() {
 
         const answer = state.answers[currentQuestion.id]
         if (answer === undefined || answer === null || answer === "") return false
-        if (currentQuestion.type === "checkbox" && Array.isArray(answer) && answer.length === 0) return false
-        if (currentQuestion.type === "file" && (!Array.isArray(answer) || answer.length === 0)) return false
-        if (currentQuestion.type === "number" && (isNaN(answer) || answer <= 0)) return false
+        if (currentQuestion.question_type === "checkbox" && Array.isArray(answer) && answer.length === 0) return false
+        if (currentQuestion.question_type === "file" && (!Array.isArray(answer) || answer.length === 0)) return false
+        if (currentQuestion.question_type === "number" && (isNaN(answer) || answer <= 0)) return false
 
         return true
     }
@@ -224,8 +210,21 @@ export function ClinicalQuiz() {
         </div>
     )
 
+    // Utility to map answers keyed by question.id to an object keyed by question_property
+    function mapAnswersToProperties(answers: Record<string, any>, questions: Question[]) {
+        const result: Record<string, any> = {}
+        for (const q of questions) {
+            if (q.question_property) {
+                result[q.question_property] = answers[q.id]
+            }
+        }
+        return result
+    }
+
     if (state.isCompleted && state.recommendations) {
-        return <RecommendationsScreen recommendations={state.recommendations} patientData={state.answers} onBack={handleBack} />
+        // Map answers to question_property keys for RecommendationsScreen
+        const patientData = mapAnswersToProperties(state.answers, questions)
+        return <RecommendationsScreen recommendations={state.recommendations} patientData={patientData} onBack={handleBack} />
     }
 
     if (state.isReviewMode) {
@@ -235,7 +234,7 @@ export function ClinicalQuiz() {
                     <ProgressBar currentStep={totalSteps} totalSteps={totalSteps} />
 
                     <ReviewScreen
-                        questions={hairLossQuestions.filter((q) => state.questionFlow.includes(q.id))}
+                        questions={questions.filter((q) => state.questionFlow.includes(q.id))}
                         answers={state.answers}
                         onSubmit={handleSubmit}
                     />

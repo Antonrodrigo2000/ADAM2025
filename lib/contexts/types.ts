@@ -18,7 +18,7 @@ export interface QuizActions {
   goToQuestion: (index: number) => void
   enterReviewMode: () => void
   exitReviewMode: () => void
-  submitQuiz: () => void
+  submitQuiz: (questions: any) => void
   resetQuiz: () => void
   loadSavedQuiz: () => void
 }

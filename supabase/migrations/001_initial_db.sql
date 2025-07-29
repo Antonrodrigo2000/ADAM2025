@@ -55,6 +55,7 @@ CREATE TABLE questionnaires (
 CREATE TABLE questions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     questionnaire_id UUID REFERENCES questionnaires(id) ON DELETE CASCADE,
+    question_property TEXT NOT NULL, -- e.g. "age", "family_history"
     question_text TEXT NOT NULL,
     question_type VARCHAR(20), -- single_choice, multiple_choice, text, number, date
     options JSONB, -- For choice questions: ["Option 1", "Option 2"]
