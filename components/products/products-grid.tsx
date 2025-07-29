@@ -1,49 +1,23 @@
 import { CategoryCard } from "./category-card"
 import type { HealthVertical } from "@/types/products"
 
-// Mock data - will be replaced with Supabase queries
-const mockCategories: HealthVertical[] = [
-  {
-    id: "1",
-    name: "Hair Loss Treatment",
-    slug: "hair-loss",
-    description:
-      "Clinically proven treatments to prevent hair loss and promote regrowth. FDA-approved medications delivered monthly.",
-    icon: "hair",
-    productCount: 8,
-    startingPrice: 2800,
-    gradient: "from-blue-50 to-indigo-50",
-  },
-  {
-    id: "2",
-    name: "Sexual Health",
-    slug: "sexual-health",
-    description:
-      "Discreet treatments for erectile dysfunction and premature ejaculation. Confidential consultations with licensed physicians.",
-    icon: "heart",
-    productCount: 12,
-    startingPrice: 3200,
-    gradient: "from-red-50 to-pink-50",
-  },
-  {
-    id: "3",
-    name: "Skincare",
-    slug: "skincare",
-    description:
-      "Medical-grade skincare solutions for acne, anti-aging, and skin health. Dermatologist-recommended formulations.",
-    icon: "skin",
-    productCount: 15,
-    startingPrice: 2400,
-    gradient: "from-green-50 to-emerald-50",
-  },
-]
+interface ProductsGridProps {
+  categories: HealthVertical[]
+}
 
-export function ProductsGrid() {
+export function ProductsGrid({ categories }: ProductsGridProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-      {mockCategories.map((category) => (
-        <CategoryCard key={category.id} category={category} />
-      ))}
+    <div className="py-8">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose your treatment category</h2>
+        <p className="text-lg text-gray-600">Browse our range of clinically proven treatments</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {categories.map((category) => (
+          <CategoryCard key={category.id} category={category} />
+        ))}
+      </div>
     </div>
   )
 }
