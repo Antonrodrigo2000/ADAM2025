@@ -1,4 +1,5 @@
 import JsonProductPage from "@/components/products/json-product-page"
+import { Header } from "@/components/layout/header"
 
 // Sample product data based on your JSON structure
 const sampleProduct = {
@@ -51,5 +52,12 @@ const sampleProduct = {
 }
 
 export default function ProductDemoPage() {
-  return <JsonProductPage product={sampleProduct} />
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-1">
+        <JsonProductPage product={sampleProduct} />
+      </main>
+    </div>
+  )
 }
