@@ -183,8 +183,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 />
               </svg>
             </div>
-            <span>Free delivery</span>
-          </div>
+            <span>Doorstep deliveryiv>
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center shadow-[2px_2px_4px_rgba(0,0,0,0.1),-2px_-2px_4px_rgba(255,255,255,0.8)]">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
