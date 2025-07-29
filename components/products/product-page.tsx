@@ -6,8 +6,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ChevronDown, Check, Truck, Shield, Clock } from "lucide-react"
-import { useCart } from "@/lib/contexts"
-import { useToast } from "@/hooks/use-toast"
 
 interface ProductImage {
   src: string
@@ -58,45 +56,11 @@ export default function ProductPage({
   howItWorks,
   aboutTreatment,
 }: ProductPageProps) {
-  const { actions: cartActions } = useCart()
-  const { toast } = useToast()
-  
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [selectedVariant, setSelectedVariant] = useState(defaultVariant || variants[0]?.id)
   const [selectedOption, setSelectedOption] = useState(defaultOption || options[0]?.id)
   const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false)
   const [isAboutOpen, setIsAboutOpen] = useState(false)
-  
-  const handleAddToCart = () => {
-    const variant = variants.find(v => v.id === selectedVariant)
-    const option = options.find(o => o.id === selectedOption)
-    
-    if (!variant) return
-    
-    const cartItem = {
-      productId: `${category.toLowerCase().replace(/\s+/g, '-')}-${title.toLowerCase().replace(/\s+/g, '-')}`,
-      variantId: variant.id,
-      productName: title,
-      variantName: variant.name,
-      price: variant.price,
-      originalPrice: variant.originalPrice,
-      quantity: 1,
-      subscription: variant.type === 'subscription' ? {
-        frequency: variant.frequency || 'Monthly',
-        isActive: true
-      } : undefined,
-      selectedOptions: option ? { format: option.name } : undefined,
-      image: images[0]?.src
-    }
-    
-    cartActions.addItem(cartItem)
-    
-    // Show success notification
-    toast({
-      title: 'Added to Cart',
-      description: `${title} has been added to your cart`
-    })
-  }
 
   const currentVariant = variants.find((v) => v.id === selectedVariant)
   const isSubscription = currentVariant?.type === "subscription"
@@ -278,10 +242,7 @@ export default function ProductPage({
 
             {/* Add to Cart Button */}
             <div className="space-y-4">
-              <Button 
-                onClick={handleAddToCart}
-                className="w-full bg-black hover:bg-gray-800 text-white py-4 text-lg font-semibold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-              >
+              <Button className="w-full bg-black hover:bg-gray-800 text-white py-4 text-lg font-semibold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]">
                 ADD TO CART
                 {savings && (
                   <span className="ml-2 bg-white/20 px-2 py-1 rounded-md text-sm">Save {savings.percentage}%</span>

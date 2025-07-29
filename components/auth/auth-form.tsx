@@ -6,7 +6,6 @@ import { useState } from "react"
 import Link from "next/link"
 import { ArrowRight, Lock, Mail, Eye, EyeOff } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useAuth } from "@/lib/contexts"
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -32,32 +31,8 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function AuthForm() {
-  const { state, actions } = useAuth()
   const [isSignUp, setIsSignUp] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: ''
-  })
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (isSignUp) {
-      await actions.signUp(formData)
-    } else {
-      await actions.signIn(formData.email, formData.password)
-    }
-  }
 
   return (
     <div className="w-full max-w-lg mx-auto">
@@ -94,41 +69,7 @@ export function AuthForm() {
         </div>
 
         {/* Form */}
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Name fields for sign up */}
-          {isSignUp && (
-            <>
-              <div className="neomorphic-input-container">
-                <div className="neomorphic-input-wrapper">
-                  <input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    placeholder="First name"
-                    required
-                    className="neomorphic-input"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-              <div className="neomorphic-input-container">
-                <div className="neomorphic-input-wrapper">
-                  <input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    placeholder="Last name"
-                    required
-                    className="neomorphic-input"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
+        <form className="space-y-6">
           {/* Email input */}
           <div className="neomorphic-input-container">
             <div className="neomorphic-input-wrapper">
@@ -140,8 +81,6 @@ export function AuthForm() {
                 placeholder="Email address"
                 required
                 className="neomorphic-input"
-                value={formData.email}
-                onChange={handleInputChange}
               />
             </div>
           </div>
@@ -157,8 +96,6 @@ export function AuthForm() {
                 placeholder="Password"
                 required
                 className="neomorphic-input"
-                value={formData.password}
-                onChange={handleInputChange}
               />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="neomorphic-eye-button">
                 {showPassword ? (
@@ -179,32 +116,12 @@ export function AuthForm() {
             </div>
           )}
 
-          {/* Error message */}
-          {state.error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-              <p className="text-sm text-red-600">{state.error}</p>
-            </div>
-          )}
-
           {/* Submit button */}
           <div className="neomorphic-button-container">
-            <button 
-              type="submit" 
-              disabled={state.isLoading}
-              className="neomorphic-primary-button group disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="submit" className="neomorphic-primary-button group">
               <span className="relative z-10 flex items-center justify-center">
-                {state.isLoading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    {isSignUp ? "Creating Account..." : "Signing In..."}
-                  </>
-                ) : (
-                  <>
-                    {isSignUp ? "Create Account" : "Sign In"}
-                    <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-                  </>
-                )}
+                {isSignUp ? "Create Account" : "Sign In"}
+                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
               </span>
             </button>
           </div>

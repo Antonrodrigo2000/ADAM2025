@@ -1,6 +1,6 @@
 "use client"
 
-import type { Question } from "@/data/hairlossquestions"
+import type { Question } from "@/data/mockquestions"
 
 interface ReviewScreenProps {
   questions: Question[]
@@ -14,13 +14,18 @@ export function ReviewScreen({ questions, answers, onSubmit }: ReviewScreenProps
 
     switch (question.type) {
       case "radio":
-      case "select":
       case "scale":
-        return answer
+        const option = question.options?.find((opt) => opt.value === answer)
+        return option?.label || answer
 
       case "checkbox":
         if (Array.isArray(answer) && answer.length > 0) {
-          return answer.join(", ")
+          return answer
+            .map((val) => {
+              const option = question.options?.find((opt) => opt.value === val)
+              return option?.label || val
+            })
+            .join(", ")
         }
         return "None selected"
 
@@ -31,7 +36,6 @@ export function ReviewScreen({ questions, answers, onSubmit }: ReviewScreenProps
         return "No files uploaded"
 
       case "text":
-      case "number":
       default:
         return answer
     }
@@ -61,7 +65,7 @@ export function ReviewScreen({ questions, answers, onSubmit }: ReviewScreenProps
           <div key={question.id} className="border-b border-neutral-100 pb-4 last:border-b-0">
             {" "}
             {/* Reduced pb-6 to pb-4 */}
-            <h3 className="font-medium text-neutral-800 mb-1.5 text-base">{question.label}</h3>{" "}
+            <h3 className="font-medium text-neutral-800 mb-1.5 text-base">{question.prompt}</h3>{" "}
             {/* Reduced text-lg to text-base, mb-2 to mb-1.5 */}
             <p className="text-neutral-600 text-sm">{formatAnswer(question, answers[question.id])}</p>{" "}
             {/* Reduced text-base to text-sm */}

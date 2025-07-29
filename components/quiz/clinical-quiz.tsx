@@ -8,16 +8,71 @@ import { QuestionCard } from "./question-card"
 import { ReviewScreen } from "./review-screen"
 import { RecommendationsScreen } from "./recommendations-screen"
 import type { Question } from "@/data/hairlossquestions"
-import { useQuiz } from "@/lib/contexts"
-import type { PatientData } from "@/lib/hairloss-recommendations"
+import recommendTreatment from "@/lib/hairloss-recommendations"
+import type { PatientData, RecommendationResult } from "@/lib/hairloss-recommendations"
+
+const STORAGE_KEY = "clinical-quiz-answers"
 
 export function ClinicalQuiz() {
-  const { state, actions } = useQuiz()
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [answers, setAnswers] = useState<Record<string, any>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isReviewMode, setIsReviewMode] = useState(false)
+  const [isRecommendationsMode, setIsRecommendationsMode] = useState(false)
+  const [questionFlow, setQuestionFlow] = useState<string[]>([])
+  const [recommendations, setRecommendations] = useState<RecommendationResult | null>(null)
   const [showDisclaimer, setShowDisclaimer] = useState(true)
 
-  const currentQuestion = hairLossQuestions.find((q) => q.id === state.questionFlow[state.currentQuestionIndex])
-  const totalSteps = state.questionFlow.length + 2 // +1 for disclaimer, +1 for review screen
+  // Load saved answers from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      try {
+        setAnswers(JSON.parse(saved))
+      } catch (error) {
+        console.error("Failed to load saved answers:", error)
+      }
+    }
+
+    // Initialize question flow with first question
+    setQuestionFlow([hairLossQuestions[0].id])
+  }, [])
+
+  // Save answers to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(answers))
+  }, [answers])
+
+  // Update question flow based on conditional logic
+  useEffect(() => {
+    updateQuestionFlow()
+  }, [answers])
+
+  const updateQuestionFlow = () => {
+    const flow: string[] = []
+
+    for (const question of hairLossQuestions) {
+      // Check if question should be included based on conditional logic
+      if (question.conditional) {
+        const { questionId, value } = question.conditional
+        const answer = answers[questionId]
+
+        // For checkbox questions, check if the value is in the array
+        if (Array.isArray(answer)) {
+          if (!answer.includes(value)) continue
+        } else if (answer !== value) {
+          continue
+        }
+      }
+
+      flow.push(question.id)
+    }
+
+    setQuestionFlow(flow)
+  }
+
+  const currentQuestion = hairLossQuestions.find((q) => q.id === questionFlow[currentQuestionIndex])
+  const totalSteps = questionFlow.length + 2 // +1 for disclaimer, +1 for review screen
 
   const validateQuestion = (question: Question, answer: any): string | null => {
     if (answer === undefined || answer === null || answer === "") {
@@ -42,14 +97,14 @@ export function ClinicalQuiz() {
   }
 
   const handleAnswerChange = (questionId: string, value: any) => {
-    actions.setAnswer(questionId, value)
+    setAnswers((prev) => ({ ...prev, [questionId]: value }))
     setErrors((prev) => ({ ...prev, [questionId]: "" }))
   }
 
   const handleNext = () => {
     if (!currentQuestion) return
 
-    const answer = state.answers[currentQuestion.id]
+    const answer = answers[currentQuestion.id]
     const error = validateQuestion(currentQuestion, answer)
 
     if (error) {
@@ -60,21 +115,58 @@ export function ClinicalQuiz() {
     // Clear any existing error
     setErrors((prev) => ({ ...prev, [currentQuestion.id]: "" }))
 
-    actions.nextQuestion()
+    // Check if this is the last question
+    if (currentQuestionIndex >= questionFlow.length - 1) {
+      setIsReviewMode(true)
+      return
+    }
+
+    setCurrentQuestionIndex(currentQuestionIndex + 1)
   }
 
   const handleBack = () => {
-    if (state.isCompleted) {
-      // Go back from recommendations to review
-      actions.exitReviewMode()
-    } else {
-      actions.previousQuestion()
+    if (isRecommendationsMode) {
+      setIsRecommendationsMode(false)
+      setIsReviewMode(true)
+    } else if (isReviewMode) {
+      setIsReviewMode(false)
+      setCurrentQuestionIndex(questionFlow.length - 1)
+    } else if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1)
     }
   }
 
   const handleSubmit = () => {
     try {
-      actions.submitQuiz()
+      // Transform answers to match PatientData interface
+      const patientData: PatientData = {
+        age: answers.age || 0,
+        gender: answers.gender || "",
+        hairLossAreas: answers.hairLossAreas || [],
+        hairLossOnset: answers.hairLossOnset || "",
+        hairLossProgression: answers.hairLossProgression || "",
+        familyHistory: answers.familyHistory || "",
+        familyHistoryAge: answers.familyHistoryAge,
+        medicalConditions: answers.medicalConditions || [],
+        otherMedicalConditions: answers.otherMedicalConditions,
+        medications: answers.medications || "",
+        medicationsList: answers.medicationsList,
+        previousTreatments: answers.previousTreatments || "",
+        previousTreatmentsDetails: answers.previousTreatmentsDetails,
+        treatmentGoals: answers.treatmentGoals || [],
+        importance: Number(answers.importance) || 1,
+        commitment: answers.commitment || "",
+        photos: answers.photos || [],
+      }
+
+      // Generate recommendations
+      const result = recommendTreatment(patientData)
+      setRecommendations(result)
+      setIsReviewMode(false)
+      setIsRecommendationsMode(true)
+
+      // Clear localStorage after successful submission
+      localStorage.removeItem(STORAGE_KEY)
     } catch (error) {
       console.error("Error generating recommendations:", error)
       alert("There was an error processing your assessment. Please try again.")
@@ -84,7 +176,7 @@ export function ClinicalQuiz() {
   const canGoNext = () => {
     if (!currentQuestion) return false
 
-    const answer = state.answers[currentQuestion.id]
+    const answer = answers[currentQuestion.id]
     if (answer === undefined || answer === null || answer === "") return false
     if (currentQuestion.type === "checkbox" && Array.isArray(answer) && answer.length === 0) return false
     if (currentQuestion.type === "file" && (!Array.isArray(answer) || answer.length === 0)) return false
@@ -204,19 +296,19 @@ export function ClinicalQuiz() {
     </div>
   )
 
-  if (state.isCompleted && state.recommendations) {
-    return <RecommendationsScreen recommendations={state.recommendations} patientData={state.answers} onBack={handleBack} />
+  if (isRecommendationsMode && recommendations) {
+    return <RecommendationsScreen recommendations={recommendations} patientData={answers} onBack={handleBack} />
   }
 
-  if (state.isReviewMode) {
+  if (isReviewMode) {
     return (
       <div className="min-h-screen bg-neutral-50 py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <ProgressBar currentStep={totalSteps} totalSteps={totalSteps} />
 
           <ReviewScreen
-            questions={hairLossQuestions.filter((q) => state.questionFlow.includes(q.id))}
-            answers={state.answers}
+            questions={hairLossQuestions.filter((q) => questionFlow.includes(q.id))}
+            answers={answers}
             onSubmit={handleSubmit}
           />
 
@@ -255,11 +347,11 @@ export function ClinicalQuiz() {
   return (
     <div className="min-h-screen bg-neutral-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
-        <ProgressBar currentStep={state.currentQuestionIndex + 2} totalSteps={totalSteps} />
+        <ProgressBar currentStep={currentQuestionIndex + 2} totalSteps={totalSteps} />
 
         <QuestionCard
           question={currentQuestion}
-          value={state.answers[currentQuestion.id]}
+          value={answers[currentQuestion.id]}
           onChange={(value) => handleAnswerChange(currentQuestion.id, value)}
           error={errors[currentQuestion.id]}
         />
@@ -267,7 +359,7 @@ export function ClinicalQuiz() {
         <div className="mt-8 flex justify-between">
           <button
             onClick={handleBack}
-            disabled={state.currentQuestionIndex === 0}
+            disabled={currentQuestionIndex === 0}
             className="flex items-center px-6 py-3 text-neutral-600 hover:text-neutral-800 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
