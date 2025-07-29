@@ -138,7 +138,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function ProductPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header variant="light" />
+      <Header variant="dark" />
       <ProductDetailPage product={sampleProduct} />
       <Footer />
     </div>

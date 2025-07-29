@@ -44,7 +44,7 @@ export interface ClinicalStudy {
   title: string
   description: string
   efficacy_rate: number
-  study_url?: string
+  study_url: string
 }
 
 export interface FAQ {

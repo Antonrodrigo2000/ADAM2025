@@ -1,4 +1,6 @@
 "use client"
+
+import { useState } from "react"
 import type { Product } from "@/types/product"
 import { ProductImageGallery } from "./product-image-gallery"
 import { ProductInfo } from "./product-info"
@@ -11,49 +13,70 @@ interface ProductDetailPageProps {
 }
 
 export function ProductDetailPage({ product }: ProductDetailPageProps) {
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="pt-20">
       {/* Breadcrumb */}
-      <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
-        <a href="/" className="hover:text-blue-600 transition-colors">
-          Home
-        </a>
-        <span>/</span>
-        <a href="/products" className="hover:text-blue-600 transition-colors">
-          Products
-        </a>
-        <span>/</span>
-        <a
-          href={`/products/category/${product.health_vertical.slug}`}
-          className="hover:text-blue-600 transition-colors"
-        >
-          {product.health_vertical.name}
-        </a>
-        <span>/</span>
-        <span className="text-gray-900 font-medium">{product.name}</span>
-      </nav>
-
-      {/* Main Product Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-16">
-        {/* Left Column - Images */}
-        <div className="lg:col-span-3">
-          <ProductImageGallery images={product.images} productName={product.name} />
-          <div className="mt-8">
-            <TrustBadges />
-          </div>
-        </div>
-
-        {/* Right Column - Product Info */}
-        <div className="lg:col-span-2">
-          <ProductInfo product={product} />
+      <div className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-4">
+          <nav className="flex items-center space-x-2 text-sm text-gray-600">
+            <a href="/" className="hover:text-blue-600">
+              Home
+            </a>
+            <span>/</span>
+            <a href="/products" className="hover:text-blue-600">
+              Products
+            </a>
+            <span>/</span>
+            <a href={`/products?category=${product.health_vertical.slug}`} className="hover:text-blue-600">
+              {product.health_vertical.name}
+            </a>
+            <span>/</span>
+            <span className="text-gray-900">{product.name}</span>
+          </nav>
         </div>
       </div>
 
-      {/* Tabbed Content */}
-      <ProductTabs product={product} />
+      {/* Main Product Section */}
+      <div className="bg-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            {/* Left Column - Images (60%) */}
+            <div className="lg:col-span-3">
+              <ProductImageGallery
+                images={product.images}
+                selectedIndex={selectedImageIndex}
+                onImageSelect={setSelectedImageIndex}
+              />
+              <div className="mt-6">
+                <TrustBadges />
+              </div>
+            </div>
+
+            {/* Right Column - Product Info (40%) */}
+            <div className="lg:col-span-2">
+              <div className="sticky top-24">
+                <ProductInfo product={product} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Product Details Tabs */}
+      <div className="bg-gray-50">
+        <div className="container mx-auto px-4 py-12">
+          <ProductTabs product={product} />
+        </div>
+      </div>
 
       {/* Related Products */}
-      <RelatedProducts currentProductId={product.id} />
+      <div className="bg-white">
+        <div className="container mx-auto px-4 py-12">
+          <RelatedProducts />
+        </div>
+      </div>
     </div>
   )
 }

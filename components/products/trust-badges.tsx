@@ -5,12 +5,12 @@ export function TrustBadges() {
     {
       icon: Shield,
       title: "Licensed Physicians",
-      description: "Qualified medical professionals",
+      description: "Prescribed by qualified doctors",
     },
     {
       icon: Truck,
       title: "Discreet Packaging",
-      description: "Private & secure delivery",
+      description: "Private and confidential delivery",
     },
     {
       icon: Clock,
@@ -20,21 +20,20 @@ export function TrustBadges() {
     {
       icon: Award,
       title: "Quality Assured",
-      description: "Authentic medications only",
+      description: "Pharmacy-grade medications",
     },
   ]
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {badges.map((badge, index) => (
-        <div key={index} className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg">
-          <div className="flex-shrink-0 w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-            <badge.icon className="w-5 h-5 text-blue-600" />
-          </div>
-          <div>
-            <h4 className="font-medium text-gray-900 text-sm">{badge.title}</h4>
-            <p className="text-xs text-gray-600">{badge.description}</p>
-          </div>
+        <div
+          key={index}
+          className="flex flex-col items-center text-center p-4 bg-blue-50 rounded-lg border border-blue-100"
+        >
+          <badge.icon className="w-8 h-8 text-blue-600 mb-2" />
+          <h4 className="font-semibold text-gray-900 text-sm mb-1">{badge.title}</h4>
+          <p className="text-xs text-gray-600 leading-tight">{badge.description}</p>
         </div>
       ))}
     </div>
