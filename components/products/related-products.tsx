@@ -1,126 +1,106 @@
-import Link from "next/link"
+"use client"
+
 import Image from "next/image"
+import Link from "next/link"
 import { Star } from "lucide-react"
-import type { Product } from "@/types/product"
 
 interface RelatedProductsProps {
-  products: Product[]
+  currentProductId: string
 }
 
-export default function RelatedProducts({ products }: RelatedProductsProps) {
-  // Mock related products if none provided
-  const mockProducts: Product[] = [
-    {
-      id: "2",
-      name: "Finasteride 1mg Tablets",
-      slug: "finasteride-1mg",
-      description: "Oral medication for hair loss prevention",
-      active_ingredient: "Finasteride 1mg",
-      dosage: "Take 1 tablet daily",
-      price: 3200,
-      consultation_fee: 2000,
-      prescription_required: true,
-      health_vertical_id: "1",
-      health_vertical: { name: "Hair Loss", slug: "hair-loss" },
-      images: [
-        {
-          id: "1",
-          url: "/placeholder.svg?height=300&width=300&text=Finasteride",
-          alt: "Finasteride tablets",
-          is_primary: true,
-        },
-      ],
-      rating: 4.4,
-      review_count: 892,
-      benefits: [],
-      how_it_works: "",
-      expected_timeline: "",
-      ingredients: [],
-      side_effects: [],
-      contraindications: [],
-      warnings: [],
-      faqs: [],
-    },
-    {
-      id: "3",
-      name: "Hair Growth Shampoo",
-      slug: "hair-growth-shampoo",
-      description: "Strengthening shampoo with biotin and caffeine",
-      active_ingredient: "Biotin, Caffeine",
-      dosage: "Use 2-3 times per week",
-      price: 1800,
-      consultation_fee: 0,
-      prescription_required: false,
-      health_vertical_id: "1",
-      health_vertical: { name: "Hair Loss", slug: "hair-loss" },
-      images: [
-        {
-          id: "1",
-          url: "/placeholder.svg?height=300&width=300&text=Shampoo",
-          alt: "Hair growth shampoo",
-          is_primary: true,
-        },
-      ],
-      rating: 4.2,
-      review_count: 456,
-      benefits: [],
-      how_it_works: "",
-      expected_timeline: "",
-      ingredients: [],
-      side_effects: [],
-      contraindications: [],
-      warnings: [],
-      faqs: [],
-    },
-  ]
+// Sample related products data
+const relatedProducts = [
+  {
+    id: "2",
+    name: "Finasteride 1mg",
+    slug: "finasteride-1mg",
+    price: 3500,
+    rating: 4.7,
+    review_count: 892,
+    image: "/placeholder.svg?height=200&width=200&text=Finasteride",
+    prescription_required: true,
+  },
+  {
+    id: "3",
+    name: "Hair Growth Shampoo",
+    slug: "hair-growth-shampoo",
+    price: 2200,
+    rating: 4.4,
+    review_count: 456,
+    image: "/placeholder.svg?height=200&width=200&text=Shampoo",
+    prescription_required: false,
+  },
+  {
+    id: "4",
+    name: "Biotin Supplements",
+    slug: "biotin-supplements",
+    price: 1800,
+    rating: 4.5,
+    review_count: 623,
+    image: "/placeholder.svg?height=200&width=200&text=Biotin",
+    prescription_required: false,
+  },
+  {
+    id: "5",
+    name: "Scalp Massage Oil",
+    slug: "scalp-massage-oil",
+    price: 1500,
+    rating: 4.3,
+    review_count: 234,
+    image: "/placeholder.svg?height=200&width=200&text=Oil",
+    prescription_required: false,
+  },
+]
 
-  const displayProducts = products.length > 0 ? products : mockProducts
-
-  if (displayProducts.length === 0) {
-    return null
-  }
+export function RelatedProducts({ currentProductId }: RelatedProductsProps) {
+  const filteredProducts = relatedProducts.filter((product) => product.id !== currentProductId)
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Customers also bought</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {displayProducts.slice(0, 3).map((product) => (
+    <div className="mt-16">
+      <h2 className="text-2xl font-bold text-gray-900 mb-8">Customers Also Bought</h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {filteredProducts.map((product) => (
           <Link
             key={product.id}
             href={`/products/${product.slug}`}
-            className="group border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300"
           >
-            <div className="aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden">
+            <div className="aspect-square bg-gray-50 overflow-hidden">
               <Image
-                src={product.images[0]?.url || "/placeholder.svg?height=200&width=200"}
-                alt={product.images[0]?.alt || product.name}
+                src={product.image || "/placeholder.svg"}
+                alt={product.name}
                 width={200}
                 height={200}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </div>
-            <h3 className="font-medium text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-              {product.name}
-            </h3>
-            <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
-            <div className="flex items-center space-x-2 mb-2">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-4 h-4 ${
-                      i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
-                    }`}
-                  />
-                ))}
+
+            <div className="p-4">
+              <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                {product.name}
+              </h3>
+
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-4 h-4 ${
+                        i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm text-gray-600">({product.review_count})</span>
               </div>
-              <span className="text-sm text-gray-600">({product.review_count})</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-gray-900">LKR {product.price.toLocaleString()}</span>
-              {product.prescription_required && (
-                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Prescription</span>
-              )}
+
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-bold text-blue-600">LKR {product.price.toLocaleString()}</span>
+                {product.prescription_required && (
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Rx Required</span>
+                )}
+              </div>
             </div>
           </Link>
         ))}

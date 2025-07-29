@@ -19,35 +19,40 @@ export interface Product {
   benefits: string[]
   how_it_works: string
   expected_timeline: string
-  ingredients: ProductIngredient[]
+  ingredients: Ingredient[]
   side_effects: string[]
   contraindications: string[]
   warnings: string[]
-  clinical_studies?: string
-  faqs: ProductFAQ[]
-  related_products?: Product[]
+  clinical_studies: ClinicalStudy[]
+  faqs: FAQ[]
 }
 
 export interface ProductImage {
   id: string
   url: string
-  alt: string
+  alt_text: string
   is_primary: boolean
 }
 
-export interface ProductIngredient {
+export interface Ingredient {
   name: string
   dosage: string
   description: string
 }
 
-export interface ProductFAQ {
-  id: string
+export interface ClinicalStudy {
+  title: string
+  description: string
+  efficacy_rate: number
+  study_url?: string
+}
+
+export interface FAQ {
   question: string
   answer: string
 }
 
-export interface ProductReview {
+export interface Review {
   id: string
   user_name: string
   rating: number

@@ -9,54 +9,44 @@ interface ProductImageGalleryProps {
   productName: string
 }
 
-export default function ProductImageGallery({ images, productName }: ProductImageGalleryProps) {
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-
-  if (!images || images.length === 0) {
-    return (
-      <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-        <span className="text-gray-400">No image available</span>
-      </div>
-    )
-  }
+export function ProductImageGallery({ images, productName }: ProductImageGalleryProps) {
+  const [selectedImage, setSelectedImage] = useState(0)
+  const primaryImage = images.find((img) => img.is_primary) || images[0]
 
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+      <div className="aspect-square bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
         <Image
-          src={images[selectedImageIndex]?.url || "/placeholder.svg?height=500&width=500"}
-          alt={images[selectedImageIndex]?.alt || productName}
-          width={500}
-          height={500}
-          className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
+          src={images[selectedImage]?.url || primaryImage.url}
+          alt={images[selectedImage]?.alt_text || primaryImage.alt_text}
+          width={600}
+          height={600}
+          className="w-full h-full object-cover"
+          priority
         />
       </div>
 
       {/* Thumbnail Gallery */}
-      {images.length > 1 && (
-        <div className="grid grid-cols-4 gap-2">
-          {images.map((image, index) => (
-            <button
-              key={image.id}
-              onClick={() => setSelectedImageIndex(index)}
-              className={`aspect-square bg-gray-50 rounded-lg overflow-hidden border-2 transition-all ${
-                selectedImageIndex === index
-                  ? "border-blue-500 ring-2 ring-blue-200"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              <Image
-                src={image.url || "/placeholder.svg"}
-                alt={image.alt}
-                width={120}
-                height={120}
-                className="w-full h-full object-contain"
-              />
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-4 gap-3">
+        {images.map((image, index) => (
+          <button
+            key={image.id}
+            onClick={() => setSelectedImage(index)}
+            className={`aspect-square bg-white rounded-lg border-2 overflow-hidden transition-all duration-200 ${
+              selectedImage === index ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <Image
+              src={image.url || "/placeholder.svg"}
+              alt={image.alt_text}
+              width={150}
+              height={150}
+              className="w-full h-full object-cover"
+            />
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
