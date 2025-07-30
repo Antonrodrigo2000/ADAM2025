@@ -12,7 +12,7 @@ export default function LandingPage() {
       <Header />
       <main className="flex-1">
         <HeroSection />
-        <HairLossProductsSection />
+        <HairRegrowthSection />
         <ServicesSection />
         <HowItWorksSection />
         <TestimonialsSection />
@@ -71,174 +71,80 @@ function HeroSection() {
   )
 }
 
-function HairLossProductsSection() {
+function HairRegrowthSection() {
   return (
-    <section className="relative py-20 md:py-28 bg-black overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 z-0">
-        <div
-          className="absolute inset-0 techno-grid opacity-30"
-          style={
-            {
-              "--grid-color": "rgba(255, 165, 0, 0.05)",
-              "--grid-size": "40px",
-            } as React.CSSProperties
-          }
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/95 to-black" />
-
-        {/* Subtle orange glow effects */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "2s" }}
-        />
-      </div>
-
-      <div className="container mx-auto relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold font-display tracking-tighter mb-4 text-white drop-shadow-lg">
-            Advanced Hair Solutions
-          </h2>
-          <p className="text-lg text-neutral-300 max-w-2xl mx-auto">
-            Clinically-proven treatments engineered for maximum effectiveness. Regain your confidence with
-            science-backed solutions.
-          </p>
+    <section id="hair-regrowth-section" className="bg-black text-white py-16 md:py-20">
+      <div className="container mx-auto px-4 md:px-6">
+        {/* Desktop and Tablet Layout */}
+        <div className="hidden md:flex items-center gap-8 lg:gap-12">
+          <div className="flex-shrink-0">
+            <img
+              src="/placeholder.svg?height=150&width=150&text=Minoxidil+Spray"
+              alt="Minoxidil+ Rx Hair Regrowth Spray"
+              className="w-32 h-32 lg:w-40 lg:h-40 object-contain"
+            />
+          </div>
+          <div className="flex-1">
+            <div className="mb-4">
+              <span className="inline-block bg-primary text-black text-xs font-bold px-3 py-1 rounded-full mb-4 font-mono">
+                NEW
+              </span>
+              <h2 className="text-2xl lg:text-3xl font-bold font-mono mb-4">Boost hair regrowth with Minoxidil+ Rx</h2>
+              <p className="text-gray-300 text-base lg:text-lg font-mono leading-relaxed mb-6">
+                It's the next evolution of minoxidil: a full-circle formula with clinically proven ingredients that can
+                help boost regrowth, increase hair thickness, and promote a healthy scalp.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button
+                asChild
+                className="bg-white text-black hover:bg-gray-200 font-mono font-bold text-sm px-6 py-3 rounded-none transition-colors"
+              >
+                <Link href="/products/minoxidil-5-solution">LEARN MORE</Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="border-white text-white hover:bg-white hover:text-black font-mono font-bold text-sm px-6 py-3 rounded-none transition-colors bg-transparent"
+              >
+                <Link href="/products">SEE ALL OUR PRODUCTS</Link>
+              </Button>
+            </div>
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* Minoxidil 5% Solution Card */}
-          <Link href="/products/minoxidil-5-solution" className="group block">
-            <div className="relative bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 overflow-hidden transition-all duration-300 group-hover:border-primary/60 group-hover:bg-white/10 group-hover:-translate-y-2 group-hover:shadow-2xl">
-              {/* Card glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
-
-              {/* Background Image with dark overlay */}
-              <div className="relative h-48 rounded-xl mb-6 overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{
-                    backgroundImage: `url('/placeholder.svg?height=200&width=400&text=Minoxidil+5%25+Solution')`,
-                  }}
-                />
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              </div>
-
-              {/* Content */}
-              <div className="relative z-10 space-y-4">
-                <div className="flex items-start justify-between">
-                  <h3 className="text-2xl font-bold font-display text-white group-hover:text-primary transition-colors duration-300">
-                    Minoxidil 5% Solution
-                  </h3>
-                  <div className="bg-green-500/20 border border-green-500/30 rounded-full px-3 py-1">
-                    <span className="text-xs font-medium text-green-400">Non-prescription</span>
-                  </div>
-                </div>
-
-                <p className="text-neutral-300 leading-relaxed">
-                  FDA-approved topical treatment that stimulates hair follicles and promotes regrowth. Clinically proven
-                  to slow hair loss and encourage new growth.
-                </p>
-
-                {/* Features */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="text-xs bg-white/10 text-neutral-300 px-2 py-1 rounded-full">FDA Approved</span>
-                  <span className="text-xs bg-white/10 text-neutral-300 px-2 py-1 rounded-full">Topical Solution</span>
-                  <span className="text-xs bg-white/10 text-neutral-300 px-2 py-1 rounded-full">
-                    6-12 Months Results
-                  </span>
-                </div>
-
-                {/* Price */}
-                <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                  <div>
-                    <span className="text-3xl font-bold text-white">LKR 4,500</span>
-                    <span className="text-neutral-400">/month</span>
-                  </div>
-                  <div className="flex items-center text-primary group-hover:text-orange-400 transition-colors duration-300">
-                    <span className="text-sm font-medium mr-2">View Treatment</span>
-                    <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Combination Spray Card */}
-          <Link href="/products/minoxidil-finasteride-combination-spray" className="group block">
-            <div className="relative bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 overflow-hidden transition-all duration-300 group-hover:border-primary/60 group-hover:bg-white/10 group-hover:-translate-y-2 group-hover:shadow-2xl">
-              {/* Premium badge */}
-              <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-primary text-white text-xs font-bold px-3 py-1 rounded-full">
-                PREMIUM
-              </div>
-
-              {/* Card glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 via-transparent to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
-
-              {/* Background Image with dark overlay */}
-              <div className="relative h-48 rounded-xl mb-6 overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{
-                    backgroundImage: `url('/placeholder.svg?height=200&width=400&text=Combination+Spray')`,
-                  }}
-                />
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              </div>
-
-              {/* Content */}
-              <div className="relative z-10 space-y-4">
-                <div className="flex items-start justify-between">
-                  <h3 className="text-2xl font-bold font-display text-white group-hover:text-primary transition-colors duration-300">
-                    Minoxidil + Finasteride Spray
-                  </h3>
-                  <div className="bg-orange-500/20 border border-orange-500/30 rounded-full px-3 py-1">
-                    <span className="text-xs font-medium text-orange-400">Prescription required</span>
-                  </div>
-                </div>
-
-                <p className="text-neutral-300 leading-relaxed">
-                  Advanced dual-action formula combining minoxidil and finasteride for maximum effectiveness. Targets
-                  hair loss from multiple pathways.
-                </p>
-
-                {/* Features */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="text-xs bg-white/10 text-neutral-300 px-2 py-1 rounded-full">Dual Action</span>
-                  <span className="text-xs bg-white/10 text-neutral-300 px-2 py-1 rounded-full">Maximum Strength</span>
-                  <span className="text-xs bg-white/10 text-neutral-300 px-2 py-1 rounded-full">
-                    12-18 Months Results
-                  </span>
-                </div>
-
-                {/* Price */}
-                <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                  <div>
-                    <span className="text-3xl font-bold text-white">LKR 7,500</span>
-                    <span className="text-neutral-400">/month</span>
-                  </div>
-                  <div className="flex items-center text-primary group-hover:text-orange-400 transition-colors duration-300">
-                    <span className="text-sm font-medium mr-2">View Treatment</span>
-                    <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Link>
-        </div>
-
-        {/* Bottom CTA */}
-        <div className="text-center mt-12">
-          <p className="text-neutral-400 mb-6">Not sure which treatment is right for you?</p>
-          <Button
-            size="lg"
-            className="rounded-full group text-lg px-8 py-6 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            Take Our Assessment
-            <ArrowRight className="ml-2 h-5 w-5 transform group-hover:translate-x-1 transition-transform" />
-          </Button>
+        {/* Mobile Layout */}
+        <div className="md:hidden text-center">
+          <div className="mb-6">
+            <img
+              src="/placeholder.svg?height=100&width=100&text=Minoxidil+Spray"
+              alt="Minoxidil+ Rx Hair Regrowth Spray"
+              className="w-24 h-24 object-contain mx-auto mb-4"
+            />
+            <span className="inline-block bg-primary text-black text-xs font-bold px-3 py-1 rounded-full mb-4 font-mono">
+              NEW
+            </span>
+            <h2 className="text-xl font-bold font-mono mb-4">Boost hair regrowth with Minoxidil+ Rx</h2>
+            <p className="text-gray-300 text-sm font-mono leading-relaxed mb-6 px-4">
+              It's the next evolution of minoxidil: a full-circle formula with clinically proven ingredients that can
+              help boost regrowth, increase hair thickness, and promote a healthy scalp.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 px-4">
+            <Button
+              asChild
+              className="bg-white text-black hover:bg-gray-200 font-mono font-bold text-xs px-4 py-2 rounded-none transition-colors"
+            >
+              <Link href="/products/minoxidil-5-solution">LEARN MORE</Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="border-white text-white hover:bg-white hover:text-black font-mono font-bold text-xs px-4 py-2 rounded-none transition-colors bg-transparent"
+            >
+              <Link href="/products">SEE ALL OUR PRODUCTS</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </section>
