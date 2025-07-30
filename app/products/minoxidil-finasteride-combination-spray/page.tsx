@@ -1,22 +1,19 @@
 import type { Metadata } from "next"
 import { ProductDetailPage } from "@/components/products/product-detail-page"
-import { Header } from "@/components/layout/header"
-import { Footer } from "@/components/layout/footer"
 import { combinationSprayData } from "@/data/combination-spray-data"
+import { Header } from "@/components/layout/header"
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: `${combinationSprayData.name} - ADAM Telehealth`,
-    description: combinationSprayData.description,
-  }
+export const metadata: Metadata = {
+  title: `${combinationSprayData.name} | ADAM`,
+  description: combinationSprayData.description,
+  keywords: "minoxidil, finasteride, hair loss, combination therapy, prescription, Sri Lanka, men's health",
 }
 
 export default function CombinationSprayPage() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <>
       <Header variant="dark" />
       <ProductDetailPage product={combinationSprayData} />
-      <Footer />
-    </div>
+    </>
   )
 }
