@@ -1,146 +1,158 @@
 import type { Product } from "@/types/product"
 
 export const combinationSprayData: Product = {
-  id: "combo-spray-001",
+  id: "2",
   name: "Minoxidil 5% + Finasteride 0.1% Spray",
   slug: "minoxidil-finasteride-combination-spray",
   description:
-    "Advanced dual-action topical spray combining minoxidil and finasteride for maximum hair regrowth potential. Prescription-strength formula for men with moderate to severe hair loss.",
-  short_description: "Dual-action prescription spray for advanced hair loss treatment",
+    "Advanced dual-action hair loss treatment combining minoxidil and finasteride in a convenient topical spray for maximum effectiveness.",
+  active_ingredient: "Minoxidil 5% + Finasteride 0.1%",
+  dosage: "Apply 1ml twice daily to affected scalp areas",
   price: 7500,
   consultation_fee: 2500,
   prescription_required: true,
+  health_vertical_id: "2",
   health_vertical: {
-    id: "skincare-001",
-    name: "Advanced Skincare",
-    slug: "skincare",
+    name: "Advanced Hair Care",
+    slug: "advanced-hair-care",
   },
-  active_ingredient: "Minoxidil 5% + Finasteride 0.1%",
-  dosage: "Apply 1ml twice daily to affected scalp areas",
   images: [
-    "/placeholder.svg?height=600&width=600&text=Combination+Spray+Main",
-    "/placeholder.svg?height=600&width=600&text=Application+Guide",
-    "/placeholder.svg?height=600&width=600&text=Before+After+Results",
-    "/placeholder.svg?height=600&width=600&text=Clinical+Study+Data",
+    {
+      id: "1",
+      url: "/placeholder.svg?height=400&width=400&text=Combination+Spray+Bottle",
+      alt_text: "Minoxidil Finasteride Combination Spray Bottle",
+      is_primary: true,
+    },
+    {
+      id: "2",
+      url: "/placeholder.svg?height=400&width=400&text=Spray+Application",
+      alt_text: "How to apply combination spray",
+      is_primary: false,
+    },
+    {
+      id: "3",
+      url: "/placeholder.svg?height=400&width=400&text=Clinical+Results",
+      alt_text: "Clinical study results",
+      is_primary: false,
+    },
+    {
+      id: "4",
+      url: "/placeholder.svg?height=400&width=400&text=Professional+Use",
+      alt_text: "Professional using product",
+      is_primary: false,
+    },
   ],
-  key_benefits: [
-    "Dual-action formula targets hair loss from multiple pathways",
-    "5% Minoxidil stimulates blood flow and follicle growth",
-    "0.1% Finasteride blocks DHT production locally",
-    "Superior efficacy compared to single-ingredient treatments",
-    "Topical application minimizes systemic side effects",
-    "Convenient once-daily spray application",
+  rating: 4.8,
+  review_count: 892,
+  benefits: [
+    "Dual-action formula for superior results",
+    "Blocks DHT production at the source",
+    "Stimulates blood flow to follicles",
+    "Convenient once-daily application",
+    "Clinically proven combination therapy",
+    "Reduces hair loss by up to 90%",
   ],
   how_it_works:
-    "This advanced combination spray works through two complementary mechanisms. Minoxidil 5% acts as a vasodilator, increasing blood flow to hair follicles and extending the growth phase of hair. Finasteride 0.1% works as a 5-alpha reductase inhibitor, blocking the conversion of testosterone to DHT (dihydrotestosterone) directly at the scalp level. Together, they address both the vascular and hormonal factors contributing to male pattern baldness, providing superior results compared to either ingredient alone.",
+    "This combination therapy works through two complementary mechanisms: Minoxidil increases blood flow and nutrient delivery to hair follicles, while Finasteride blocks the conversion of testosterone to DHT (dihydrotestosterone), the primary hormone responsible for male pattern baldness. Together, they provide comprehensive hair loss prevention and regrowth.",
   expected_timeline:
-    "Initial results may be visible within 3-4 months, with significant improvement typically seen at 6-9 months. Maximum benefits are usually achieved after 12-18 months of consistent use. Some users may experience initial shedding in the first 2-4 weeks as dormant follicles enter a new growth cycle.",
+    "Initial stabilization of hair loss occurs within 3-6 months. New hair growth typically begins around month 4-6, with significant improvement visible by month 8-12. Maximum benefits are usually achieved after 12-18 months of consistent use.",
   ingredients: [
     {
       name: "Minoxidil",
-      concentration: "5%",
+      dosage: "5%",
       description:
-        "FDA-approved vasodilator that increases blood flow to hair follicles and extends the anagen (growth) phase of hair",
+        "Vasodilator that increases blood flow to hair follicles, promoting growth and preventing miniaturization.",
     },
     {
       name: "Finasteride",
-      concentration: "0.1%",
-      description: "5-alpha reductase inhibitor that blocks DHT production locally at the scalp level",
+      dosage: "0.1%",
+      description:
+        "5α-reductase inhibitor that blocks DHT production, preventing further hair loss at the hormonal level.",
     },
     {
       name: "Propylene Glycol",
-      concentration: "30%",
-      description: "Penetration enhancer that helps active ingredients absorb into the scalp",
+      dosage: "20%",
+      description: "Enhanced penetration enhancer for optimal absorption of active ingredients.",
     },
     {
       name: "Ethanol",
-      concentration: "60%",
-      description: "Solvent and antimicrobial agent that ensures product stability and rapid drying",
+      dosage: "50%",
+      description: "Solvent system optimized for dual-drug delivery and rapid drying.",
     },
+  ],
+  side_effects: [
+    "Mild scalp irritation or dryness",
+    "Temporary increase in hair shedding (first 2-8 weeks)",
+    "Rare: decreased libido (less than 2% of users)",
+    "Rare: breast tenderness",
+    "Contact dermatitis (uncommon)",
+  ],
+  contraindications: [
+    "Women of childbearing age",
+    "Pregnancy or breastfeeding",
+    "Under 18 years of age",
+    "Known hypersensitivity to finasteride or minoxidil",
+    "Liver disease or dysfunction",
+    "Prostate cancer",
+  ],
+  warnings: [
+    "Prescription medication - medical supervision required",
+    "For external use only - avoid contact with eyes",
+    "Wash hands thoroughly after application",
+    "Women should not handle crushed or broken components",
+    "Discontinue if severe side effects occur",
+    "Regular monitoring recommended during first 6 months",
   ],
   clinical_studies: [
     {
       title: "Combination Therapy Efficacy Study",
-      description:
-        "24-month study of 180 men showed 85% improvement in hair count with combination therapy vs 65% with minoxidil alone",
-      participants: 180,
-      duration: "24 months",
-      results: "85% showed significant hair regrowth",
+      description: "24-month study showing 94% of men maintained or increased hair count with combination therapy",
+      efficacy_rate: 94,
+      study_url: "#",
     },
     {
       title: "Topical Finasteride Safety Profile",
-      description:
-        "Comprehensive safety analysis showing minimal systemic absorption and reduced side effect profile compared to oral finasteride",
-      participants: 240,
-      duration: "18 months",
-      results: "97% completion rate with minimal side effects",
+      description: "Reduced systemic absorption compared to oral finasteride while maintaining efficacy",
+      efficacy_rate: 87,
+      study_url: "#",
     },
     {
-      title: "DHT Reduction Analysis",
-      description: "Scalp DHT levels reduced by 68% with topical combination vs 41% with minoxidil monotherapy",
-      participants: 120,
-      duration: "12 months",
-      results: "68% reduction in scalp DHT levels",
+      title: "DHT Suppression Analysis",
+      description: "Significant reduction in scalp DHT levels with minimal systemic effects",
+      efficacy_rate: 76,
+      study_url: "#",
     },
-  ],
-  side_effects: [
-    "Scalp irritation or redness (common, usually temporary)",
-    "Dry or flaky scalp (common)",
-    "Initial hair shedding in first 2-4 weeks (normal response)",
-    "Unwanted facial hair growth if product runs onto face (uncommon)",
-    "Headache or dizziness (rare)",
-    "Sexual side effects (very rare with topical application)",
-    "Allergic contact dermatitis (rare)",
-  ],
-  contraindications: [
-    "Women who are pregnant, planning pregnancy, or breastfeeding",
-    "Children under 18 years of age",
-    "Known hypersensitivity to minoxidil or finasteride",
-    "Scalp conditions such as psoriasis or dermatitis",
-    "Severe cardiovascular disease",
-    "Liver disease or elevated liver enzymes",
-    "Prostate cancer or elevated PSA levels",
-  ],
-  warnings: [
-    "Prescription medication - requires medical supervision",
-    "Regular monitoring of liver function and PSA levels recommended",
-    "Wash hands thoroughly after application",
-    "Avoid contact with eyes, nose, and mouth",
-    "Do not apply to broken or irritated skin",
-    "Women should not handle this product due to finasteride content",
-    "Discontinue use if severe scalp irritation develops",
-    "Results are not permanent - continued use required to maintain benefits",
   ],
   faqs: [
     {
-      question: "Why is combination therapy more effective than single treatments?",
+      question: "How is this different from using minoxidil alone?",
       answer:
-        "The combination addresses hair loss through two different mechanisms. Minoxidil improves blood flow and extends hair growth phases, while finasteride blocks DHT production. This dual approach targets both vascular and hormonal causes of hair loss, resulting in superior efficacy compared to either treatment alone.",
+        "The combination addresses hair loss from two angles: minoxidil stimulates growth while finasteride prevents further loss by blocking DHT. Studies show combination therapy is significantly more effective than either treatment alone.",
     },
     {
-      question: "Do I need a prescription for this combination spray?",
+      question: "Do I need a prescription for this product?",
       answer:
-        "Yes, this product contains finasteride which requires a prescription and medical supervision. Our licensed physicians will evaluate your medical history, current medications, and hair loss pattern before prescribing. Regular follow-ups are recommended to monitor progress and any potential side effects.",
+        "Yes, this is a prescription medication that requires consultation with one of our licensed physicians. Finasteride requires medical supervision and monitoring.",
     },
     {
-      question: "How does topical finasteride compare to oral finasteride?",
+      question: "Are there fewer side effects compared to oral finasteride?",
       answer:
-        "Topical finasteride provides localized DHT blocking with minimal systemic absorption, reducing the risk of sexual side effects associated with oral finasteride. Studies show similar efficacy for hair regrowth while maintaining a better safety profile, especially for men concerned about systemic effects.",
+        "Yes, topical application significantly reduces systemic absorption, leading to fewer side effects while maintaining therapeutic effectiveness at the scalp level.",
     },
     {
-      question: "How should I apply the combination spray?",
+      question: "How long before I see results?",
       answer:
-        "Apply 1ml (approximately 6-8 sprays) to dry scalp twice daily, focusing on areas of hair thinning. Massage gently and allow to dry completely before styling. Do not wash hair for at least 4 hours after application. Use consistently for best results.",
+        "Most patients notice reduced hair loss within 3-4 months. New growth typically becomes visible around month 6, with optimal results achieved after 12-18 months of consistent use.",
     },
     {
-      question: "Can I use other hair products with this treatment?",
+      question: "Can I use this with other hair products?",
       answer:
-        "Yes, but apply the spray to clean, dry scalp first and allow it to dry completely before using other styling products. Avoid products containing alcohol or harsh chemicals that might increase scalp irritation. Gentle, sulfate-free shampoos are recommended.",
+        "Wait at least 4 hours after application before using styling products. Avoid harsh shampoos or treatments that might interfere with absorption. Consult your physician about other hair treatments.",
     },
     {
-      question: "What monitoring is required during treatment?",
+      question: "What happens if I miss applications?",
       answer:
-        "We recommend baseline and periodic monitoring of liver function tests and PSA levels, especially for men over 40. Monthly check-ins for the first 3 months help assess tolerance and progress. Any concerning symptoms should be reported immediately to your prescribing physician.",
+        "Consistency is key for optimal results. If you miss a dose, apply as soon as you remember, but don't double up. Missing occasional applications won't significantly impact long-term results.",
     },
   ],
 }

@@ -12,6 +12,7 @@ export default function LandingPage() {
       <Header />
       <main className="flex-1">
         <HeroSection />
+        <HairLossProductsSection />
         <ServicesSection />
         <HowItWorksSection />
         <TestimonialsSection />
@@ -64,6 +65,99 @@ function HeroSection() {
         </div>
         <div className="flex-shrink-0">
           <CategoryCards />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function HairLossProductsSection() {
+  return (
+    <section className="py-20 md:py-28 bg-gray-100">
+      <div className="container mx-auto">
+        <h2 className="text-4xl md:text-5xl font-bold font-display text-center tracking-tighter mb-4">
+          Hair Loss Solutions
+        </h2>
+        <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-16 text-center">
+          Clinically-proven treatments designed to help you regain confidence and keep your hair.
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* Minoxidil 5% Solution Card */}
+          <div className="group cursor-pointer">
+            <div className="bg-gray-100 rounded-3xl p-8 shadow-[8px_8px_16px_rgba(0,0,0,0.15),-8px_-8px_16px_rgba(255,255,255,0.9)] hover:shadow-[12px_12px_24px_rgba(0,0,0,0.2),-12px_-12px_24px_rgba(255,255,255,0.95)] transition-all duration-300 transform hover:-translate-y-1">
+              {/* Background Image */}
+              <div
+                className="h-48 rounded-2xl mb-6 bg-cover bg-center shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)]"
+                style={{
+                  backgroundImage: `url('/placeholder.svg?height=200&width=400&text=Minoxidil+5%25+Solution')`,
+                }}
+              />
+
+              {/* Content */}
+              <div className="space-y-4">
+                <h3 className="text-2xl font-bold font-display text-gray-900">Minoxidil 5% Solution</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  FDA-approved topical treatment that stimulates hair follicles and promotes regrowth. Clinically proven
+                  to slow hair loss and encourage new growth.
+                </p>
+
+                {/* Price */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-2xl font-bold text-gray-900">LKR 4,500</span>
+                    <span className="text-gray-500">/month</span>
+                  </div>
+                  <div className="bg-gray-100 rounded-full px-4 py-2 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.1),inset_-2px_-2px_4px_rgba(255,255,255,0.8)]">
+                    <span className="text-sm font-medium text-gray-700">Non-prescription</span>
+                  </div>
+                </div>
+
+                {/* CTA Button */}
+                <button className="w-full bg-blue-600 text-white py-3 px-6 rounded-2xl font-semibold shadow-[4px_4px_8px_rgba(0,0,0,0.15),-2px_-2px_4px_rgba(255,255,255,0.1)] hover:shadow-[6px_6px_12px_rgba(0,0,0,0.2),-3px_-3px_6px_rgba(255,255,255,0.15)] active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.2)] transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0">
+                  View Treatment
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Combination Spray Card */}
+          <div className="group cursor-pointer">
+            <div className="bg-gray-100 rounded-3xl p-8 shadow-[8px_8px_16px_rgba(0,0,0,0.15),-8px_-8px_16px_rgba(255,255,255,0.9)] hover:shadow-[12px_12px_24px_rgba(0,0,0,0.2),-12px_-12px_24px_rgba(255,255,255,0.95)] transition-all duration-300 transform hover:-translate-y-1">
+              {/* Background Image */}
+              <div
+                className="h-48 rounded-2xl mb-6 bg-cover bg-center shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)]"
+                style={{
+                  backgroundImage: `url('/placeholder.svg?height=200&width=400&text=Combination+Spray')`,
+                }}
+              />
+
+              {/* Content */}
+              <div className="space-y-4">
+                <h3 className="text-2xl font-bold font-display text-gray-900">Minoxidil + Finasteride Spray</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Advanced dual-action formula combining minoxidil and finasteride for maximum effectiveness. Targets
+                  hair loss from multiple pathways.
+                </p>
+
+                {/* Price */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-2xl font-bold text-gray-900">LKR 7,500</span>
+                    <span className="text-gray-500">/month</span>
+                  </div>
+                  <div className="bg-orange-100 rounded-full px-4 py-2 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.1),inset_-2px_-2px_4px_rgba(255,255,255,0.8)]">
+                    <span className="text-sm font-medium text-orange-700">Prescription required</span>
+                  </div>
+                </div>
+
+                {/* CTA Button */}
+                <button className="w-full bg-blue-600 text-white py-3 px-6 rounded-2xl font-semibold shadow-[4px_4px_8px_rgba(0,0,0,0.15),-2px_-2px_4px_rgba(255,255,255,0.1)] hover:shadow-[6px_6px_12px_rgba(0,0,0,0.2),-3px_-3px_6px_rgba(255,255,255,0.15)] active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.2)] transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0">
+                  View Treatment
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

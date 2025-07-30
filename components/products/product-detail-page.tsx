@@ -7,7 +7,6 @@ import { ProductInfo } from "./product-info"
 import { ProductTabs } from "./product-tabs"
 import { RelatedProducts } from "./related-products"
 import { TrustBadges } from "./trust-badges"
-import { Footer } from "@/components/layout/footer"
 
 interface ProductDetailPageProps {
   product: Product
@@ -81,9 +80,6 @@ export function ProductDetailPage({ product }: ProductDetailPageProps) {
           <RelatedProducts />
         </div>
       </div>
-
-      {/* Footer - Same as Landing Page */}
-      <Footer />
     </div>
   )
 }
