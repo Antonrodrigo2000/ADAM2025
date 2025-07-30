@@ -73,77 +73,48 @@ function HeroSection() {
 
 function HairRegrowthSection() {
   return (
-    <section id="hair-regrowth-section" className="bg-black text-white py-16 md:py-20">
-      <div className="container mx-auto px-4 md:px-6">
-        {/* Desktop and Tablet Layout */}
-        <div className="hidden md:flex items-center gap-8 lg:gap-12">
-          <div className="flex-shrink-0">
-            <img
-              src="/placeholder.svg?height=150&width=150&text=Minoxidil+Spray"
-              alt="Minoxidil+ Rx Hair Regrowth Spray"
-              className="w-32 h-32 lg:w-40 lg:h-40 object-contain"
-            />
-          </div>
-          <div className="flex-1">
-            <div className="mb-4">
-              <span className="inline-block bg-primary text-black text-xs font-bold px-3 py-1 rounded-full mb-4 font-mono">
+    <section id="hair-regrowth-section" className="bg-black text-white">
+      <div className="min-h-[400px] md:min-h-[500px] flex flex-col md:flex-row">
+        {/* Left Half - Image */}
+        <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-12">
+          <img
+            src="/placeholder.svg?height=300&width=300&text=Minoxidil+Spray"
+            alt="Minoxidil+ Rx Hair Regrowth Spray"
+            className="w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 object-contain"
+          />
+        </div>
+
+        {/* Right Half - Text Container */}
+        <div className="w-full md:w-1/2 flex items-center p-8 md:p-12 lg:p-16">
+          <div className="w-full max-w-lg">
+            <div className="mb-6">
+              <span className="inline-block bg-primary text-black text-xs font-bold px-3 py-1 rounded-full mb-4 font-mono uppercase tracking-wider">
                 NEW
               </span>
-              <h2 className="text-2xl lg:text-3xl font-bold font-mono mb-4">Boost hair regrowth with Minoxidil+ Rx</h2>
-              <p className="text-gray-300 text-base lg:text-lg font-mono leading-relaxed mb-6">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold font-mono mb-4 leading-tight">
+                Boost hair regrowth with Minoxidil+ Rx
+              </h2>
+              <p className="text-gray-300 text-base md:text-lg font-mono leading-relaxed mb-8">
                 It's the next evolution of minoxidil: a full-circle formula with clinically proven ingredients that can
                 help boost regrowth, increase hair thickness, and promote a healthy scalp.
               </p>
             </div>
+
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 asChild
-                className="bg-white text-black hover:bg-gray-200 font-mono font-bold text-sm px-6 py-3 rounded-none transition-colors"
+                className="bg-white text-black hover:bg-gray-200 font-mono font-bold text-sm px-8 py-3 rounded-none transition-colors border-2 border-white"
               >
                 <Link href="/products/minoxidil-5-solution">LEARN MORE</Link>
               </Button>
               <Button
                 asChild
                 variant="outline"
-                className="border-white text-white hover:bg-white hover:text-black font-mono font-bold text-sm px-6 py-3 rounded-none transition-colors bg-transparent"
+                className="border-2 border-white text-white hover:bg-white hover:text-black font-mono font-bold text-sm px-8 py-3 rounded-none transition-colors bg-transparent"
               >
                 <Link href="/products">SEE ALL OUR PRODUCTS</Link>
               </Button>
             </div>
-          </div>
-        </div>
-
-        {/* Mobile Layout */}
-        <div className="md:hidden text-center">
-          <div className="mb-6">
-            <img
-              src="/placeholder.svg?height=100&width=100&text=Minoxidil+Spray"
-              alt="Minoxidil+ Rx Hair Regrowth Spray"
-              className="w-24 h-24 object-contain mx-auto mb-4"
-            />
-            <span className="inline-block bg-primary text-black text-xs font-bold px-3 py-1 rounded-full mb-4 font-mono">
-              NEW
-            </span>
-            <h2 className="text-xl font-bold font-mono mb-4">Boost hair regrowth with Minoxidil+ Rx</h2>
-            <p className="text-gray-300 text-sm font-mono leading-relaxed mb-6 px-4">
-              It's the next evolution of minoxidil: a full-circle formula with clinically proven ingredients that can
-              help boost regrowth, increase hair thickness, and promote a healthy scalp.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 px-4">
-            <Button
-              asChild
-              className="bg-white text-black hover:bg-gray-200 font-mono font-bold text-xs px-4 py-2 rounded-none transition-colors"
-            >
-              <Link href="/products/minoxidil-5-solution">LEARN MORE</Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="border-white text-white hover:bg-white hover:text-black font-mono font-bold text-xs px-4 py-2 rounded-none transition-colors bg-transparent"
-            >
-              <Link href="/products">SEE ALL OUR PRODUCTS</Link>
-            </Button>
           </div>
         </div>
       </div>
