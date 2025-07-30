@@ -54,7 +54,7 @@ export function Header({ variant = "default" }: HeaderProps) {
             Hair Loss
           </Link>
           <Link
-            href="#skin"
+            href="/products/minoxidil-finasteride-combination-spray"
             className={cn("hover:text-blue-600 transition-colors", isDark || isLight ? "text-gray-700" : "text-white")}
           >
             Skincare
