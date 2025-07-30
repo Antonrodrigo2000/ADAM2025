@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Upload, X } from "lucide-react"
 import type { Question } from "@/data/hairlossquestions"
@@ -47,7 +46,7 @@ export function QuestionCard({ question, value, onChange, error }: QuestionCardP
   }
 
   const renderInput = () => {
-    switch (question.type) {
+    switch (question.question_type) {
       case "radio":
         return (
           <div className="space-y-3">

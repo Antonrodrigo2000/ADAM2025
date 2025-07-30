@@ -12,7 +12,7 @@ export function ReviewScreen({ questions, answers, onSubmit }: ReviewScreenProps
   const formatAnswer = (question: Question, answer: any) => {
     if (!answer) return "Not answered"
 
-    switch (question.type) {
+    switch (question.question_type) {
       case "radio":
       case "select":
       case "scale":

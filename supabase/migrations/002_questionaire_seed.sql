@@ -21,9 +21,10 @@ VALUES (
 );
 
 -- Insert questions into the questions table
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'age',
   'What is your age?',
   'number',
   NULL,
@@ -31,9 +32,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'gender',
   'What is your gender?',
   'select',
   '["Male", "Female"]'::jsonb,
@@ -41,9 +43,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'hairLossAreas',
   'Where are you losing hair? (Select all that apply)',
   'checkbox',
   '["Temples (sides of forehead)", "Crown (top back of head)", "Overall thinning (hair getting thinner everywhere)", "Patches of complete hair loss (bald spots)"]'::jsonb,
@@ -51,9 +54,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'hairLossOnset',
   'When did you first notice your hair loss?',
   'select',
   '["Less than 6 months ago", "6 months to 1 year ago", "1 to 5 years ago", "More than 5 years ago"]'::jsonb,
@@ -61,9 +65,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'hairLossProgression',
   'How quickly has your hair loss progressed?',
   'select',
   '["Slowly", "Moderately", "Quickly"]'::jsonb,
@@ -71,9 +76,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'familyHistory',
   'Do any of your male relatives have similar hair loss?',
   'radio',
   '["Yes", "No"]'::jsonb,
@@ -81,9 +87,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'familyHistoryAge',
   'If yes, at what age did they start losing hair?',
   'text',
   NULL,
@@ -91,19 +98,21 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'medicalConditions',
   'Do you have any of the following conditions? (Select all that apply)',
   'checkbox',
-  '["Allergy to finasteride", "Allergy to minoxidil", "Heart conditions", "Liver disease", "Prostate cancer history", "Low blood pressure", "Scalp wounds or infections", "Scalp sensitivity", "Pregnant woman in household", "Other medical conditions"]'::jsonb,
+  '["Allergy to finasteride", "Allergy to minoxidil", "Heart conditions", "Liver disease", "Prostate cancer history", "Low blood pressure", "Scalp wounds or infections", "Scalp sensitivity", "Pregnant woman in household", "Other medical conditions", "None of the above"]'::jsonb,
   8,
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'otherMedicalConditions',
   'If you selected "Other medical conditions," please specify.',
   'text',
   NULL,
@@ -111,9 +120,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'medications',
   'Are you currently taking any medications?',
   'radio',
   '["Yes", "No"]'::jsonb,
@@ -121,9 +131,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'medicationsList',
   'If yes, please list them.',
   'text',
   NULL,
@@ -131,9 +142,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'previousTreatments',
   'Have you tried any hair loss treatments before?',
   'radio',
   '["Yes", "No"]'::jsonb,
@@ -141,9 +153,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'previousTreatmentsDetails',
   'If yes, please describe what you tried and the results.',
   'text',
   NULL,
@@ -151,9 +164,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'treatmentGoals',
   'What are your main goals for hair loss treatment? (Select all that apply)',
   'checkbox',
   '["Stop hair loss", "Regrow hair", "Improve appearance", "Other"]'::jsonb,
@@ -161,9 +175,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'importance',
   'How important is treating your hair loss to you? (1 = Not important, 10 = Very important)',
   'scale',
   '["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]'::jsonb,
@@ -171,9 +186,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'commitment',
   'Are you willing to follow a daily treatment routine for at least 6 months?',
   'radio',
   '["Yes", "No"]'::jsonb,
@@ -181,9 +197,10 @@ VALUES (
   true
 );
 
-INSERT INTO public.questions (questionnaire_id, question_text, question_type, options, order_index, is_required)
+INSERT INTO public.questions (questionnaire_id, question_property, question_text, question_type, options, order_index, is_required)
 VALUES (
   (SELECT id FROM public.questionnaires WHERE name = 'Hair Loss Assessment Questionnaire'),
+  'photos',
   'Please upload two photos of your scalp (front and back views). For best results, take the photos in good lighting with your hair dry and styled as usual.',
   'file',
   NULL,
