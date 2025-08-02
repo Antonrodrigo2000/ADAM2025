@@ -14,7 +14,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const quantityOptions = [
     { months: 1, price: product.price, savings: 0, label: "1 Month Supply" },
     { months: 3, price: product.price * 3 * 0.9, savings: 10, label: "3 Month Supply" },
-    { months: 6, price: product.price * 6 * 0.8, savings: 20, label: "6 Month Supply" },
   ]
 
   const selectedOption = quantityOptions[selectedQuantity - 1] || quantityOptions[0]
