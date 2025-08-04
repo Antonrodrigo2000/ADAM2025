@@ -66,6 +66,32 @@ export interface CartActions {
   removeDiscount: () => void
   clearCart: () => void
   calculateTotals: () => void
+  saveCheckoutData: (data: CheckoutData) => void
+  getCheckoutData: () => CheckoutData | null
+  clearCheckoutData: () => void
+}
+
+export interface CheckoutData {
+  paymentToken?: string
+  paymentMethod?: string
+  userDetails?: {
+    email: string
+    firstName: string
+    lastName: string
+    phone: string
+    dateOfBirth: string
+    sex: string
+  }
+  deliveryAddress?: {
+    street: string
+    city: string
+    postcode: string
+    country: string
+  }
+  quizResponses?: Record<string, any>
+  orderNotes?: string
+  agreedToTerms: boolean
+  agreedToMarketing: boolean
 }
 
 // Auth State Types

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
-import { CartState, CartActions, CartItem } from './types'
+import { CartState, CartActions, CartItem, CheckoutData } from './types'
 
 // Initial state
 const initialCartState: CartState = {
@@ -124,9 +124,9 @@ function cartReducer(state: CartState, action: CartActionType): CartState {
       const consultationFees = state.items.reduce((sum, item) => {
         return sum + (item.prescriptionRequired ? item.consultationFee : 0)
       }, 0)
-      const tax = (subtotal + consultationFees) * 0.1 // 10% tax rate - make this configurable
-      const shipping = (subtotal + consultationFees) > 50 ? 0 : 5 // Free shipping over $50
-      const total = subtotal + consultationFees + tax + shipping - state.discount
+      const tax = 0 // No tax
+      const shipping = 400 // Fixed delivery fee of LKR 400
+      const total = subtotal + consultationFees + shipping - state.discount
 
       return {
         ...state,
@@ -165,20 +165,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart-state')
+    const savedCart = localStorage.getItem('adam-cart-state')
+    
     if (savedCart) {
       try {
         const cartData = JSON.parse(savedCart)
-        dispatch({ type: 'LOAD_CART', cartData })
+        
+        // Validate cart data structure
+        if (cartData && Array.isArray(cartData.items)) {
+          dispatch({ type: 'LOAD_CART', cartData })
+        }
       } catch (error) {
         console.error('Failed to load cart from localStorage:', error)
+        localStorage.removeItem('adam-cart-state')
       }
     }
   }, [])
 
-  // Save cart to localStorage whenever it changes
+  // Save cart to localStorage whenever it changes (with debouncing)
   useEffect(() => {
-    localStorage.setItem('cart-state', JSON.stringify(state))
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem('adam-cart-state', JSON.stringify(state))
+      } catch (error) {
+        console.error('Failed to save cart to localStorage:', error)
+      }
+    }, 100) // Debounce to avoid excessive writes
+
+    return () => clearTimeout(timeoutId)
   }, [state])
 
   // Recalculate totals whenever items, discount, or shipping changes
@@ -234,11 +248,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     clearCart: () => {
       dispatch({ type: 'CLEAR_CART' })
-      localStorage.removeItem('cart-state')
+      localStorage.removeItem('adam-cart-state')
+      localStorage.removeItem('adam-checkout-data')
     },
 
     calculateTotals: () => {
       dispatch({ type: 'CALCULATE_TOTALS' })
+    },
+
+    saveCheckoutData: (data: CheckoutData) => {
+      try {
+        localStorage.setItem('adam-checkout-data', JSON.stringify(data))
+      } catch (error) {
+        console.error('Failed to save checkout data:', error)
+      }
+    },
+
+    getCheckoutData: (): CheckoutData | null => {
+      try {
+        const data = localStorage.getItem('adam-checkout-data')
+        return data ? JSON.parse(data) : null
+      } catch (error) {
+        console.error('Failed to load checkout data:', error)
+        return null
+      }
+    },
+
+    clearCheckoutData: () => {
+      localStorage.removeItem('adam-checkout-data')
     },
   }
 

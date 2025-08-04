@@ -162,15 +162,11 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
                             <span>Subtotal</span>
-                            <span>LKR {(state.subtotal - state.shipping - state.tax).toLocaleString()}</span>
+                            <span>LKR {state.subtotal.toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span>Tax</span>
-                            <span>LKR {state.tax.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Shipping</span>
-                            <span>{state.shipping === 0 ? 'Free' : `LKR ${state.shipping.toLocaleString()}`}</span>
+                            <span>Delivery</span>
+                            <span>LKR {state.shipping.toLocaleString()}</span>
                           </div>
                           {state.discount > 0 && (
                             <div className="flex justify-between text-sm text-green-600">

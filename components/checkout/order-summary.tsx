@@ -36,9 +36,16 @@ export function OrderSummary() {
             </div>
 
             <div className="text-right flex-shrink-0">
-              <div className="font-bold text-neutral-800 text-sm">£{(item.price * item.quantity).toFixed(2)}</div>
-              {item.originalPrice && (
-                <div className="text-xs text-neutral-500 line-through">£{(item.originalPrice * item.quantity).toFixed(2)}</div>
+              <div className="font-bold text-neutral-800 text-sm">LKR {item.totalPrice.toLocaleString()}</div>
+              {item.months > 1 && (
+                <div className="text-xs text-neutral-500">
+                  LKR {item.monthlyPrice.toLocaleString()}/month × {item.months}
+                </div>
+              )}
+              {item.prescriptionRequired && (
+                <div className="text-xs text-blue-600">
+                  + LKR {item.consultationFee.toLocaleString()} consultation
+                </div>
               )}
             </div>
           </div>
@@ -49,7 +56,7 @@ export function OrderSummary() {
       <div className="space-y-2 border-t border-neutral-200 pt-3">
         <div className="flex justify-between text-neutral-700 text-sm">
           <span>Subtotal</span>
-          <span>£{state.subtotal.toFixed(2)}</span>
+          <span>LKR {state.subtotal.toLocaleString()}</span>
         </div>
 
         {state.discount > 0 && (
@@ -66,7 +73,7 @@ export function OrderSummary() {
               )}
             </div>
             <div className="text-right">
-              <div>-£{state.discount.toFixed(2)}</div>
+              <div>-LKR {state.discount.toLocaleString()}</div>
               {state.discountCode && (
                 <div className="text-xs text-neutral-500">Code: {state.discountCode}</div>
               )}
@@ -75,20 +82,13 @@ export function OrderSummary() {
         )}
 
         <div className="flex justify-between text-neutral-700 text-sm">
-          <span>Tax</span>
-          <span>£{state.tax.toFixed(2)}</span>
-        </div>
-
-        <div className="flex justify-between text-neutral-700 text-sm">
           <span>Delivery</span>
-          <span className="text-emerald-600 font-semibold">
-            {state.shipping === 0 ? "Free" : `£${state.shipping.toFixed(2)}`}
-          </span>
+          <span>LKR {state.shipping.toLocaleString()}</span>
         </div>
 
         <div className="flex justify-between text-lg font-bold text-neutral-800 pt-2 border-t border-neutral-200">
           <span>Total</span>
-          <span>£{state.total.toFixed(2)}</span>
+          <span>LKR {state.total.toLocaleString()}</span>
         </div>
       </div>
     </div>

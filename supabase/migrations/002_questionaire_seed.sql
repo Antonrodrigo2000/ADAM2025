@@ -11,8 +11,9 @@ VALUES (
 );
 
 -- Insert into questionnaires table, linking to the 'Hair Loss' health vertical
-INSERT INTO public.questionnaires (health_vertical_id, version, name, description, is_active)
+INSERT INTO public.questionnaires (id, health_vertical_id, version, name, description, is_active)
 VALUES (
+  '724410b6-680f-4ef1-a92e-03ed963a088c',
   (SELECT id FROM public.health_verticals WHERE slug = 'hair-loss'),
   1,
   'Hair Loss Assessment Questionnaire',

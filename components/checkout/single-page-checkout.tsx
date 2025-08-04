@@ -2,9 +2,14 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Eye, EyeOff, Calendar, ChevronDown } from "lucide-react"
 import { OrderSummary } from "./order-summary"
+import { useCart } from "@/lib/contexts/cart-context"
+import { useQuiz } from "@/lib/contexts/quiz-context"
+import { useAuth } from "@/lib/contexts/auth-context"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 
 interface FormData {
   email: string
@@ -23,6 +28,14 @@ interface FormData {
 
 export function SinglePageCheckout() {
   const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isCartLoaded, setIsCartLoaded] = useState(false)
+  const { state: cartState, actions: cartActions } = useCart()
+  const { state: quizState } = useQuiz()
+  const { actions: authActions } = useAuth()
+  const router = useRouter()
+
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -38,13 +51,183 @@ export function SinglePageCheckout() {
     marketingOptOut: false,
   })
 
+  // Wait for cart to load from localStorage before checking if empty
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsCartLoaded(true)
+    }, 100) // Give cart context time to load from localStorage
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Redirect to home if cart is empty (but only after cart has loaded)
+  useEffect(() => {
+    if (isCartLoaded && cartState.items.length === 0) {
+      router.push('/')
+    }
+  }, [isCartLoaded, cartState.items.length, router])
+
+  // Load saved checkout data if available
+  useEffect(() => {
+    const savedCheckoutData = cartActions.getCheckoutData()
+    if (savedCheckoutData?.userDetails) {
+      setFormData(prev => ({
+        ...prev,
+        email: savedCheckoutData.userDetails?.email || "",
+        legalFirstName: savedCheckoutData.userDetails?.firstName || "",
+        legalSurname: savedCheckoutData.userDetails?.lastName || "",
+        phoneNumber: savedCheckoutData.userDetails?.phone || "",
+        dateOfBirth: savedCheckoutData.userDetails?.dateOfBirth || "",
+        sex: savedCheckoutData.userDetails?.sex || "",
+        postcode: savedCheckoutData.deliveryAddress?.postcode || "",
+        city: savedCheckoutData.deliveryAddress?.city || "",
+        address: savedCheckoutData.deliveryAddress?.street || "",
+        agreeToTerms: savedCheckoutData.agreedToTerms || false,
+        marketingOptOut: !savedCheckoutData.agreedToMarketing || false,
+      }))
+    }
+  }, [cartActions])
+
   const updateFormData = (field: keyof FormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    setSubmitError(null) // Clear errors when user makes changes
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const createUserAccount = async () => {
+    // Create auth account and profile using the auth context
+    const userData = {
+      email: formData.email,
+      password: formData.password,
+      firstName: formData.legalFirstName,
+      lastName: formData.legalSurname,
+      dateOfBirth: formData.dateOfBirth,
+      phone: formData.phoneNumber,
+      sex: formData.sex,
+      address: {
+        street: formData.address,
+        city: formData.city,
+        postcode: formData.postcode,
+        country: 'Sri Lanka'
+      },
+      agreeToTerms: formData.agreeToTerms,
+      marketingOptOut: formData.marketingOptOut
+    }
+
+    // Use auth context for signup which handles everything
+    await authActions.signUp(userData)
+
+    // Save quiz responses if available (after user is created)
+    if (quizState.answers && Object.keys(quizState.answers).length > 0) {
+      // Get the current session to get user ID
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session?.user) {
+        const { error: quizError } = await supabase
+          .from('user_responses')
+          .insert({
+            user_id: session.user.id,
+            questionnaire_id: '724410b6-680f-4ef1-a92e-03ed963a088c',
+            responses: quizState.answers,
+            completed_at: new Date().toISOString()
+          })
+
+        if (quizError) {
+          console.error('Failed to save quiz responses:', quizError)
+          // Don't throw here as it's not critical for checkout
+        }
+      }
+    }
+  }
+
+  const initializePayment = async () => {
+    // Save checkout data
+    cartActions.saveCheckoutData({
+      userDetails: {
+        email: formData.email,
+        firstName: formData.legalFirstName,
+        lastName: formData.legalSurname,
+        phone: formData.phoneNumber,
+        dateOfBirth: formData.dateOfBirth,
+        sex: formData.sex,
+      },
+      deliveryAddress: {
+        street: formData.address,
+        city: formData.city,
+        postcode: formData.postcode,
+        country: 'Sri Lanka',
+      },
+      quizResponses: quizState.answers,
+      agreedToTerms: formData.agreeToTerms,
+      agreedToMarketing: !formData.marketingOptOut,
+    })
+
+    // Initialize Genie IPG payment
+    const response = await fetch('/api/payment/initialize', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: cartState.total * 100, // Convert to cents
+        currency: 'LKR',
+        orderItems: cartState.items,
+        customerDetails: {
+          email: formData.email,
+          firstName: formData.legalFirstName,
+          lastName: formData.legalSurname,
+          phone: formData.phoneNumber,
+        }
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Payment initialization failed: ${error}`)
+    }
+
+    const paymentData = await response.json()
+    
+    // Redirect to Genie IPG
+    window.location.href = paymentData.redirectUrl
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Form submitted:", formData)
+    setIsSubmitting(true)
+    setSubmitError(null)
+
+    try {
+      // Step 1: Create user account
+      await createUserAccount()
+
+      // Step 2: Payment flow (commented out for now)
+      // await initializePayment()
+
+      // Step 3: Clear cart and let auth context handle redirect
+      cartActions.clearCart()
+      cartActions.clearCheckoutData()
+      
+      // Success! Auth context will handle redirect to dashboard
+
+    } catch (error) {
+      console.error('Checkout error:', error)
+      setSubmitError(error instanceof Error ? error.message : 'An unexpected error occurred')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Show loading while cart is being loaded
+  if (!isCartLoaded) {
+    return (
+      <div className="min-h-screen bg-neutral-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
+          <p className="text-gray-600">Loading checkout...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -307,14 +490,22 @@ export function SinglePageCheckout() {
                     </label>
                   </div>
 
+                  {/* Error Display */}
+                  {submitError && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+                      <p className="text-sm text-red-800">{submitError}</p>
+                    </div>
+                  )}
+
                   {/* Submit Button */}
                   <div className="neomorphic-button-container">
                     <button
                       type="submit"
-                      className="neomorphic-primary-button h-10 text-base group relative overflow-hidden"
+                      disabled={isSubmitting || cartState.items.length === 0}
+                      className="neomorphic-primary-button h-10 text-base group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="relative z-10 transition-transform duration-300 group-hover:scale-105">
-                        Continue →
+                        {isSubmitting ? 'Processing...' : 'Continue to Payment →'}
                       </span>
                       <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-orange-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                     </button>
