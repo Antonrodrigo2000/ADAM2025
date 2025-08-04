@@ -4,6 +4,9 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { ShoppingCart } from "lucide-react"
+import { useCart } from "@/lib/contexts/cart-context"
+import { CartSidebar } from "@/components/cart/cart-sidebar"
 
 interface HeaderProps {
   variant?: "default" | "dark" | "light"
@@ -11,6 +14,8 @@ interface HeaderProps {
 
 export function Header({ variant = "default" }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const { state } = useCart()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,6 +27,7 @@ export function Header({ variant = "default" }: HeaderProps) {
 
   const isDark = variant === "dark"
   const isLight = variant === "light"
+  const cartItemCount = state.items.reduce((total, item) => total + item.quantity, 0)
 
   return (
     <header
@@ -66,10 +72,36 @@ export function Header({ variant = "default" }: HeaderProps) {
             Sexual Health
           </Link>
         </nav>
-        <Button asChild variant={isDark || isLight ? "default" : "ghost"} className="rounded-full">
-          <Link href="/auth">Get Started</Link>
-        </Button>
+        <div className="flex items-center space-x-4">
+          {/* Cart Button */}
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className={cn(
+              "relative p-2 rounded-full transition-colors",
+              isDark || isLight 
+                ? "text-gray-700 hover:text-blue-600 hover:bg-gray-100" 
+                : "text-white hover:text-blue-400 hover:bg-white/10"
+            )}
+          >
+            <ShoppingCart className="h-6 w-6" />
+            {cartItemCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                {cartItemCount > 99 ? '99+' : cartItemCount}
+              </span>
+            )}
+          </button>
+          
+          {/* Get Started Button - only show if cart is empty */}
+          {cartItemCount === 0 && (
+            <Button asChild variant={isDark || isLight ? "default" : "ghost"} className="rounded-full">
+              <Link href="/auth">Get Started</Link>
+            </Button>
+          )}
+        </div>
       </div>
+      
+      {/* Cart Sidebar */}
+      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   )
 }

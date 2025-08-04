@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import type { Product } from "@/types/product"
+import { useCart } from "@/lib/contexts/cart-context"
 
 interface ProductInfoProps {
   product: Product
@@ -10,6 +11,7 @@ interface ProductInfoProps {
 export function ProductInfo({ product }: ProductInfoProps) {
   const [selectedQuantity, setSelectedQuantity] = useState(1)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const { actions } = useCart()
 
   const quantityOptions = [
     { months: 1, price: product.price, savings: 0, label: "1 Month Supply" },
@@ -22,8 +24,31 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
   const handleAddToCart = async () => {
     setIsAddingToCart(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsAddingToCart(false)
+    
+    try {
+      // Add item to cart with month-based pricing
+      await actions.addItem({
+        productId: product.id,
+        variantId: `${product.id}-${selectedOption.months}m`, // Create variant ID based on months
+        productName: product.name,
+        variantName: selectedOption.label,
+        price: selectedOption.price, // Total price for the selected option
+        monthlyPrice: product.price, // Base monthly price
+        quantity: 1, // Always 1 for now - user can adjust in cart
+        months: selectedOption.months,
+        totalPrice: selectedOption.price,
+        consultationFee: product.consultation_fee,
+        prescriptionRequired: product.prescription_required,
+        image: product.images?.[0]?.url || '',
+      })
+      
+      // Show success feedback or open cart sidebar
+      console.log('Added to cart successfully')
+    } catch (error) {
+      console.error('Failed to add to cart:', error)
+    } finally {
+      setIsAddingToCart(false)
+    }
   }
 
   return (

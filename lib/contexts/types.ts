@@ -33,6 +33,11 @@ export interface CartItem {
   price: number
   originalPrice?: number
   quantity: number
+  months: number // Number of months supply
+  monthlyPrice: number // Price per month
+  totalPrice: number // Total price for the quantity * months
+  consultationFee: number
+  prescriptionRequired: boolean
   subscription?: {
     frequency: string
     isActive: boolean
@@ -73,9 +78,36 @@ export interface User {
 }
 
 export interface UserProfile {
+  id: string
+  firstName?: string
+  lastName?: string
   dateOfBirth?: string
   phone?: string
+  sex?: 'male' | 'female' | 'other' | 'prefer_not_to_say'
   address?: Address
+  preferences?: Record<string, any>
+  verificationStatus: 'pending' | 'partial' | 'verified' | 'rejected'
+  accountStatus: 'active' | 'suspended' | 'deleted' | 'pending_verification'
+  agreedToTerms: boolean
+  agreedToTermsAt?: string
+  agreedToMarketing: boolean
+  agreedToMarketingAt?: string
+  marketingPreferences: MarketingPreferences
+  privacyPreferences: Record<string, any>
+  lastLoginAt?: string
+  emailVerified: boolean
+  phoneVerified: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MarketingPreferences {
+  email?: boolean
+  sms?: boolean
+  push?: boolean
+  newsletter?: boolean
+  productUpdates?: boolean
+  healthTips?: boolean
 }
 
 export interface Address {
@@ -97,6 +129,9 @@ export interface AuthActions {
   signUp: (userData: any) => Promise<void>
   signOut: () => void
   updateProfile: (profile: Partial<UserProfile>) => Promise<void>
+  updateConsent: (termsConsent?: boolean, marketingConsent?: boolean, marketingPrefs?: MarketingPreferences) => Promise<void>
+  verifyEmail: () => Promise<void>
+  verifyPhone: (code: string) => Promise<void>
   clearError: () => void
 }
 

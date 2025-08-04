@@ -34,7 +34,8 @@ function cartReducer(state: CartState, action: CartActionType): CartState {
     case 'ADD_ITEM': {
       const existingItemIndex = state.items.findIndex(
         item => item.productId === action.item.productId && 
-                item.variantId === action.item.variantId
+                item.variantId === action.item.variantId &&
+                item.months === action.item.months
       )
 
       let newItems: CartItem[]
@@ -43,7 +44,11 @@ function cartReducer(state: CartState, action: CartActionType): CartState {
         // Update existing item quantity
         newItems = state.items.map((item, index) => 
           index === existingItemIndex 
-            ? { ...item, quantity: item.quantity + action.item.quantity }
+            ? { 
+                ...item, 
+                quantity: item.quantity + action.item.quantity,
+                totalPrice: (item.quantity + action.item.quantity) * item.months * item.monthlyPrice
+              }
             : item
         )
       } else {
@@ -51,6 +56,7 @@ function cartReducer(state: CartState, action: CartActionType): CartState {
         const newItem: CartItem = {
           ...action.item,
           id: `cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          totalPrice: action.item.quantity * action.item.months * action.item.monthlyPrice
         }
         newItems = [...state.items, newItem]
       }
@@ -75,7 +81,11 @@ function cartReducer(state: CartState, action: CartActionType): CartState {
         ...state,
         items: state.items.map(item =>
           item.id === action.itemId
-            ? { ...item, quantity: action.quantity }
+            ? { 
+                ...item, 
+                quantity: action.quantity,
+                totalPrice: action.quantity * item.months * item.monthlyPrice
+              }
             : item
         ),
       }
@@ -110,14 +120,17 @@ function cartReducer(state: CartState, action: CartActionType): CartState {
       }
 
     case 'CALCULATE_TOTALS': {
-      const subtotal = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-      const tax = subtotal * 0.1 // 10% tax rate - make this configurable
-      const shipping = subtotal > 50 ? 0 : 5 // Free shipping over $50
-      const total = subtotal + tax + shipping - state.discount
+      const subtotal = state.items.reduce((sum, item) => sum + item.totalPrice, 0)
+      const consultationFees = state.items.reduce((sum, item) => {
+        return sum + (item.prescriptionRequired ? item.consultationFee : 0)
+      }, 0)
+      const tax = (subtotal + consultationFees) * 0.1 // 10% tax rate - make this configurable
+      const shipping = (subtotal + consultationFees) > 50 ? 0 : 5 // Free shipping over $50
+      const total = subtotal + consultationFees + tax + shipping - state.discount
 
       return {
         ...state,
-        subtotal,
+        subtotal: subtotal + consultationFees,
         tax,
         shipping,
         total: Math.max(0, total), // Ensure total is never negative
