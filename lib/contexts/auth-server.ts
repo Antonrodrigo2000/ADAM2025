@@ -83,3 +83,23 @@ export async function createServerProfile(userId: string, profileData: any): Pro
     return null
   }
 }
+
+export async function signOutServer() {
+  try {
+    const supabase = await createClient()
+    const { error } = await supabase.auth.signOut()
+    
+    if (error) {
+      console.error('Server sign out error:', error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, error: null }
+  } catch (error) {
+    console.error('Server sign out error:', error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to sign out' 
+    }
+  }
+}

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { User, Package, Clock, MapPin, Phone, Mail, Calendar, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/lib/contexts'
+// Removed useAuth import since we're using server-side auth
 
 interface UserProfile {
     id: string
@@ -31,7 +31,6 @@ export default function DashboardClient({ user }: { user: any }) {
     const [orders, setOrders] = useState<Order[]>([])
     const [loading, setLoading] = useState(true)
     const router = useRouter()
-    const { actions: authActions } = useAuth()
 
     useEffect(() => {
         loadUserData()
@@ -51,7 +50,27 @@ export default function DashboardClient({ user }: { user: any }) {
     }
 
     const handleSignOut = async () => {
-        await authActions.signOut()
+        try {
+            const response = await fetch('/api/auth/signout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (response.ok) {
+                // Redirect to home page after successful sign out
+                window.location.href = '/'
+            } else {
+                console.error('Sign out failed')
+                // Fallback: redirect anyway
+                window.location.href = '/'
+            }
+        } catch (error) {
+            console.error('Sign out error:', error)
+            // Fallback: redirect anyway
+            window.location.href = '/'
+        }
     }
 
     const formatDate = (dateString: string) => {
