@@ -7,9 +7,6 @@ import { Eye, EyeOff, Calendar, ChevronDown } from "lucide-react"
 import { OrderSummary } from "./order-summary"
 import { useCart } from "@/lib/contexts/cart-context"
 import { useQuiz } from "@/lib/contexts/quiz-context"
-import { useAuth } from "@/lib/contexts/auth-context"
-import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
 
 interface FormData {
   email: string
@@ -31,10 +28,9 @@ export function SinglePageCheckout() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isCartLoaded, setIsCartLoaded] = useState(false)
+  const [checkoutCompleted, setCheckoutCompleted] = useState(false)
   const { state: cartState, actions: cartActions } = useCart()
   const { state: quizState } = useQuiz()
-  const { actions: authActions } = useAuth()
-  const router = useRouter()
 
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -61,11 +57,13 @@ export function SinglePageCheckout() {
   }, [])
 
   // Redirect to home if cart is empty (but only after cart has loaded)
+  // Note: Don't redirect if checkout was completed successfully
   useEffect(() => {
-    if (isCartLoaded && cartState.items.length === 0) {
-      router.push('/')
+    if (isCartLoaded && cartState.items.length === 0 && !isSubmitting && !checkoutCompleted) {
+      console.log("Cart is empty, redirecting to home")
+      window.location.href = '/'
     }
-  }, [isCartLoaded, cartState.items.length, router])
+  }, [isCartLoaded, cartState.items.length, isSubmitting, checkoutCompleted])
 
   // Load saved checkout data if available
   useEffect(() => {
@@ -93,55 +91,8 @@ export function SinglePageCheckout() {
     setSubmitError(null) // Clear errors when user makes changes
   }
 
-  const createUserAccount = async () => {
-    // Create auth account and profile using the auth context
-    const userData = {
-      email: formData.email,
-      password: formData.password,
-      firstName: formData.legalFirstName,
-      lastName: formData.legalSurname,
-      dateOfBirth: formData.dateOfBirth,
-      phone: formData.phoneNumber,
-      sex: formData.sex,
-      address: {
-        street: formData.address,
-        city: formData.city,
-        postcode: formData.postcode,
-        country: 'Sri Lanka'
-      },
-      agreeToTerms: formData.agreeToTerms,
-      marketingOptOut: formData.marketingOptOut
-    }
-
-    // Use auth context for signup which handles everything
-    await authActions.signUp(userData)
-
-    // Save quiz responses if available (after user is created)
-    if (quizState.answers && Object.keys(quizState.answers).length > 0) {
-      // Get the current session to get user ID
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (session?.user) {
-        const { error: quizError } = await supabase
-          .from('user_responses')
-          .insert({
-            user_id: session.user.id,
-            questionnaire_id: '724410b6-680f-4ef1-a92e-03ed963a088c',
-            responses: quizState.answers,
-            completed_at: new Date().toISOString()
-          })
-
-        if (quizError) {
-          console.error('Failed to save quiz responses:', quizError)
-          // Don't throw here as it's not critical for checkout
-        }
-      }
-    }
-  }
-
-  const initializePayment = async () => {
-    // Save checkout data
+  const processCheckout = async () => {
+    // Save checkout data before processing
     cartActions.saveCheckoutData({
       userDetails: {
         email: formData.email,
@@ -162,35 +113,40 @@ export function SinglePageCheckout() {
       agreedToMarketing: !formData.marketingOptOut,
     })
 
-    // Initialize Genie IPG payment
-    const response = await fetch('/api/payment/initialize', {
+    // Call the checkout API with all data
+    const response = await fetch('/api/checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        amount: cartState.total * 100, // Convert to cents
-        currency: 'LKR',
-        orderItems: cartState.items,
-        customerDetails: {
-          email: formData.email,
-          firstName: formData.legalFirstName,
-          lastName: formData.legalSurname,
-          phone: formData.phoneNumber,
-        }
+        email: formData.email,
+        password: formData.password,
+        legalFirstName: formData.legalFirstName,
+        legalSurname: formData.legalSurname,
+        dateOfBirth: formData.dateOfBirth,
+        phoneNumber: formData.phoneNumber,
+        sex: formData.sex,
+        postcode: formData.postcode,
+        city: formData.city,
+        address: formData.address,
+        agreeToTerms: formData.agreeToTerms,
+        marketingOptOut: formData.marketingOptOut,
+        cartItems: cartState.items,
+        cartTotal: cartState.total,
+        quizResponses: quizState.answers,
       }),
     })
 
     if (!response.ok) {
-      const error = await response.text()
-      throw new Error(`Payment initialization failed: ${error}`)
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Checkout failed')
     }
 
-    const paymentData = await response.json()
-    
-    // Redirect to Genie IPG
-    window.location.href = paymentData.redirectUrl
+    const result = await response.json()
+    return result
   }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -198,17 +154,23 @@ export function SinglePageCheckout() {
     setSubmitError(null)
 
     try {
-      // Step 1: Create user account
-      await createUserAccount()
+      // Process checkout using server-side API
+      const result = await processCheckout()
 
-      // Step 2: Payment flow (commented out for now)
-      // await initializePayment()
-
-      // Step 3: Clear cart and let auth context handle redirect
-      cartActions.clearCart()
-      cartActions.clearCheckoutData()
-      
-      // Success! Auth context will handle redirect to dashboard
+      if (result.success) {
+        console.log(result)
+        // Mark checkout as completed to prevent home redirect
+        setCheckoutCompleted(true)
+        
+        // Clear cart and checkout data
+        cartActions.clearCart()
+        cartActions.clearCheckoutData()
+        
+        // Redirect to dashboard - server-side auth will handle authentication check
+        window.location.href = result.redirectUrl || '/dashboard'
+      } else {
+        throw new Error('Checkout failed')
+      }
 
     } catch (error) {
       console.error('Checkout error:', error)
