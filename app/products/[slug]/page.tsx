@@ -8,6 +8,10 @@ interface ProductPageProps {
   params: {
     slug: string
   }
+  searchParams: Promise<{
+    recommended?: string
+    from?: string
+  }>
 }
 
 async function fetchProductBySlug(slug: string) {
@@ -71,7 +75,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   }
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params, searchParams }: ProductPageProps) {
   const product = await fetchProductBySlug(params.slug)
 
   if (!product) {
@@ -79,10 +83,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound()
   }
 
+  const resolvedSearchParams = await searchParams
+  const isRecommended = resolvedSearchParams.recommended === 'true' && resolvedSearchParams.from === 'quiz'
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header variant="dark" />
-      <ProductDetailPage product={product} />
+      <ProductDetailPage product={product} isRecommended={isRecommended} />
       <Footer />
     </div>
   )

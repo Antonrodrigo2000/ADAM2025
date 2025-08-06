@@ -107,8 +107,8 @@ export async function POST(request: NextRequest) {
         sex: body.sex,
         agreed_to_terms: body.agreeToTerms,
         agreed_to_terms_at: body.agreeToTerms ? new Date().toISOString() : null,
-        agreed_to_marketing: !body.marketingOptOut,
-        agreed_to_marketing_at: !body.marketingOptOut ? new Date().toISOString() : null,
+        agreed_to_marketing: body.marketingOptOut,
+        agreed_to_marketing_at: body.marketingOptOut ? new Date().toISOString() : null,
         marketing_preferences: {
           email: !body.marketingOptOut,
           sms: !body.marketingOptOut,

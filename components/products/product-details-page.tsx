@@ -7,16 +7,23 @@ import { ProductInfo } from "./product-info"
 import { ProductTabs } from "./product-tabs"
 import { RelatedProducts } from "./related-products"
 import { TrustBadges } from "./trust-badges"
+import { RecommendationBanner } from "./recommendation-banner"
 
 interface ProductDetailPageProps {
     product: Product
+    isRecommended?: boolean
 }
 
-export function ProductDetailPage({ product }: ProductDetailPageProps) {
+export function ProductDetailPage({ product, isRecommended = false }: ProductDetailPageProps) {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
     return (
         <div className="pt-20 bg-gray-100 min-h-screen">
+            {/* Recommendation Banner */}
+            {isRecommended && (
+                <RecommendationBanner productName={product.name} />
+            )}
+
             {/* Breadcrumb */}
             <div className="bg-gray-100 border-b border-gray-200/50">
                 <div className="container mx-auto px-4 py-4">

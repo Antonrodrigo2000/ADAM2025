@@ -1,8 +1,8 @@
 "use client"
 
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import type { RecommendationResult } from "@/lib/hairloss-recommendations"
 
 interface RecommendationsScreenProps {
@@ -13,6 +13,7 @@ interface RecommendationsScreenProps {
 
 export function RecommendationsScreen({ recommendations, patientData: _patientData, onBack }: RecommendationsScreenProps) {
   const router = useRouter()
+  const [isRedirecting, setIsRedirecting] = useState(false)
   
   const canPurchase =
     recommendations.recommendation === "Minoxidil 5% Standalone" ||
@@ -32,7 +33,20 @@ export function RecommendationsScreen({ recommendations, patientData: _patientDa
     if (canPurchase) {
       const slug = getProductSlug()
       if (slug) {
-        router.push(`/products/${slug}`)
+        // Add recommendation parameter to indicate this is from quiz recommendation
+        const productUrl = `/products/${slug}?recommended=true&from=quiz`
+        
+        // Set loading state immediately
+        setIsRedirecting(true)
+        
+        // Prefetch the route to start loading data in the background
+        router.prefetch(`/products/${slug}`)
+        
+        // Start navigation after a brief moment to ensure loading state is visible
+        // The loading state will persist until the new page is fully loaded
+        setTimeout(() => {
+          router.push(productUrl)
+        }, 300) // Small delay to ensure spinner is visible
       }
     }
   }, [canPurchase, router])
@@ -60,7 +74,26 @@ export function RecommendationsScreen({ recommendations, patientData: _patientDa
 
   const referralContent = getReferralContent()
 
-  // If it's a purchasable recommendation, the useEffect will handle redirect
+  // If it's a purchasable recommendation, show loading state
+  if (canPurchase && isRedirecting) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center space-y-6">
+          <div className="relative">
+            <div className="w-16 h-16 mx-auto">
+              <Loader2 className="w-16 h-16 animate-spin text-white" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold font-display">Preparing Your Treatment</h2>
+            <p className="text-neutral-400">Getting your personalized product details ready...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // If it's a purchasable recommendation but not redirecting yet, return null
   // Only render referral content for non-purchasable cases
   if (canPurchase) {
     return null
