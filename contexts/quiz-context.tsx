@@ -5,6 +5,7 @@ import { QuizState, QuizActions } from './types'
 import recommendTreatment from '@/lib/algorithm/hairloss-recommendations'
 import { Question } from '@/data/types/question'
 import { createClient } from '../lib/supabase/client'
+import imageStorage from '@/lib/storage/image-storage'
 
 // Initial state
 const initialQuizState: QuizState = {
@@ -22,6 +23,7 @@ const initialQuizState: QuizState = {
 // Action types
 type QuizActionType =
     | { type: 'SET_ANSWER'; questionId: string; value: any }
+    | { type: 'SET_PROCESSED_ANSWER'; questionId: string; value: any }
     | { type: 'NEXT_QUESTION' }
     | { type: 'PREVIOUS_QUESTION' }
     | { type: 'GO_TO_QUESTION'; index: number }
@@ -37,8 +39,14 @@ type QuizActionType =
 function quizReducer(state: QuizState & { questions?: Question[] }, action: QuizActionType): QuizState {
     switch (action.type) {
         case 'SET_ANSWER':
+            // This action stores the raw answer immediately for UI responsiveness
             const newAnswers = { ...state.answers, [action.questionId]: action.value }
             return { ...state, answers: newAnswers }
+
+        case 'SET_PROCESSED_ANSWER':
+            // This action stores the processed answer (with image references)
+            const processedAnswers = { ...state.answers, [action.questionId]: action.value }
+            return { ...state, answers: processedAnswers }
 
         case 'NEXT_QUESTION':
             if (state.currentQuestionIndex < state.questionFlow.length - 1) {
@@ -114,6 +122,153 @@ function generateSessionId(): string {
     return `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 }
 
+function isImageData(value: any): boolean {
+    // Check if it's a base64 image string
+    if (typeof value === 'string' && value.startsWith('data:image/')) {
+        return true
+    }
+    // Check if it's a File object with image type
+    if (value instanceof File && value.type.startsWith('image/')) {
+        return true
+    }
+    // Check if it's a file object from QuestionCard (structure: {name, size, type, data})
+    if (value && typeof value === 'object' && 
+        value.name && value.size && value.type && value.data &&
+        typeof value.type === 'string' && value.type.startsWith('image/') &&
+        typeof value.data === 'string' && value.data.startsWith('data:image/')) {
+        return true
+    }
+    // Check if it's an array containing images
+    if (Array.isArray(value)) {
+        return value.some(item => isImageData(item))
+    }
+    return false
+}
+
+async function processAnswerValue(
+    sessionId: string,
+    questionId: string,
+    value: any
+): Promise<any> {
+    if (!isImageData(value)) {
+        return value
+    }
+
+    console.log('processAnswerValue - processing:', value)
+
+    try {
+        // Handle single image
+        if (typeof value === 'string' && value.startsWith('data:image/')) {
+            console.log('Processing base64 string')
+            const imageId = await imageStorage.storeImage(sessionId, questionId, value)
+            return { type: 'image_reference', imageId }
+        } else if (value instanceof File && value.type.startsWith('image/')) {
+            console.log('Processing File object')
+            const imageId = await imageStorage.storeImage(sessionId, questionId, value)
+            return { type: 'image_reference', imageId }
+        } else if (value && typeof value === 'object' && 
+                   value.name && value.size && value.type && value.data &&
+                   typeof value.type === 'string' && value.type.startsWith('image/') &&
+                   typeof value.data === 'string' && value.data.startsWith('data:image/')) {
+            console.log('Processing QuestionCard file object with metadata:', { name: value.name, size: value.size, type: value.type })
+            // Handle file object from QuestionCard - store the base64 data
+            const imageId = await imageStorage.storeImage(sessionId, questionId, value.data)
+            const result = { type: 'image_reference', imageId, metadata: { name: value.name, size: value.size, fileType: value.type } }
+            console.log('Created image reference with metadata:', result)
+            return result
+        }
+
+        // Handle array of images
+        if (Array.isArray(value)) {
+            console.log('Processing array of files')
+            const processedItems = await Promise.all(
+                value.map(async (item, index) => {
+                    if (isImageData(item)) {
+                        // Check if it's a QuestionCard file object
+                        if (item && typeof item === 'object' && 
+                            item.name && item.size && item.type && item.data &&
+                            typeof item.type === 'string' && item.type.startsWith('image/') &&
+                            typeof item.data === 'string' && item.data.startsWith('data:image/')) {
+                            console.log('Processing array item - QuestionCard file object:', { name: item.name, size: item.size, type: item.type })
+                            const imageId = await imageStorage.storeImage(sessionId, `${questionId}_${index}`, item.data)
+                            const result = { type: 'image_reference', imageId, metadata: { name: item.name, size: item.size, fileType: item.type } }
+                            console.log('Created array item image reference with metadata:', result)
+                            return result
+                        } else {
+                            // Handle other image types (base64 strings, File objects)
+                            const imageId = await imageStorage.storeImage(sessionId, `${questionId}_${index}`, item)
+                            return { type: 'image_reference', imageId }
+                        }
+                    }
+                    return item
+                })
+            )
+            return processedItems
+        }
+
+        return value
+    } catch (error) {
+        console.error('Failed to store image:', error)
+        // Fallback to original value if storage fails
+        return value
+    }
+}
+
+function createSafeStateForStorage(state: QuizState): QuizState {
+    // Create a copy of the state with potentially dangerous values filtered out
+    const safeAnswers: Record<string, any> = {}
+    
+    for (const [questionId, answer] of Object.entries(state.answers)) {
+        safeAnswers[questionId] = filterLargeValues(answer)
+    }
+    
+    return {
+        ...state,
+        answers: safeAnswers
+    }
+}
+
+function filterLargeValues(value: any): any {
+    // If it's already an image reference, keep it
+    if (value?.type === 'image_reference') {
+        return value
+    }
+    
+    // If it's a base64 image, replace with placeholder
+    if (typeof value === 'string' && value.startsWith('data:image/')) {
+        return { type: 'temp_image', size: value.length }
+    }
+    
+    // If it's a File object, replace with placeholder
+    if (value instanceof File && value.type.startsWith('image/')) {
+        return { type: 'temp_file', name: value.name, size: value.size }
+    }
+    
+    // If it's a file object from QuestionCard, replace with placeholder
+    if (value && typeof value === 'object' && 
+        value.name && value.size && value.type && value.data &&
+        typeof value.type === 'string' && value.type.startsWith('image/') &&
+        typeof value.data === 'string' && value.data.startsWith('data:image/')) {
+        return { type: 'temp_file', name: value.name, size: value.size, originalType: value.type }
+    }
+    
+    // If it's an array, filter each item
+    if (Array.isArray(value)) {
+        return value.map(filterLargeValues)
+    }
+    
+    // If it's an object, filter its properties
+    if (value && typeof value === 'object') {
+        const filtered: any = {}
+        for (const [key, val] of Object.entries(value)) {
+            filtered[key] = filterLargeValues(val)
+        }
+        return filtered
+    }
+    
+    return value
+}
+
 function updateQuestionFlow(answers: Record<string, any>, questions: any[]): string[] {
     const flow: string[] = []
     for (const question of questions) {
@@ -136,6 +291,8 @@ interface QuizContextType {
     state: QuizState
     actions: QuizActions
     questions: any[]
+    getImage: (imageId: string) => Promise<string | File | null>
+    getAnswerWithImages: (questionId: string) => Promise<any>
 }
 
 const QuizContext = createContext<QuizContextType | null>(null)
@@ -145,8 +302,19 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(quizReducer, initialQuizState)
     const [questions, setQuestions] = useState<Question[]>([])
 
-    // Fetch questions from Supabase
+    // Initialize image storage and fetch questions from Supabase
     useEffect(() => {
+        const initializeServices = async () => {
+            // Initialize image storage
+            try {
+                await imageStorage.init()
+                // Clean up old images (older than 24 hours)
+                await imageStorage.cleanupOldImages()
+            } catch (error) {
+                console.error('Failed to initialize image storage:', error)
+            }
+        }
+        
         const fetchQuestions = async () => {
             try {
                 const supabase = createClient()
@@ -183,6 +351,8 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
                 console.error('Failed to fetch questions:', err)
             }
         }
+        
+        initializeServices()
         fetchQuestions()
     }, [])
 
@@ -203,10 +373,23 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
         }
     }, [])
 
-    // Save to localStorage whenever state changes
+    // Save to localStorage whenever state changes (excluding raw images)
     useEffect(() => {
         if (state.sessionId) {
-            localStorage.setItem('clinical-quiz-state', JSON.stringify(state))
+            // Create a version of state safe for localStorage (without raw images)
+            const safeState = createSafeStateForStorage(state)
+            try {
+                localStorage.setItem('clinical-quiz-state', JSON.stringify(safeState))
+            } catch (error) {
+                console.error('Failed to save quiz state to localStorage:', error)
+                // If it still fails, try saving without answers entirely
+                try {
+                    const minimalState = { ...safeState, answers: {} }
+                    localStorage.setItem('clinical-quiz-state', JSON.stringify(minimalState))
+                } catch (fallbackError) {
+                    console.error('Failed to save even minimal quiz state:', fallbackError)
+                }
+            }
         }
     }, [state])
 
@@ -222,7 +405,26 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
     // Actions
     const actions: QuizActions = {
         setAnswer: (questionId: string, value: any) => {
-            dispatch({ type: 'SET_ANSWER', questionId, value })
+            // If the value contains images, process them immediately in the background
+            // and store a safe placeholder in the meantime
+            if (isImageData(value)) {
+                // Store a safe placeholder immediately
+                const safePlaceholder = filterLargeValues(value)
+                dispatch({ type: 'SET_ANSWER', questionId, value: safePlaceholder })
+                
+                // Process images in background
+                processAnswerValue(state.sessionId, questionId, value)
+                    .then((processedValue) => {
+                        dispatch({ type: 'SET_PROCESSED_ANSWER', questionId, value: processedValue })
+                    })
+                    .catch((error) => {
+                        console.error('Error processing answer:', error)
+                        // Keep the safe placeholder if processing fails
+                    })
+            } else {
+                // For non-image values, store directly
+                dispatch({ type: 'SET_ANSWER', questionId, value })
+            }
         },
         nextQuestion: () => {
             dispatch({ type: 'NEXT_QUESTION' })
@@ -239,13 +441,26 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
         exitReviewMode: () => {
             dispatch({ type: 'EXIT_REVIEW_MODE' })
         },
-        submitQuiz: () => {
+        submitQuiz: async () => {
             dispatch({ type: 'SUBMIT_QUIZ', questions })
             localStorage.removeItem('clinical-quiz-state')
+            // Clean up images after submission
+            try {
+                await imageStorage.deleteImagesBySession(state.sessionId)
+            } catch (error) {
+                console.error('Failed to cleanup images after quiz submission:', error)
+            }
         },
-        resetQuiz: () => {
+        resetQuiz: async () => {
+            const oldSessionId = state.sessionId
             dispatch({ type: 'RESET_QUIZ' })
             localStorage.removeItem('clinical-quiz-state')
+            // Clean up images from the old session
+            try {
+                await imageStorage.deleteImagesBySession(oldSessionId)
+            } catch (error) {
+                console.error('Failed to cleanup images after quiz reset:', error)
+            }
         },
         loadSavedQuiz: () => {
             const savedQuiz = localStorage.getItem('clinical-quiz-state')
@@ -260,8 +475,56 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
         },
     }
 
+    // Image retrieval functions
+    const getImage = async (imageId: string): Promise<string | File | null> => {
+        try {
+            return await imageStorage.getImage(imageId)
+        } catch (error) {
+            console.error('Failed to retrieve image:', error)
+            return null
+        }
+    }
+
+    const getAnswerWithImages = async (questionId: string): Promise<any> => {
+        const answer = state.answers[questionId]
+        if (!answer) return answer
+
+        try {
+            // Handle single image reference
+            if (answer?.type === 'image_reference') {
+                return await imageStorage.getImage(answer.imageId)
+            }
+
+            // Handle placeholders - return null to indicate images are still processing
+            if (answer?.type === 'temp_image' || answer?.type === 'temp_file') {
+                return null // or return a loading indicator
+            }
+
+            // Handle array of answers with potential image references and placeholders
+            if (Array.isArray(answer)) {
+                const resolvedItems = await Promise.all(
+                    answer.map(async (item) => {
+                        if (item?.type === 'image_reference') {
+                            return await imageStorage.getImage(item.imageId)
+                        }
+                        if (item?.type === 'temp_image' || item?.type === 'temp_file') {
+                            return null // Still processing
+                        }
+                        return item
+                    })
+                )
+                return resolvedItems
+            }
+
+            return answer
+        } catch (error) {
+            console.error('Failed to retrieve images for answer:', error)
+            return answer // Return original answer if retrieval fails
+        }
+    }
+
     return (
-        <QuizContext.Provider value={{ state, actions, questions }}>
+        <QuizContext.Provider value={{ state, actions, questions, getImage, getAnswerWithImages }}>
             {children}
         </QuizContext.Provider>
     )

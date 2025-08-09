@@ -68,6 +68,29 @@ export function QuestionCard({ question, value, onChange, error }: QuestionCardP
     onChange(newFiles)
   }
 
+  const getFileName = (file: any): string => {
+    console.log('getFileName received:', file)
+    
+    // Handle original file objects
+    if (file && file.name) {
+      console.log('Found name in original file object:', file.name)
+      return file.name
+    }
+    // Handle temp_file placeholders
+    if (file && file.type === 'temp_file' && file.name) {
+      console.log('Found name in temp_file placeholder:', file.name)
+      return file.name
+    }
+    // Handle image references with metadata
+    if (file && file.type === 'image_reference' && file.metadata && file.metadata.name) {
+      console.log('Found name in image reference metadata:', file.metadata.name)
+      return file.metadata.name
+    }
+    // Fallback
+    console.log('No name found, using fallback')
+    return 'Uploaded file'
+  }
+
   const renderInput = () => {
     switch (question.question_type) {
       case "radio":
@@ -230,9 +253,9 @@ export function QuestionCard({ question, value, onChange, error }: QuestionCardP
 
             {value && value.length > 0 && (
               <div className="space-y-2">
-                {value.map((file: {name: string, size: number, type: string, data: string}, index: number) => (
+                {value.map((file: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
-                    <span className="text-sm text-neutral-700 truncate">{file.name}</span>
+                    <span className="text-sm text-neutral-700 truncate">{getFileName(file)}</span>
                     <button
                       type="button"
                       onClick={() => removeFile(index)}

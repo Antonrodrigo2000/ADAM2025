@@ -48,6 +48,7 @@ export function ClinicalQuiz() {
     }
 
     const handleAnswerChange = (questionId: string, value: any) => {
+        // Fire and forget - let setAnswer handle the async processing internally
         actions.setAnswer(questionId, value)
         setErrors((prev) => ({ ...prev, [questionId]: "" }))
     }
@@ -80,7 +81,7 @@ export function ClinicalQuiz() {
 
     const handleSubmit = () => {
         try {
-            actions.submitQuiz(questions)
+            actions.submitQuiz()
         } catch (error) {
             console.error("Error generating recommendations:", error)
             alert("There was an error processing your assessment. Please try again.")
