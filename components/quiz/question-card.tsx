@@ -15,11 +15,34 @@ interface QuestionCardProps {
 export function QuestionCard({ question, value, onChange, error }: QuestionCardProps) {
   const [dragActive, setDragActive] = useState(false)
 
-  const handleFileUpload = (files: FileList | null) => {
+  const handleFileUpload = async (files: FileList | null) => {
     if (!files) return
 
     const fileArray = Array.from(files)
-    onChange(fileArray)
+    
+    // Convert files to base64 for localStorage compatibility
+    const fileDataPromises = fileArray.map(async (file) => {
+      return new Promise<{name: string, size: number, type: string, data: string}>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+          resolve({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            data: reader.result as string
+          })
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+    })
+
+    try {
+      const fileDataArray = await Promise.all(fileDataPromises)
+      onChange(fileDataArray)
+    } catch (error) {
+      console.error('Error converting files to base64:', error)
+    }
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -207,7 +230,7 @@ export function QuestionCard({ question, value, onChange, error }: QuestionCardP
 
             {value && value.length > 0 && (
               <div className="space-y-2">
-                {value.map((file: File, index: number) => (
+                {value.map((file: {name: string, size: number, type: string, data: string}, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
                     <span className="text-sm text-neutral-700 truncate">{file.name}</span>
                     <button

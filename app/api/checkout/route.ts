@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Step 4: Save quiz responses if available
+    // Step 4: Save quiz responses if available (including base64 file data)
     if (body.quizResponses && Object.keys(body.quizResponses).length > 0) {
       // Get the hair-loss questionnaire ID
       const { data: questionnaire } = await supabase
@@ -141,18 +141,21 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (questionnaire) {
+        // Save quiz responses as-is (including base64 file data for later upload)
         const { error: quizError } = await supabase
           .from('user_responses')
           .insert({
             user_id: userId,
             questionnaire_id: questionnaire.id,
-            responses: body.quizResponses,
+            responses: body.quizResponses, // Keep base64 file data intact
             completed_at: new Date().toISOString()
           })
 
         if (quizError) {
           console.error('Failed to save quiz responses:', quizError)
           // Don't fail the entire request for quiz save
+        } else {
+          console.log('Quiz responses saved successfully (including base64 file data)')
         }
       } else {
         console.error('Hair Loss Assessment Questionnaire not found')
