@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import type { Product } from "@/types/product"
-import { useCart } from "@/lib/contexts/cart-context"
+import type { Product } from "@/data/types/product"
+import { useCart } from "@/contexts/cart-context"
 
 interface ProductInfoProps {
   product: Product

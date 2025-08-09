@@ -2,8 +2,8 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Space_Grotesk, MuseoModerno } from "next/font/google"
 import "./globals.css"
-import { cn } from "@/lib/utils"
-import { AppProviders } from "@/lib/contexts"
+import { cn } from "@/utils/style/utils"
+import { AppProviders } from "@/contexts"
 import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({

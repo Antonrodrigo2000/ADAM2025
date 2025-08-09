@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/style/utils"
 import { ShoppingCart } from "lucide-react"
-import { useCart } from "@/lib/contexts/cart-context"
+import { useCart } from "@/contexts/cart-context"
 import { CartSidebar } from "@/components/cart/cart-sidebar"
 
 interface HeaderProps {

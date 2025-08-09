@@ -1,4 +1,4 @@
-import { getServerAuth } from '@/lib/contexts/auth-server'
+import { getServerAuth } from '@/contexts/auth-server'
 import DashboardClient from './DashboardClient'
 import { redirect } from 'next/navigation'
 

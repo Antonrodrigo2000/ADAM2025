@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { signOutServer } from '@/lib/contexts/auth-server'
+import { signOutServer } from '@/contexts/auth-server'
 
 export async function POST() {
   const result = await signOutServer()

@@ -3,7 +3,7 @@
 import { ArrowRight, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import type { RecommendationResult } from "@/lib/hairloss-recommendations"
+import type { RecommendationResult } from "@/lib/algorithm/hairloss-recommendations"
 
 interface RecommendationsScreenProps {
   recommendations: RecommendationResult

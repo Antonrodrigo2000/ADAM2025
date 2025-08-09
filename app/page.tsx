@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { ArrowRight, Zap, Shield, Heart, TrendingUp } from "lucide-react"
 import { Header } from "@/components/layout/header"
-import { CategoryCards } from "@/components/category-cards"
+import { CategoryCards } from "@/components/hero/category-cards"
 
 export default function LandingPage() {
   return (

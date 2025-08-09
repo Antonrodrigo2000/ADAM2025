@@ -6,7 +6,7 @@ import { ProgressBar } from "./progress-bar"
 import { QuestionCard } from "./question-card"
 import { ReviewScreen } from "./review-screen"
 import { RecommendationsScreen } from "./recommendations-screen"
-import { useQuiz } from "@/lib/contexts"
+import { useQuiz } from "@/contexts"
 import type { Question } from "@/data/hairlossquestions"
 
 export function ClinicalQuiz() {

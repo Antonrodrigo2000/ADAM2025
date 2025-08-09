@@ -5,8 +5,8 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Eye, EyeOff, Calendar, ChevronDown } from "lucide-react"
 import { OrderSummary } from "./order-summary"
-import { useCart } from "@/lib/contexts/cart-context"
-import { useQuiz } from "@/lib/contexts/quiz-context"
+import { useCart } from "@/contexts/cart-context"
+import { useQuiz } from "@/contexts/quiz-context"
 
 interface FormData {
   email: string

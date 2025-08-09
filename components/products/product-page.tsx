@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ChevronDown, Check, Truck, Shield, Clock } from "lucide-react"
-import { useCart } from "@/lib/contexts"
+import { useCart } from "@/contexts"
 import { useToast } from "@/hooks/use-toast"
 
 interface ProductImage {

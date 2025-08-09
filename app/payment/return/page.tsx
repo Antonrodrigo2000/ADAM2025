@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useCart } from '@/lib/contexts/cart-context'
+import { useCart } from '@/contexts/cart-context'
 import { createClient } from '@supabase/supabase-js'
 import { CheckCircle, XCircle, Loader } from 'lucide-react'
 

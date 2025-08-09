@@ -1,6 +1,6 @@
 "use client"
 
-import { useCart } from "@/lib/contexts"
+import { useCart } from "@/contexts"
 
 export function OrderSummary() {
   const { state, actions } = useCart()

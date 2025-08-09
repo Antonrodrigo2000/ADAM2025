@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getServerAuth, createServerProfile } from '@/lib/contexts/auth-server'
-import type { CartItem } from '@/lib/contexts/types'
+import { getServerAuth, createServerProfile } from '@/contexts/auth-server'
+import type { CartItem } from '@/contexts/types'
 
 interface CheckoutRequest {
   email: string

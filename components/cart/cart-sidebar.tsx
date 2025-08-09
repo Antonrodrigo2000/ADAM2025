@@ -3,7 +3,7 @@
 import { Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { X, Plus, Minus, ShoppingCart } from 'lucide-react'
-import { useCart } from '@/lib/contexts/cart-context'
+import { useCart } from '@/contexts/cart-context'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 

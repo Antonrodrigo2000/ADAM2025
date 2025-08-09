@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import type { ProductImage } from "@/types/product"
+import type { ProductImage } from "@/data/types/product"
 
 interface ProductImageGalleryProps {
   images: ProductImage[]

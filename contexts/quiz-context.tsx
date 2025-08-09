@@ -2,9 +2,9 @@
 
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react'
 import { QuizState, QuizActions } from './types'
-import recommendTreatment from '@/lib/hairloss-recommendations'
-import { createClient } from '@/app/utils/supabase/client'
-import { Question } from '@/data/hairlossquestions'
+import recommendTreatment from '@/lib/algorithm/hairloss-recommendations'
+import { Question } from '@/data/types/question'
+import { createClient } from '../lib/supabase/client'
 
 // Initial state
 const initialQuizState: QuizState = {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import type { Product } from "@/types/product"
+import type { Product } from "@/data/types/product"
 import { ProductImageGallery } from "./product-image-gallery"
 import { ProductInfo } from "./product-info"
 import { ProductTabs } from "./product-tabs"

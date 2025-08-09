@@ -5,7 +5,7 @@ import type React from "react"
 import { useRef } from "react"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/style/utils"
 import type { Category } from "./category-cards"
 
 export function CategoryCard({ category, isFeatured = false }: { category: Category; isFeatured?: boolean }) {
