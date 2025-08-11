@@ -308,7 +308,9 @@ export function buildQuestionnaireInputFromDatabase(
     questions: any[],
     photos: PhotoInput[],
     assessmentType: string,
-    cartItems?: any[]
+    cartItems?: any[],
+    organizationId?: string,
+    customerId?: string
 ): QuestionnaireInput {
 
     const questionnaireId = assessmentType === 'hair-loss' ? 'hair-loss-questionnaire' : 'erectile-dysfunction-questionnaire'
@@ -341,13 +343,13 @@ export function buildQuestionnaireInputFromDatabase(
         // Handle different response types based on question type and response data
         if (questionInfo.type === 'file') {
             // Handle file uploads - use photos that were uploaded to Medplum
-            const questionPhotos = photos.filter(photo => photo.description?.startsWith(questionId))
+            // Match photos by questionId (preferred) or fall back to description matching
+            const questionPhotos = photos.filter(photo => 
+                photo.questionId === questionId || photo.description?.startsWith(questionId)
+            )
             if (questionPhotos.length > 0) {
                 answer.answer = questionPhotos.map(photo => ({
-                    valueAttachment: {
-                        contentType: photo.contentType,
-                        url: `Binary/${photo.binaryId}`,
-                    }
+                    valueString: photo.binaryId // Reference to Binary resource by ID
                 }))
             }
         } else if (Array.isArray(response)) {
@@ -378,16 +380,21 @@ export function buildQuestionnaireInputFromDatabase(
         }
     })
 
-    // Add cart items to the questionnaire response
+    // Add cart items as a single questionnaire item
     if (cartItems && cartItems.length > 0) {
-        cartItems.forEach((item, index) => {
-            const cartAnswer: any = {
-                linkId: `cart_item_${index + 1}`,
-                text: item.productName,
-                answer: [{ valueString: item.productId }] // Using productId as genie_product_id
-            }
-            answers.push(cartAnswer)
-        })
+        // Create linkId in format: organizationId_customerId_cart
+        const cartLinkId = organizationId && customerId 
+            ? `${organizationId}_${customerId}_cart`
+            : 'cart'
+        
+        const cartAnswer: any = {
+            linkId: cartLinkId,
+            text: 'Selected products for purchase',
+            answer: cartItems.map(item => ({
+                valueString: item.productId // All product IDs as separate answer items
+            }))
+        }
+        answers.push(cartAnswer)
     }
 
     return {

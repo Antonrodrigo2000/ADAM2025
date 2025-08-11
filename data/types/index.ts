@@ -19,7 +19,8 @@ export interface PatientInput {
 export interface PhotoInput {
   contentType: string; // e.g., 'image/jpeg'
   dataBase64: string; // base64-encoded image string
-  description?: string; // e.g., 'front', 'back'
+  description?: string; // e.g., 'front', 'back', or descriptive label
+  questionId?: string; // ID of the question this photo answers
   binaryId?: string; // ID of the created Binary resource
 }
 

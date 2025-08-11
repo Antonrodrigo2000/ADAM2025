@@ -8,6 +8,10 @@ import {
     buildQuestionnaireInputFromDatabase
 } from './build-fhir-resources'
 import { createMedplumClient } from '@/lib/medplum/client'
+import { compressExistingPhotoInput, validatePhotoInputForMedplum } from './medplum-image-compressor'
+
+// Adam Health Organization ID from FHIR config
+const ADAM_HEALTH_ORGANIZATION_ID = '019873c3-14e8-7306-9a3b-509c078689e0'
 
 export interface MedplumResponse {
     success: boolean
@@ -16,6 +20,12 @@ export interface MedplumResponse {
     binaryIds?: string[]
     error?: string
     bundle?: Bundle
+    compressionInfo?: Array<{
+        originalSize: string
+        compressedSize: string
+        wasCompressed: boolean
+        compressionRatio?: number
+    }>
 }
 
 export class MedplumService {
@@ -71,15 +81,67 @@ export class MedplumService {
     }
 
     /**
-     * Create Binary resource for photo
+     * Create Binary resource for photo with automatic compression
      */
     async createBinaryResource(photo: PhotoInput, patientRef: string): Promise<string> {
+        const result = await this.createBinaryResourceWithCompressionInfo(photo, patientRef)
+        return result.binaryId
+    }
+
+    /**
+     * Create Binary resource for photo with compression tracking
+     */
+    async createBinaryResourceWithCompressionInfo(
+        photo: PhotoInput, 
+        patientRef: string
+    ): Promise<{
+        binaryId: string
+        compressionInfo: {
+            originalSize: number
+            compressedSize: number
+            wasCompressed: boolean
+            compressionRatio?: number
+        }
+    }> {
         const medplum = await createMedplumClient();
 
-        const binaryResource = buildBinaryResource(photo, patientRef)
-        const createdBinary = await medplum.createResource(binaryResource)
+        // Check original size
+        const originalValidation = validatePhotoInputForMedplum(photo)
+        const originalSize = originalValidation.size
+        let finalPhoto = photo
+        let wasCompressed = false
+        let compressionRatio: number | undefined
 
-        return createdBinary.id!
+        if (!originalValidation.isValid) {
+            // Compress the photo if it doesn't meet requirements
+            try {
+                const compressionResult = await compressExistingPhotoInput(photo)
+                if (compressionResult.meetsRequirements) {
+                    finalPhoto = compressionResult.photoInput
+                    wasCompressed = true
+                    compressionRatio = compressionResult.compressionRatio
+                } else {
+                    // Even after compression, it might not meet requirements
+                    throw new Error(`Image compression failed: ${originalValidation.reason}`)
+                }
+            } catch (compressionError) {
+                throw new Error(`Failed to compress image: ${compressionError instanceof Error ? compressionError.message : 'Unknown compression error'}`)
+            }
+        }
+
+        const binaryResource = buildBinaryResource(finalPhoto, patientRef)
+        const createdBinary = await medplum.createResource(binaryResource)
+        const finalSize = finalPhoto.dataBase64.length * 0.75
+
+        return {
+            binaryId: createdBinary.id!,
+            compressionInfo: {
+                originalSize,
+                compressedSize: finalSize,
+                wasCompressed,
+                compressionRatio
+            }
+        }
     }
 
     /**
@@ -99,7 +161,7 @@ export class MedplumService {
     }
 
     /**
-     * Save questionnaire and cart data to FHIR server
+     * Save questionnaire and cart data to FHIR server with automatic image compression
      */
     async saveQuestionnaireAndCart(
         patientId: string,
@@ -109,17 +171,27 @@ export class MedplumService {
     ): Promise<MedplumResponse> {
         try {
             const binaryIds: string[] = []
+            const compressionInfo: MedplumResponse['compressionInfo'] = []
             const patientRef = `Patient/${patientId}`
 
-            // Create Binary resources for photos
+            // Process photos with compression and create Binary resources
             for (let i = 0; i < photos.length; i++) {
                 const photo = photos[i]
                 if (!photo) continue
 
-                const binaryId = await this.createBinaryResource(photo, patientRef)
-                binaryIds.push(binaryId)
+                // Use the method that returns compression info
+                const result = await this.createBinaryResourceWithCompressionInfo(photo, patientRef)
+                
+                binaryIds.push(result.binaryId)
+                photo.binaryId = result.binaryId
 
-                photo.binaryId = binaryId
+                // Track compression info
+                compressionInfo.push({
+                    originalSize: `${Math.round(result.compressionInfo.originalSize / 1024)}KB`,
+                    compressedSize: `${Math.round(result.compressionInfo.compressedSize / 1024)}KB`,
+                    wasCompressed: result.compressionInfo.wasCompressed,
+                    compressionRatio: result.compressionInfo.compressionRatio
+                })
             }
 
             // Build questionnaire input using database questions with proper linkId and text
@@ -128,7 +200,9 @@ export class MedplumService {
                 questionnaireData.questions,
                 photos,
                 'hair-loss',
-                cartItems
+                cartItems,
+                ADAM_HEALTH_ORGANIZATION_ID,
+                patientId // Use patientId as customerId
             )
 
             // Create QuestionnaireResponse with patient reference
@@ -143,6 +217,7 @@ export class MedplumService {
                 patientId,
                 questionnaireResponseId,
                 binaryIds,
+                compressionInfo
             }
         } catch (error) {
             return {
