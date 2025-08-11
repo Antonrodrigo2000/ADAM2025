@@ -1,10 +1,6 @@
 import type { Patient, Binary, QuestionnaireResponse } from '@medplum/fhirtypes'
 import type { PatientInput, PhotoInput, QuestionnaireInput } from '@/data/types'
 
-// ============================================================================
-// CONFIGURATION
-// ============================================================================
-
 const FHIR_CONFIG = {
     DEFAULT_COUNTRY: 'Sri Lanka',
     NIC_SYSTEM: 'http://fhir.health.gov.lk/ips/identifier/nic',
@@ -12,7 +8,7 @@ const FHIR_CONFIG = {
     DISTRICT_EXTENSION_URL: 'https://api.emed.lk/StructureDefinition/district',
     ADAM_HEALTH_SYSTEM: 'https://api.emed.lk/adam-health/customer-id',
     CUSTOMER_ID_SYSTEM: 'http://terminology.hl7.org/CodeSystem/v2-0203',
-    ADAM_HEALTH_ORGANIZATION_ID: '019873c3-14e8-7306-9a3b-509c078689e0',
+    ADAM_HEALTH_ORGANIZATION_ID: process.env.EMED_ADAM_HEALTH_ORGANIZATION_ID,
 }
 
 /**
@@ -340,7 +336,7 @@ export function buildQuestionnaireInputFromDatabase(
         if (questionInfo.type === 'file') {
             // Handle file uploads - use photos that were uploaded to Medplum
             // Match photos by questionId (preferred) or fall back to description matching
-            const questionPhotos = photos.filter(photo => 
+            const questionPhotos = photos.filter(photo =>
                 photo.questionId === questionId || photo.description?.startsWith(questionId)
             )
             if (questionPhotos.length > 0) {
@@ -379,10 +375,10 @@ export function buildQuestionnaireInputFromDatabase(
     // Add cart items as a single questionnaire item
     if (cartItems && cartItems.length > 0) {
         // Create linkId in format: organizationId_customerId_cart
-        const cartLinkId = organizationId && customerId 
+        const cartLinkId = organizationId && customerId
             ? `${organizationId}_${customerId}_cart`
             : 'cart'
-        
+
         const cartAnswer: any = {
             linkId: cartLinkId,
             text: 'Selected products for purchase',
