@@ -12,14 +12,30 @@ const SelectGroup = SelectPrimitive.Group
 
 const SelectValue = SelectPrimitive.Value
 
+export interface SelectTriggerProps extends 
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {
+  theme?: "light" | "dark"
+  error?: boolean
+}
+
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  SelectTriggerProps
+>(({ className, children, theme = "dark", error = false, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+      "flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+      // Dark theme (default)
+      theme === "dark" && [
+        "border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring",
+        error && "border-destructive focus:ring-destructive"
+      ],
+      // Light theme
+      theme === "light" && [
+        "bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:ring-orange-500 focus:border-orange-500",
+        error && "border-red-400 focus:ring-red-500 focus:border-red-500"
+      ],
       className
     )}
     {...props}

@@ -5,9 +5,9 @@ import { Footer } from "@/components/layout/footer"
 import { notFound } from "next/navigation"
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
   searchParams: Promise<{
     recommended?: string
     from?: string
@@ -60,7 +60,8 @@ async function fetchProductBySlug(slug: string) {
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const product = await fetchProductBySlug(params.slug)
+  const resolvedParams = await params
+  const product = await fetchProductBySlug(resolvedParams.slug)
   
   if (!product) {
     return {
@@ -76,10 +77,11 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 }
 
 export default async function ProductPage({ params, searchParams }: ProductPageProps) {
-  const product = await fetchProductBySlug(params.slug)
+  const resolvedParams = await params
+  const product = await fetchProductBySlug(resolvedParams.slug)
 
   if (!product) {
-    console.error(`Product not found for slug: ${params.slug}`)
+    console.error(`Product not found for slug: ${resolvedParams.slug}`)
     notFound()
   }
 

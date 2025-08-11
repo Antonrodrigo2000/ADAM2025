@@ -7,21 +7,59 @@ import { Eye, EyeOff, Calendar, ChevronDown } from "lucide-react"
 import { OrderSummary } from "./order-summary"
 import { useCart } from "@/contexts/cart-context"
 import { useQuiz } from "@/contexts/quiz-context"
+import { z } from "zod"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { DatePicker } from "@/components/ui/date-picker"
 
 interface FormData {
   email: string
   password: string
   legalFirstName: string
   legalSurname: string
+  nic: string
   dateOfBirth: string
+  dateOfBirthDate?: Date
   phoneNumber: string
   sex: string
   postcode: string
   city: string
+  district: string
   address: string
   agreeToTerms: boolean
   marketingOptOut: boolean
 }
+
+const sriLankanNICRegex = /^(?:19|20|[0-9]{2})[0-9]{2}[0-9]{8}|[0-9]{9}[xXvV]$/
+
+const formSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string()
+    .min(12, "Password must be at least 12 characters")
+    .regex(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/, "Password must include uppercase, lowercase, number, and special character"),
+  legalFirstName: z.string().min(1, "Legal first name is required"),
+  legalSurname: z.string().min(1, "Legal surname is required"),
+  nic: z.string()
+    .regex(sriLankanNICRegex, "Please enter a valid Sri Lankan NIC number")
+    .refine((val) => val.length === 10 || val.length === 12, "NIC must be 10 or 12 characters"),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  phoneNumber: z.string()
+    .min(10, "Phone number must be at least 10 digits")
+    .regex(/^\+?[0-9\s-()]+$/, "Please enter a valid phone number"),
+  sex: z.enum(["male", "female"], { errorMap: () => ({ message: "Please select your sex" }) }),
+  postcode: z.string().min(1, "Postcode is required"),
+  city: z.string().min(1, "City is required"),
+  district: z.string().min(1, "District is required"),
+  address: z.string().min(10, "Please provide a complete address"),
+  agreeToTerms: z.boolean().refine((val) => val === true, "You must agree to the terms and conditions"),
+  marketingOptOut: z.boolean(),
+})
+
+type ValidationErrors = Partial<Record<keyof FormData, string>>
 
 export function SinglePageCheckout() {
   const [showPassword, setShowPassword] = useState(false)
@@ -29,6 +67,7 @@ export function SinglePageCheckout() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isCartLoaded, setIsCartLoaded] = useState(false)
   const [checkoutCompleted, setCheckoutCompleted] = useState(false)
+  const [errors, setErrors] = useState<ValidationErrors>({})
   const { state: cartState, actions: cartActions } = useCart()
   const { state: quizState } = useQuiz()
 
@@ -37,11 +76,14 @@ export function SinglePageCheckout() {
     password: "",
     legalFirstName: "",
     legalSurname: "",
+    nic: "",
     dateOfBirth: "",
+    dateOfBirthDate: undefined,
     phoneNumber: "",
     sex: "",
     postcode: "",
     city: "",
+    district: "",
     address: "",
     agreeToTerms: false,
     marketingOptOut: false,
@@ -89,6 +131,24 @@ export function SinglePageCheckout() {
   const updateFormData = (field: keyof FormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     setSubmitError(null) // Clear errors when user makes changes
+    // Clear field-specific error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }))
+    }
+  }
+
+  // Helper function to handle date changes
+  const handleDateChange = (date: Date | undefined) => {
+    const dateString = date ? date.toISOString().split('T')[0] : ""
+    setFormData((prev) => ({ 
+      ...prev, 
+      dateOfBirthDate: date,
+      dateOfBirth: dateString 
+    }))
+    // Clear error when user selects a date
+    if (errors.dateOfBirth) {
+      setErrors((prev) => ({ ...prev, dateOfBirth: undefined }))
+    }
   }
 
   const processCheckout = async () => {
@@ -124,11 +184,13 @@ export function SinglePageCheckout() {
         password: formData.password,
         legalFirstName: formData.legalFirstName,
         legalSurname: formData.legalSurname,
+        nic: formData.nic,
         dateOfBirth: formData.dateOfBirth,
         phoneNumber: formData.phoneNumber,
         sex: formData.sex,
         postcode: formData.postcode,
         city: formData.city,
+        district: formData.district,
         address: formData.address,
         agreeToTerms: formData.agreeToTerms,
         marketingOptOut: formData.marketingOptOut,
@@ -152,6 +214,23 @@ export function SinglePageCheckout() {
     e.preventDefault()
     setIsSubmitting(true)
     setSubmitError(null)
+
+    // Validate form data
+    const validationResult = formSchema.safeParse(formData)
+    if (!validationResult.success) {
+      const newErrors: ValidationErrors = {}
+      validationResult.error.errors.forEach((error) => {
+        const field = error.path[0] as keyof FormData
+        newErrors[field] = error.message
+      })
+      setErrors(newErrors)
+      setIsSubmitting(false)
+      setSubmitError("Please fix the validation errors below")
+      return
+    }
+
+    // Clear any previous errors
+    setErrors({})
 
     try {
       // Process checkout using server-side API
@@ -217,42 +296,51 @@ export function SinglePageCheckout() {
 
                 <div className="space-y-4">
                   {/* Email */}
-                  <div className="neomorphic-input-container">
-                    <label className="block text-xs font-medium text-neutral-700 mb-1.5">Email address</label>
-                    <div className="neomorphic-input-wrapper">
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => updateFormData("email", e.target.value)}
-                        className="neomorphic-input h-10 text-sm"
-                        required
-                      />
-                    </div>
-                    <p className="text-xs text-neutral-500 mt-1">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-xs font-medium" theme="light">Email address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => updateFormData("email", e.target.value)}
+                      className="h-10 text-sm"
+                      theme="light"
+                      error={!!errors.email}
+                      required
+                    />
+                    {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
+                    <p className="text-xs text-gray-500">
                       We will let you know via email once your prescription has been issued.
                     </p>
                   </div>
 
                   {/* Password */}
-                  <div className="neomorphic-input-container">
-                    <label className="block text-xs font-medium text-neutral-700 mb-1.5">Password</label>
-                    <div className="neomorphic-input-wrapper">
-                      <input
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-xs font-medium" theme="light">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
                         type={showPassword ? "text" : "password"}
                         value={formData.password}
                         onChange={(e) => updateFormData("password", e.target.value)}
-                        className="neomorphic-input h-10 text-sm pr-10"
+                        className="h-10 text-sm pr-10"
+                        theme="light"
+                        error={!!errors.password}
                         required
                       />
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 py-2"
+                        theme="light"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="neomorphic-eye-button"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
+                      </Button>
                     </div>
-                    <p className="text-xs text-neutral-500 mt-1">
+                    {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
+                    <p className="text-xs text-gray-500">
                       Password must be at least 12 characters, including a mix of letters, numbers, and special
                       characters.
                     </p>
@@ -268,86 +356,106 @@ export function SinglePageCheckout() {
 
                   {/* Legal Names */}
                   <div className="grid md:grid-cols-2 gap-3">
-                    <div className="neomorphic-input-container">
-                      <label className="block text-xs font-medium text-neutral-700 mb-1.5">Legal first name</label>
-                      <div className="neomorphic-input-wrapper">
-                        <input
-                          type="text"
-                          value={formData.legalFirstName}
-                          onChange={(e) => updateFormData("legalFirstName", e.target.value)}
-                          className="neomorphic-input h-10 text-sm"
-                          required
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="legalFirstName" className="text-xs font-medium" theme="light">Legal first name</Label>
+                      <Input
+                        id="legalFirstName"
+                        type="text"
+                        value={formData.legalFirstName}
+                        onChange={(e) => updateFormData("legalFirstName", e.target.value)}
+                        className="h-10 text-sm"
+                        theme="light"
+                        error={!!errors.legalFirstName}
+                        required
+                      />
+                      {errors.legalFirstName && <p className="text-xs text-red-600">{errors.legalFirstName}</p>}
                     </div>
-                    <div className="neomorphic-input-container">
-                      <label className="block text-xs font-medium text-neutral-700 mb-1.5">Legal surname</label>
-                      <div className="neomorphic-input-wrapper">
-                        <input
-                          type="text"
-                          value={formData.legalSurname}
-                          onChange={(e) => updateFormData("legalSurname", e.target.value)}
-                          className="neomorphic-input h-10 text-sm"
-                          required
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="legalSurname" className="text-xs font-medium" theme="light">Legal surname</Label>
+                      <Input
+                        id="legalSurname"
+                        type="text"
+                        value={formData.legalSurname}
+                        onChange={(e) => updateFormData("legalSurname", e.target.value)}
+                        className="h-10 text-sm"
+                        theme="light"
+                        error={!!errors.legalSurname}
+                        required
+                      />
+                      {errors.legalSurname && <p className="text-xs text-red-600">{errors.legalSurname}</p>}
                     </div>
                   </div>
-                  <p className="text-xs text-neutral-500 -mt-1">
+                  <p className="text-xs text-gray-500 -mt-1">
                     Please write your name as it appears on your passport or ID. We need your full legal name to confirm
                     your identity.
                   </p>
 
-                  {/* Date of Birth */}
-                  <div className="neomorphic-input-container">
-                    <label className="block text-xs font-medium text-neutral-700 mb-1.5">Date of birth</label>
-                    <div className="neomorphic-input-wrapper">
-                      <input
+                  {/* NIC and Date of Birth - Flexed to save space */}
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="nic" className="text-xs font-medium" theme="light">NIC Number</Label>
+                      <Input
+                        id="nic"
                         type="text"
-                        placeholder="Day / Month / Year"
-                        value={formData.dateOfBirth}
-                        onChange={(e) => updateFormData("dateOfBirth", e.target.value)}
-                        className="neomorphic-input h-10 text-sm pr-10"
+                        value={formData.nic}
+                        onChange={(e) => updateFormData("nic", e.target.value)}
+                        className="h-10 text-sm"
+                        placeholder="Enter your NIC number"
+                        theme="light"
+                        error={!!errors.nic}
                         required
                       />
-                      <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                      {errors.nic && <p className="text-xs text-red-600">{errors.nic}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="dateOfBirth" className="text-xs font-medium" theme="light">Date of birth</Label>
+                      <DatePicker
+                        value={formData.dateOfBirthDate}
+                        onChange={handleDateChange}
+                        placeholder="Select your date of birth"
+                        className="h-10 text-sm"
+                        light={true}
+                      />
+                      {errors.dateOfBirth && <p className="text-xs text-red-600">{errors.dateOfBirth}</p>}
                     </div>
                   </div>
+                  <p className="text-xs text-gray-500 -mt-1">
+                    Please enter your National Identity Card number as it appears on your ID.
+                  </p>
 
                   {/* Phone Number */}
-                  <div className="neomorphic-input-container">
-                    <label className="block text-xs font-medium text-neutral-700 mb-1.5">Phone number</label>
-                    <div className="neomorphic-input-wrapper">
-                      <input
-                        type="tel"
-                        value={formData.phoneNumber}
-                        onChange={(e) => updateFormData("phoneNumber", e.target.value)}
-                        className="neomorphic-input h-10 text-sm"
-                        required
-                      />
-                    </div>
-                    <p className="text-xs text-neutral-500 mt-1">
+                  <div className="space-y-2">
+                    <Label htmlFor="phoneNumber" className="text-xs font-medium" theme="light">Phone number</Label>
+                    <Input
+                      id="phoneNumber"
+                      type="tel"
+                      value={formData.phoneNumber}
+                      onChange={(e) => updateFormData("phoneNumber", e.target.value)}
+                      className="h-10 text-sm"
+                      theme="light"
+                      error={!!errors.phoneNumber}
+                      required
+                    />
+                    {errors.phoneNumber && <p className="text-xs text-red-600">{errors.phoneNumber}</p>}
+                    <p className="text-xs text-gray-500">
                       In very rare cases our clinicians may need to call you. They will always be discreet.
                     </p>
                   </div>
 
                   {/* Sex */}
-                  <div className="neomorphic-input-container">
-                    <label className="block text-xs font-medium text-neutral-700 mb-1.5">Sex</label>
-                    <div className="neomorphic-input-wrapper">
-                      <select
-                        value={formData.sex}
-                        onChange={(e) => updateFormData("sex", e.target.value)}
-                        className="neomorphic-input h-10 text-sm pr-8 appearance-none bg-transparent"
-                        required
-                      >
-                        <option value="">Choose sex</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 pointer-events-none" />
-                    </div>
-                    <p className="text-xs text-neutral-500 mt-1">
+                  <div className="space-y-2">
+                    <Label htmlFor="sex" className="text-xs font-medium" theme="light">Sex</Label>
+                    <Select value={formData.sex} onValueChange={(value) => updateFormData("sex", value)}>
+                      <SelectTrigger className="h-10 text-sm" theme="light" error={!!errors.sex}>
+                        <SelectValue placeholder="Choose sex" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.sex && <p className="text-xs text-red-600">{errors.sex}</p>}
+                    <p className="text-xs text-muted-foreground">
                       What sex were you assigned at birth, as shown on your original birth certificate. This is
                       important for us to know because it allows us to provide you with treatments as safely as
                       possible.
@@ -365,8 +473,8 @@ export function SinglePageCheckout() {
                   <h2 className="text-xl font-bold text-neutral-800">Delivery address</h2>
                 </div>
 
-                <div className="bg-neutral-100 border border-neutral-200 rounded-xl p-3 mb-4">
-                  <p className="text-xs text-neutral-700">
+                <div className="bg-muted border border-border rounded-xl p-3 mb-4">
+                  <p className="text-xs text-foreground">
                     Please make sure your address is accurate. Try using our auto-complete option. This will help us
                     confirm your identity.
                   </p>
@@ -374,82 +482,109 @@ export function SinglePageCheckout() {
 
                 <div className="space-y-4">
                   {/* Postcode */}
-                  <div className="neomorphic-input-container">
-                    <label className="block text-xs font-medium text-neutral-700 mb-1.5">Postcode</label>
-                    <div className="neomorphic-input-wrapper">
-                      <input
-                        type="text"
-                        value={formData.postcode}
-                        onChange={(e) => updateFormData("postcode", e.target.value)}
-                        className="neomorphic-input h-10 text-sm"
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="postcode" className="text-xs font-medium" theme="light">Postcode</Label>
+                    <Input
+                      id="postcode"
+                      type="text"
+                      value={formData.postcode}
+                      onChange={(e) => updateFormData("postcode", e.target.value)}
+                      className="h-10 text-sm"
+                      theme="light"
+                      error={!!errors.postcode}
+                      required
+                    />
+                    {errors.postcode && <p className="text-xs text-red-600">{errors.postcode}</p>}
                   </div>
 
                   {/* City */}
-                  <div className="neomorphic-input-container">
-                    <label className="block text-xs font-medium text-neutral-700 mb-1.5">City</label>
-                    <div className="neomorphic-input-wrapper">
-                      <input
-                        type="text"
-                        value={formData.city}
-                        onChange={(e) => updateFormData("city", e.target.value)}
-                        className="neomorphic-input h-10 text-sm"
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="city" className="text-xs font-medium" theme="light">City</Label>
+                    <Input
+                      id="city"
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => updateFormData("city", e.target.value)}
+                      className="h-10 text-sm"
+                      theme="light"
+                      error={!!errors.city}
+                      required
+                    />
+                    {errors.city && <p className="text-xs text-red-600">{errors.city}</p>}
+                  </div>
+
+                  {/* District */}
+                  <div className="space-y-2">
+                    <Label htmlFor="district" className="text-xs font-medium" theme="light">District</Label>
+                    <Input
+                      id="district"
+                      type="text"
+                      value={formData.district}
+                      onChange={(e) => updateFormData("district", e.target.value)}
+                      className="h-10 text-sm"
+                      placeholder="Enter your district"
+                      theme="light"
+                      error={!!errors.district}
+                      required
+                    />
+                    {errors.district && <p className="text-xs text-red-600">{errors.district}</p>}
                   </div>
 
                   {/* Address */}
-                  <div className="neomorphic-input-container">
-                    <label className="block text-xs font-medium text-neutral-700 mb-1.5">Address</label>
-                    <div className="neomorphic-input-wrapper">
-                      <textarea
-                        value={formData.address}
-                        onChange={(e) => updateFormData("address", e.target.value)}
-                        rows={2}
-                        className="neomorphic-input text-sm resize-none min-h-[60px]"
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address" className="text-xs font-medium" theme="light">Address</Label>
+                    <Textarea
+                      id="address"
+                      value={formData.address}
+                      onChange={(e) => updateFormData("address", e.target.value)}
+                      rows={2}
+                      className="text-sm resize-none min-h-[60px]"
+                      theme="light"
+                      error={!!errors.address}
+                      required
+                    />
+                    {errors.address && <p className="text-xs text-red-600">{errors.address}</p>}
                   </div>
 
                   {/* Terms Agreement */}
                   <div className="space-y-3">
-                    <label className="flex items-start space-x-2">
-                      <input
-                        type="checkbox"
+                    <div className="flex items-start space-x-2">
+                      <Checkbox
+                        id="agreeToTerms"
                         checked={formData.agreeToTerms}
-                        onChange={(e) => updateFormData("agreeToTerms", e.target.checked)}
-                        className="w-4 h-4 text-teal-600 border-2 border-neutral-300 rounded focus:ring-teal-500 focus:ring-2 mt-0.5"
+                        onCheckedChange={(checked) => updateFormData("agreeToTerms", checked === true)}
+                        theme="light"
+                        error={!!errors.agreeToTerms}
                         required
                       />
-                      <span className="text-xs text-neutral-700">
-                        Yes, I agree to Adam's{" "}
-                        <button type="button" className="neomorphic-link">
-                          Terms & Conditions
-                        </button>{" "}
-                        and{" "}
-                        <button type="button" className="neomorphic-link">
-                          Privacy Policy
-                        </button>
-                        .
-                      </span>
-                    </label>
+                      <div className="space-y-1">
+                        <Label htmlFor="agreeToTerms" className="text-xs font-normal leading-normal" theme="light">
+                          Yes, I agree to Adam's{" "}
+                          <Button variant="link" className="h-auto p-0 text-teal-600 hover:text-teal-700 underline text-xs" theme="light">
+                            Terms & Conditions
+                          </Button>{" "}
+                          and{" "}
+                          <Button variant="link" className="h-auto p-0 text-teal-600 hover:text-teal-700 underline text-xs" theme="light">
+                            Privacy Policy
+                          </Button>
+                          .
+                        </Label>
+                        {errors.agreeToTerms && <p className="text-xs text-red-600">{errors.agreeToTerms}</p>}
+                      </div>
+                    </div>
 
-                    <label className="flex items-start space-x-2">
-                      <input
-                        type="checkbox"
+                    <div className="flex items-start space-x-2">
+                      <Checkbox
+                        id="marketingOptOut"
                         checked={formData.marketingOptOut}
-                        onChange={(e) => updateFormData("marketingOptOut", e.target.checked)}
-                        className="w-4 h-4 text-teal-600 border-2 border-neutral-300 rounded focus:ring-teal-500 focus:ring-2 mt-0.5"
+                        onCheckedChange={(checked) => updateFormData("marketingOptOut", checked === true)}
+                        theme="light"
                       />
-                      <span className="text-xs text-neutral-700">
+                      <Label htmlFor="marketingOptOut" className="text-xs font-normal leading-normal" theme="light">
                         I do not wish to receive marketing communications that include special offers, promotions, or
                         educational content.
-                      </span>
-                    </label>
+                      </Label>
+                    </div>
                   </div>
 
                   {/* Error Display */}
@@ -460,17 +595,16 @@ export function SinglePageCheckout() {
                   )}
 
                   {/* Submit Button */}
-                  <div className="neomorphic-button-container">
-                    <button
+                  <div className="w-full">
+                    <Button
                       type="submit"
                       disabled={isSubmitting || cartState.items.length === 0}
-                      className="neomorphic-primary-button h-10 text-base group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                      size="lg"
+                      className="w-full h-10 text-base bg-teal-500 hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      theme="light"
                     >
-                      <span className="relative z-10 transition-transform duration-300 group-hover:scale-105">
-                        {isSubmitting ? 'Processing...' : 'Continue to Payment →'}
-                      </span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-orange-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                    </button>
+                      {isSubmitting ? 'Processing...' : 'Continue to Payment →'}
+                    </Button>
                   </div>
                 </div>
               </div>
