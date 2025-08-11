@@ -57,8 +57,6 @@ export async function uploadImageToSupabase(
                 throw new Error(`Failed to create bucket: ${createError.message}. Please create the '${BUCKET_NAME}' bucket manually in Supabase Dashboard.`)
             }
 
-            console.log('Successfully created temp-images bucket')
-
             // Retry upload after creating bucket
             const { data: retryData, error: retryError } = await supabase.storage
                 .from(BUCKET_NAME)
@@ -89,48 +87,6 @@ export async function uploadImageToSupabase(
 
     return data.path
 }
-
-async function storeImage(sessionId: string, questionId: string, imageData: string | File) {
-    try {
-        let fileToUpload: File;
-
-        if (typeof imageData === 'string' && imageData.startsWith('data:')) {
-            // Convert base64 data URL string to File
-            fileToUpload = base64ToFile(imageData, 'upload-image');
-        } else if (imageData instanceof File) {
-            fileToUpload = imageData;
-        } else {
-            throw new Error('Invalid image data format');
-        }
-
-        // Compress file if needed
-        if (needsCompression(fileToUpload, 100 * 1024)) {
-            // Get optimal compression options based on original size
-            const options = getOptimalCompressionOptions(fileToUpload.size, 100 * 1024);
-            const compressionResult = await compressImage(fileToUpload, options);
-            fileToUpload = compressionResult.file;
-            console.log('Compressed image:', getCompressionInfo(compressionResult.originalSize, compressionResult.compressedSize));
-        }
-
-        // Now upload compressed file
-        const supabasePath = await uploadImageToSupabase(sessionId, questionId, fileToUpload);
-
-        const imageId = `${sessionId}_${questionId}_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-
-        // Optionally store metadata or reference with file details
-        const metadata = {
-            name: fileToUpload.name,
-            size: fileToUpload.size,
-            fileType: fileToUpload.type
-        };
-        storeImageReference(sessionId, questionId, imageId, supabasePath, metadata);
-
-        return { imageId, supabasePath };
-    } catch (error) {
-        throw new Error(`Failed to store image: ${error instanceof Error ? error.message : error}`);
-    }
-}
-
 
 function getFileExtension(imageData: string | File): string {
     if (imageData instanceof File) {

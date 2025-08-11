@@ -72,16 +72,6 @@ function determineNorwoodScale(data: PatientData): number {
 }
 
 function recommendTreatment(data: PatientData): RecommendationResult {
-    // Debug: log the incoming data object
-    if (typeof window !== 'undefined') {
-        // Client-side (browser)
-        console.log('recommendTreatment data:', data)
-    } else {
-        // Server-side (Node.js)
-        // eslint-disable-next-line no-console
-        console.log('recommendTreatment data (server):', data)
-    }
-
     // Step 1: Eligibility Screening
     if (!checkEligibility(data)) {
         return {
@@ -93,7 +83,6 @@ function recommendTreatment(data: PatientData): RecommendationResult {
 
     // Step 2: Hair Loss Pattern Assessment
     const hairLossPattern = assessHairLossPattern(data)
-    console.log('hairLossPattern:', hairLossPattern)
     if (hairLossPattern === "Patchy Hair Loss" || hairLossPattern === "Scarring/Unusual Pattern") {
         return {
             recommendation: "Refer to dermatologist",

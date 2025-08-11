@@ -8,12 +8,12 @@ import { resolveQuizResponseImages } from '@/lib/storage/server-image-resolver'
  * Submit questionnaire and cart data to eMed system
  */
 export async function submitQuestionnaireAndCart(
-    patientId: string, 
+    patientId: string,
     checkoutData: CheckoutRequest
 ): Promise<void> {
     try {
         const quizResponses = getQuizDataFromCheckout(checkoutData)
-        
+
         if (!quizResponses || Object.keys(quizResponses).length === 0) {
             return
         }
@@ -45,8 +45,6 @@ export async function submitQuestionnaireAndCart(
         // Convert quiz responses to photos array for binary creation
         const photos: PhotoInput[] = await extractPhotosFromQuizResponses(quizResponses)
 
-        console.log('Extracted photos:', photos)
-
         // Use the saveQuestionnaireAndCart method
         const response = await medplumService.saveQuestionnaireAndCart(
             patientId,
@@ -54,8 +52,6 @@ export async function submitQuestionnaireAndCart(
             { quizResponses, questions },
             checkoutData.cartItems
         )
-
-        console.log('Questionnaire and cart saved successfully:', response)
 
         if (!response.success) {
             throw new Error(response.error || 'Failed to submit questionnaire')
@@ -79,10 +75,10 @@ function getQuizDataFromCheckout(checkoutData: CheckoutRequest): Record<string, 
  */
 async function extractPhotosFromQuizResponses(quizResponses: Record<string, any>): Promise<PhotoInput[]> {
     const photos: PhotoInput[] = []
-    
+
     // First resolve any image references to base64 on server-side
     const resolvedResponses = await resolveQuizResponseImages(quizResponses)
-    
+
     for (const [questionId, response] of Object.entries(resolvedResponses)) {
         if (Array.isArray(response)) {
             // Handle array of responses (could include images)
@@ -98,7 +94,7 @@ async function extractPhotosFromQuizResponses(quizResponses: Record<string, any>
             if (photo) photos.push(photo)
         }
     }
-    
+
     return photos
 }
 
@@ -110,20 +106,20 @@ function isImageResponse(response: any): boolean {
     if (response?.type === 'image_reference') {
         return true
     }
-    
+
     // Check for base64 image data
     if (typeof response === 'string' && response.startsWith('data:image/')) {
         return true
     }
-    
+
     // Check for file object with image data
-    if (response && typeof response === 'object' && 
+    if (response && typeof response === 'object' &&
         response.name && response.type && response.data &&
         typeof response.type === 'string' && response.type.startsWith('image/') &&
         typeof response.data === 'string' && response.data.startsWith('data:image/')) {
         return true
     }
-    
+
     return false
 }
 
@@ -137,31 +133,31 @@ async function convertToPhotoInput(imageResponse: any, description: string): Pro
             // If we still receive an image reference, it means resolution failed - skip it
             return null
         }
-        
+
         if (typeof imageResponse === 'string' && imageResponse.startsWith('data:image/')) {
             // Extract content type and base64 data
             const [header, base64Data] = imageResponse.split(',')
             const contentType = header.match(/data:(.*?);/)?.[1] || 'image/jpeg'
-            
+
             return {
                 contentType,
                 dataBase64: base64Data,
                 description
             }
         }
-        
-        if (imageResponse && typeof imageResponse === 'object' && 
+
+        if (imageResponse && typeof imageResponse === 'object' &&
             imageResponse.name && imageResponse.type && imageResponse.data) {
             // Extract base64 data from file object
             const [, base64Data] = imageResponse.data.split(',')
-            
+
             return {
                 contentType: imageResponse.type,
                 dataBase64: base64Data,
                 description: `${description} - ${imageResponse.name}`
             }
         }
-        
+
         return null
     } catch (error) {
         return null

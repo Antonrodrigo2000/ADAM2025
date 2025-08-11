@@ -65,9 +65,7 @@ class SupabaseImageStorageService {
   }
 
   async getImageAsBase64(imageId: string): Promise<string | null> {
-    try {
-      console.log('getImageAsBase64 called with imageId:', imageId)
-      
+    try {      
       // Parse imageId: quiz_timestamp_sessionSuffix_questionId_index_timestamp_randomString
       // Example: quiz_1754938053320_foz6gxedg_2d44a2a7-cb99-406d-9953-0624ce67b6df_0_1754938085155_ibqz2nbou
       const parts = imageId.split('_')
@@ -78,12 +76,8 @@ class SupabaseImageStorageService {
       
       const sessionId = parts[0] + '_' + parts[1] + '_' + parts[2] // quiz_timestamp_sessionSuffix
       const questionId = parts[3] + '-' + parts[4] + '-' + parts[5] + '-' + parts[6] + '-' + parts[7] // UUID format
-      
-      console.log('Parsed sessionId:', sessionId)
-      console.log('Parsed questionId:', questionId)
-      
+            
       const reference = getImageReference(sessionId, questionId, imageId)
-      console.log('Found reference:', reference)
       
       if (!reference) {
         console.warn('No reference found for:', { sessionId, questionId, imageId })
@@ -91,7 +85,6 @@ class SupabaseImageStorageService {
       }
       
       const base64 = await getImageAsBase64FromSupabase(reference.supabasePath)
-      console.log('Retrieved base64:', base64 ? 'SUCCESS' : 'FAILED')
       
       return base64
     } catch (error) {

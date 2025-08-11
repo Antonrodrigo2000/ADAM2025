@@ -132,7 +132,7 @@ function isImageData(value: any): boolean {
         return true
     }
     // Check if it's a file object from QuestionCard (structure: {name, size, type, data})
-    if (value && typeof value === 'object' && 
+    if (value && typeof value === 'object' &&
         value.name && value.size && value.type && value.data &&
         typeof value.type === 'string' && value.type.startsWith('image/') &&
         typeof value.data === 'string' && value.data.startsWith('data:image/')) {
@@ -154,50 +154,45 @@ async function processAnswerValue(
         return value
     }
 
-    console.log('processAnswerValue - processing:', value)
-
     try {
         // Handle single image
         if (typeof value === 'string' && value.startsWith('data:image/')) {
-            console.log('Processing base64 string')
             const result = await supabaseImageStorage.storeImage(sessionId, questionId, value)
             return { type: 'image_reference', imageId: result.imageId, supabasePath: result.supabasePath }
+
         } else if (value instanceof File && value.type.startsWith('image/')) {
-            console.log('Processing File object')
             const result = await supabaseImageStorage.storeImage(sessionId, questionId, value)
             return { type: 'image_reference', imageId: result.imageId, supabasePath: result.supabasePath, metadata: { name: value.name, size: value.size, fileType: value.type } }
-        } else if (value && typeof value === 'object' && 
-                   value.name && value.size && value.type && value.data &&
-                   typeof value.type === 'string' && value.type.startsWith('image/') &&
-                   typeof value.data === 'string' && value.data.startsWith('data:image/')) {
-            console.log('Processing QuestionCard file object with metadata:', { name: value.name, size: value.size, type: value.type })
+
+        } else if (value && typeof value === 'object' &&
+            value.name && value.size && value.type && value.data &&
+            typeof value.type === 'string' && value.type.startsWith('image/') &&
+            typeof value.data === 'string' && value.data.startsWith('data:image/')) {
+
             // Handle file object from QuestionCard - store the base64 data
             const result = await supabaseImageStorage.storeImage(sessionId, questionId, value.data)
-            const resultWithMetadata = { 
-                type: 'image_reference', 
-                imageId: result.imageId, 
+            const resultWithMetadata = {
+                type: 'image_reference',
+                imageId: result.imageId,
                 supabasePath: result.supabasePath,
-                metadata: { name: value.name, size: value.size, fileType: value.type } 
+                metadata: { name: value.name, size: value.size, fileType: value.type }
             }
-            console.log('Created image reference with metadata:', resultWithMetadata)
             return resultWithMetadata
         }
 
         // Handle array of images
         if (Array.isArray(value)) {
-            console.log('Processing array of files')
             const processedItems = await Promise.all(
                 value.map(async (item, index) => {
                     if (isImageData(item)) {
                         // Check if it's a QuestionCard file object
-                        if (item && typeof item === 'object' && 
+                        if (item && typeof item === 'object' &&
                             item.name && item.size && item.type && item.data &&
                             typeof item.type === 'string' && item.type.startsWith('image/') &&
                             typeof item.data === 'string' && item.data.startsWith('data:image/')) {
-                            console.log('Processing array item - QuestionCard file object:', { name: item.name, size: item.size, type: item.type })
                             const result = await supabaseImageStorage.storeImage(sessionId, `${questionId}_${index}`, item.data)
                             const resultWithMetadata = { type: 'image_reference', imageId: result.imageId, supabasePath: result.supabasePath, metadata: { name: item.name, size: item.size, fileType: item.type } }
-                            console.log('Created array item image reference with metadata:', resultWithMetadata)
+                            
                             return resultWithMetadata
                         } else {
                             // Handle other image types (base64 strings, File objects)
@@ -222,11 +217,11 @@ async function processAnswerValue(
 function createSafeStateForStorage(state: QuizState): QuizState {
     // Create a copy of the state with potentially dangerous values filtered out
     const safeAnswers: Record<string, any> = {}
-    
+
     for (const [questionId, answer] of Object.entries(state.answers)) {
         safeAnswers[questionId] = filterLargeValues(answer)
     }
-    
+
     return {
         ...state,
         answers: safeAnswers
@@ -238,30 +233,30 @@ function filterLargeValues(value: any): any {
     if (value?.type === 'image_reference') {
         return value
     }
-    
+
     // If it's a base64 image, replace with placeholder
     if (typeof value === 'string' && value.startsWith('data:image/')) {
         return { type: 'temp_image', size: value.length }
     }
-    
+
     // If it's a File object, replace with placeholder
     if (value instanceof File && value.type.startsWith('image/')) {
         return { type: 'temp_file', name: value.name, size: value.size }
     }
-    
+
     // If it's a file object from QuestionCard, replace with placeholder
-    if (value && typeof value === 'object' && 
+    if (value && typeof value === 'object' &&
         value.name && value.size && value.type && value.data &&
         typeof value.type === 'string' && value.type.startsWith('image/') &&
         typeof value.data === 'string' && value.data.startsWith('data:image/')) {
         return { type: 'temp_file', name: value.name, size: value.size, originalType: value.type }
     }
-    
+
     // If it's an array, filter each item
     if (Array.isArray(value)) {
         return value.map(filterLargeValues)
     }
-    
+
     // If it's an object, filter its properties
     if (value && typeof value === 'object') {
         const filtered: any = {}
@@ -270,7 +265,7 @@ function filterLargeValues(value: any): any {
         }
         return filtered
     }
-    
+
     return value
 }
 
@@ -316,7 +311,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
                 console.error('Failed to initialize image storage:', error)
             }
         }
-        
+
         const fetchQuestions = async () => {
             try {
                 const supabase = createClient()
@@ -353,7 +348,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
                 console.error('Failed to fetch questions:', err)
             }
         }
-        
+
         initializeServices()
         fetchQuestions()
     }, [])
@@ -413,7 +408,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
                 // Store a safe placeholder immediately
                 const safePlaceholder = filterLargeValues(value)
                 dispatch({ type: 'SET_ANSWER', questionId, value: safePlaceholder })
-                
+
                 // Process images in background
                 processAnswerValue(state.sessionId, questionId, value)
                     .then((processedValue) => {
@@ -421,14 +416,14 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
                     })
                     .catch((error) => {
                         console.error('Error processing answer:', error)
-                        
+
                         // Show user-friendly error message
                         if (error.message.includes('bucket')) {
                             console.warn('Image storage not properly configured. Please check the Supabase setup guide.')
                         } else if (error.message.includes('access denied')) {
                             console.warn('Storage access denied. Please check storage policies.')
                         }
-                        
+
                         // Keep the safe placeholder if processing fails
                     })
             } else {

@@ -99,7 +99,6 @@ export function SinglePageCheckout() {
     // Note: Don't redirect if checkout was completed successfully
     useEffect(() => {
         if (isCartLoaded && cartState.items.length === 0 && !isSubmitting && !checkoutCompleted) {
-            console.log("Cart is empty, redirecting to home")
             window.location.href = '/'
         }
     }, [isCartLoaded, cartState.items.length, isSubmitting, checkoutCompleted])
@@ -196,7 +195,7 @@ export function SinglePageCheckout() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        //setIsSubmitting(true)
+        setIsSubmitting(true)
         setSubmitError(null)
 
         // Validate form data
@@ -221,7 +220,6 @@ export function SinglePageCheckout() {
             const result = await processCheckout()
 
             if (result.success) {
-                console.log(result)
                 // Mark checkout as completed to prevent home redirect
                 setCheckoutCompleted(true)
 
@@ -230,7 +228,7 @@ export function SinglePageCheckout() {
                 cartActions.clearCheckoutData()
 
                 // Redirect to dashboard - server-side auth will handle authentication check
-                //window.location.href = result.redirectUrl || '/dashboard'
+                window.location.href = result.redirectUrl || '/dashboard'
             } else {
                 throw new Error('Checkout failed')
             }

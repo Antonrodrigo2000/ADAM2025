@@ -103,12 +103,8 @@ export class MedplumService {
     ): Promise<string> {
         const medplum = await createMedplumClient();
 
-        console.log('Creating QuestionnaireResponse with answers:', answers)
-
         const questionnaireResponse = buildQuestionnaireResponse(questionnaireId, patientRef, answers)
         const createdQuestionnaireResponse = await medplum.createResource(questionnaireResponse)
-
-        console.log('Created QuestionnaireResponse:', createdQuestionnaireResponse)
 
         return createdQuestionnaireResponse.id!
     }
@@ -137,8 +133,6 @@ export class MedplumService {
                 binaryIds.push(result)
                 photo.binaryId = result
             }
-
-            console.log('Processed photos:', binaryIds, 'with compression info:')
 
             // Build questionnaire input using database questions with proper linkId and text
             const questionnaireInput = buildQuestionnaireInputFromDatabase(
