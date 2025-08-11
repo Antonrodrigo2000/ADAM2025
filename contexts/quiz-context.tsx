@@ -5,7 +5,7 @@ import { QuizState, QuizActions } from './types'
 import recommendTreatment from '@/lib/algorithm/hairloss-recommendations'
 import { Question } from '@/data/types/question'
 import { createClient } from '../lib/supabase/client'
-import imageStorage from '@/lib/storage/image-storage'
+import supabaseImageStorage from '@/lib/storage/supabase-image-storage'
 
 // Initial state
 const initialQuizState: QuizState = {
@@ -119,7 +119,7 @@ function quizReducer(state: QuizState & { questions?: Question[] }, action: Quiz
 
 // Helper functions
 function generateSessionId(): string {
-    return `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `quiz_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
 }
 
 function isImageData(value: any): boolean {
@@ -160,22 +160,27 @@ async function processAnswerValue(
         // Handle single image
         if (typeof value === 'string' && value.startsWith('data:image/')) {
             console.log('Processing base64 string')
-            const imageId = await imageStorage.storeImage(sessionId, questionId, value)
-            return { type: 'image_reference', imageId }
+            const result = await supabaseImageStorage.storeImage(sessionId, questionId, value)
+            return { type: 'image_reference', imageId: result.imageId, supabasePath: result.supabasePath }
         } else if (value instanceof File && value.type.startsWith('image/')) {
             console.log('Processing File object')
-            const imageId = await imageStorage.storeImage(sessionId, questionId, value)
-            return { type: 'image_reference', imageId }
+            const result = await supabaseImageStorage.storeImage(sessionId, questionId, value)
+            return { type: 'image_reference', imageId: result.imageId, supabasePath: result.supabasePath, metadata: { name: value.name, size: value.size, fileType: value.type } }
         } else if (value && typeof value === 'object' && 
                    value.name && value.size && value.type && value.data &&
                    typeof value.type === 'string' && value.type.startsWith('image/') &&
                    typeof value.data === 'string' && value.data.startsWith('data:image/')) {
             console.log('Processing QuestionCard file object with metadata:', { name: value.name, size: value.size, type: value.type })
             // Handle file object from QuestionCard - store the base64 data
-            const imageId = await imageStorage.storeImage(sessionId, questionId, value.data)
-            const result = { type: 'image_reference', imageId, metadata: { name: value.name, size: value.size, fileType: value.type } }
-            console.log('Created image reference with metadata:', result)
-            return result
+            const result = await supabaseImageStorage.storeImage(sessionId, questionId, value.data)
+            const resultWithMetadata = { 
+                type: 'image_reference', 
+                imageId: result.imageId, 
+                supabasePath: result.supabasePath,
+                metadata: { name: value.name, size: value.size, fileType: value.type } 
+            }
+            console.log('Created image reference with metadata:', resultWithMetadata)
+            return resultWithMetadata
         }
 
         // Handle array of images
@@ -190,14 +195,14 @@ async function processAnswerValue(
                             typeof item.type === 'string' && item.type.startsWith('image/') &&
                             typeof item.data === 'string' && item.data.startsWith('data:image/')) {
                             console.log('Processing array item - QuestionCard file object:', { name: item.name, size: item.size, type: item.type })
-                            const imageId = await imageStorage.storeImage(sessionId, `${questionId}_${index}`, item.data)
-                            const result = { type: 'image_reference', imageId, metadata: { name: item.name, size: item.size, fileType: item.type } }
-                            console.log('Created array item image reference with metadata:', result)
-                            return result
+                            const result = await supabaseImageStorage.storeImage(sessionId, `${questionId}_${index}`, item.data)
+                            const resultWithMetadata = { type: 'image_reference', imageId: result.imageId, supabasePath: result.supabasePath, metadata: { name: item.name, size: item.size, fileType: item.type } }
+                            console.log('Created array item image reference with metadata:', resultWithMetadata)
+                            return resultWithMetadata
                         } else {
                             // Handle other image types (base64 strings, File objects)
-                            const imageId = await imageStorage.storeImage(sessionId, `${questionId}_${index}`, item)
-                            return { type: 'image_reference', imageId }
+                            const result = await supabaseImageStorage.storeImage(sessionId, `${questionId}_${index}`, item)
+                            return { type: 'image_reference', imageId: result.imageId, supabasePath: result.supabasePath }
                         }
                     }
                     return item
@@ -305,11 +310,8 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
     // Initialize image storage and fetch questions from Supabase
     useEffect(() => {
         const initializeServices = async () => {
-            // Initialize image storage
             try {
-                await imageStorage.init()
-                // Clean up old images (older than 24 hours)
-                await imageStorage.cleanupOldImages()
+                await supabaseImageStorage.cleanupOldImages()
             } catch (error) {
                 console.error('Failed to initialize image storage:', error)
             }
@@ -419,6 +421,14 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
                     })
                     .catch((error) => {
                         console.error('Error processing answer:', error)
+                        
+                        // Show user-friendly error message
+                        if (error.message.includes('bucket')) {
+                            console.warn('Image storage not properly configured. Please check the Supabase setup guide.')
+                        } else if (error.message.includes('access denied')) {
+                            console.warn('Storage access denied. Please check storage policies.')
+                        }
+                        
                         // Keep the safe placeholder if processing fails
                     })
             } else {
@@ -446,7 +456,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
             localStorage.removeItem('clinical-quiz-state')
             // Clean up images after submission
             try {
-                await imageStorage.deleteImagesBySession(state.sessionId)
+                await supabaseImageStorage.deleteImagesBySession(state.sessionId)
             } catch (error) {
                 console.error('Failed to cleanup images after quiz submission:', error)
             }
@@ -457,7 +467,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
             localStorage.removeItem('clinical-quiz-state')
             // Clean up images from the old session
             try {
-                await imageStorage.deleteImagesBySession(oldSessionId)
+                await supabaseImageStorage.deleteImagesBySession(oldSessionId)
             } catch (error) {
                 console.error('Failed to cleanup images after quiz reset:', error)
             }
@@ -478,7 +488,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
     // Image retrieval functions
     const getImage = async (imageId: string): Promise<string | File | null> => {
         try {
-            return await imageStorage.getImage(imageId)
+            return await supabaseImageStorage.getImage(imageId)
         } catch (error) {
             console.error('Failed to retrieve image:', error)
             return null
@@ -492,7 +502,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
         try {
             // Handle single image reference
             if (answer?.type === 'image_reference') {
-                return await imageStorage.getImage(answer.imageId)
+                return await supabaseImageStorage.getImage(answer.imageId)
             }
 
             // Handle placeholders - return null to indicate images are still processing
@@ -505,7 +515,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
                 const resolvedItems = await Promise.all(
                     answer.map(async (item) => {
                         if (item?.type === 'image_reference') {
-                            return await imageStorage.getImage(item.imageId)
+                            return await supabaseImageStorage.getImage(item.imageId)
                         }
                         if (item?.type === 'temp_image' || item?.type === 'temp_file') {
                             return null // Still processing

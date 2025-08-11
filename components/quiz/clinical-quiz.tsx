@@ -7,7 +7,7 @@ import { QuestionCard } from "./question-card"
 import { ReviewScreen } from "./review-screen"
 import { RecommendationsScreen } from "./recommendations-screen"
 import { useQuiz } from "@/contexts"
-import type { Question } from "@/data/hairlossquestions"
+import type { Question } from "@/data/types/question"
 
 export function ClinicalQuiz() {
     const { state, actions, questions } = useQuiz() // get questions from context

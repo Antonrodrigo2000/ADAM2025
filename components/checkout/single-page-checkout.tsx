@@ -152,7 +152,7 @@ export function SinglePageCheckout() {
                 postcode: formData.postcode,
                 country: 'Sri Lanka',
             },
-            quizResponses: quizState.answers,
+            quizResponses: quizState.answers, // Send as-is, server handles images
             agreedToTerms: formData.agreeToTerms,
             agreedToMarketing: !formData.marketingOptOut,
         })
@@ -180,7 +180,7 @@ export function SinglePageCheckout() {
                 marketingOptOut: formData.marketingOptOut,
                 cartItems: cartState.items,
                 cartTotal: cartState.total,
-                quizResponses: quizState.answers,
+                quizResponses: quizState.answers, // Send as-is, server handles images
             }),
         })
 
@@ -196,7 +196,7 @@ export function SinglePageCheckout() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        setIsSubmitting(true)
+        //setIsSubmitting(true)
         setSubmitError(null)
 
         // Validate form data
@@ -230,7 +230,7 @@ export function SinglePageCheckout() {
                 cartActions.clearCheckoutData()
 
                 // Redirect to dashboard - server-side auth will handle authentication check
-                window.location.href = result.redirectUrl || '/dashboard'
+                //window.location.href = result.redirectUrl || '/dashboard'
             } else {
                 throw new Error('Checkout failed')
             }

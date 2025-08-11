@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { CheckoutRequest } from './validation'
 import { medplumService } from '@/lib/emed'
 import type { PhotoInput } from '@/data/types'
+import { resolveQuizResponseImages } from '@/lib/storage/server-image-resolver'
 
 /**
  * Submit questionnaire and cart data to eMed system
@@ -44,6 +45,8 @@ export async function submitQuestionnaireAndCart(
         // Convert quiz responses to photos array for binary creation
         const photos: PhotoInput[] = await extractPhotosFromQuizResponses(quizResponses)
 
+        console.log('Extracted photos:', photos)
+
         // Use the saveQuestionnaireAndCart method
         const response = await medplumService.saveQuestionnaireAndCart(
             patientId,
@@ -51,6 +54,8 @@ export async function submitQuestionnaireAndCart(
             { quizResponses, questions },
             checkoutData.cartItems
         )
+
+        console.log('Questionnaire and cart saved successfully:', response)
 
         if (!response.success) {
             throw new Error(response.error || 'Failed to submit questionnaire')
@@ -75,7 +80,10 @@ function getQuizDataFromCheckout(checkoutData: CheckoutRequest): Record<string, 
 async function extractPhotosFromQuizResponses(quizResponses: Record<string, any>): Promise<PhotoInput[]> {
     const photos: PhotoInput[] = []
     
-    for (const [questionId, response] of Object.entries(quizResponses)) {
+    // First resolve any image references to base64 on server-side
+    const resolvedResponses = await resolveQuizResponseImages(quizResponses)
+    
+    for (const [questionId, response] of Object.entries(resolvedResponses)) {
         if (Array.isArray(response)) {
             // Handle array of responses (could include images)
             for (const [index, item] of response.entries()) {
@@ -126,6 +134,7 @@ async function convertToPhotoInput(imageResponse: any, description: string): Pro
     try {
         if (imageResponse?.type === 'image_reference') {
             // Image references should be resolved on the client side before sending to server
+            // If we still receive an image reference, it means resolution failed - skip it
             return null
         }
         
