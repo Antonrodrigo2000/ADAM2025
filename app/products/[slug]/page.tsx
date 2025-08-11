@@ -22,20 +22,16 @@ async function fetchProductBySlug(slug: string) {
     let apiUrl: string
     if (isGenieId) {
       // Direct fetch by Genie product ID (more efficient)
-      console.log(`Fetching product with ID: ${slug}`)
       apiUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/products?id=${encodeURIComponent(slug)}`
     } else {
       // Legacy: Extract product name from slug for API query
       const productName = slug.replace(/-/g, ' ')
-      console.log(`Fetching product with name: ${productName}`)
       apiUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/products?name=${encodeURIComponent(productName)}`
     }
     
     const response = await fetch(apiUrl, { 
       cache: 'no-store' // Always fetch fresh data
     })
-
-    console.log(`Fetching product with slug: ${slug}`, response)
 
     if (!response.ok) {
       throw new Error('Failed to fetch product')
