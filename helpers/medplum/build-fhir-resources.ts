@@ -267,10 +267,6 @@ export function buildBinaryResource(photo: PhotoInput, patientRef?: string, id?:
     return addMetaCompartment(binary)
 }
 
-// ============================================================================
-// QUESTIONNAIRE RESPONSE BUILDERS
-// ============================================================================
-
 /**
  * Build FHIR QuestionnaireResponse resource
  */
