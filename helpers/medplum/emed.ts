@@ -5,7 +5,6 @@ import {
     buildPatientPatch,
     buildBinaryResource,
     buildQuestionnaireResponse,
-    buildQuestionnaireInput,
     buildQuestionnaireInputFromDatabase
 } from './build-fhir-resources'
 import { createMedplumClient } from '@/lib/medplum/client'
@@ -100,128 +99,60 @@ export class MedplumService {
     }
 
     /**
-     * Submit questionaire & patient cart to FHIR server using sequential creation
+     * Save questionnaire and cart data to FHIR server
      */
-    async createPatientAndQuestionnaireResponse(
+    async saveQuestionnaireAndCart(
         patientId: string,
         photos: PhotoInput[],
-        questionnaireData: any,): Promise<MedplumResponse> {
-        const medplum = await createMedplumClient();
-
-        const binaryIds: string[] = []
-        const patientRef = `Patient/${patientId}`
-
-        for (let i = 0; i < photos.length; i++) {
-            const photo = photos[i]
-            if (!photo) continue // Skip undefined photos
-
-            console.log(`📸 Creating Binary resource ${i + 1}/${photos.length}`)
-
-            const binaryId = await this.createBinaryResource(photo, patientRef)
-            binaryIds.push(binaryId)
-
-            // Update the photo with the binary ID for QuestionnaireResponse reference
-            photo.binaryId = binaryId
-        }
-
-        // const questionnaireInput = buildQuestionnaireInputFromDatabase(questionnaireData, photos)
-
-        // // 4. Create QuestionnaireResponse with patient reference
-        // const questionnaireResponseId = await this.createQuestionnaireResponse(
-        //     questionnaireInput.questionnaireId,
-        //     patientRef,
-        //     questionnaireInput.answers
-        // )
-
-        const response: MedplumResponse = {
-            success: true,
-            patientId,
-            // questionnaireResponseId,
-            binaryIds,
-        }
-
-        return response;
-    }
-
-
-    /**
-     * Submit patient data to FHIR server using sequential creation
-     */
-    async submitPatientData(
-        patientData: PatientInput,
-        photos: PhotoInput[],
-        questionnaireData: any,
-        assessmentType: string
+        questionnaireData: { quizResponses: Record<string, any>; questions: any[] },
+        cartItems: any[]
     ): Promise<MedplumResponse> {
         try {
-            console.log('🚀 Starting patient data submission...')
-            console.log('📋 Patient data:', { name: `${patientData.firstName} ${patientData.lastName}`, nic: patientData.nic })
-            console.log('📸 Photos:', photos.length)
-            console.log('📝 Assessment type:', assessmentType)
-
-            // 1. Find existing patient or create new one
-            let existingPatient = await this.findPatientByNicOrEmail(patientData.nic, patientData.email)
-            let patientId = existingPatient?.id
-
-            if (!patientId) {
-                patientId = await this.createPatient(patientData)
-            } else {
-                await this.updatePatient(patientData, existingPatient!)
-            }
-
-            // 2. Create Binary resources with patient reference
-            console.log('📸 Creating Binary resources...')
             const binaryIds: string[] = []
             const patientRef = `Patient/${patientId}`
 
+            // Create Binary resources for photos
             for (let i = 0; i < photos.length; i++) {
                 const photo = photos[i]
-                if (!photo) continue // Skip undefined photos
-
-                console.log(`📸 Creating Binary resource ${i + 1}/${photos.length}`)
+                if (!photo) continue
 
                 const binaryId = await this.createBinaryResource(photo, patientRef)
                 binaryIds.push(binaryId)
 
-                // Update the photo with the binary ID for QuestionnaireResponse reference
                 photo.binaryId = binaryId
             }
 
-            // 3. Create questionnaire input with updated photo references
-            console.log('📝 Creating questionnaire input...')
-            const questionnaireInput = buildQuestionnaireInput(questionnaireData, photos, assessmentType)
+            // Build questionnaire input using database questions with proper linkId and text
+            const questionnaireInput = buildQuestionnaireInputFromDatabase(
+                questionnaireData.quizResponses,
+                questionnaireData.questions,
+                photos,
+                'hair-loss',
+                cartItems
+            )
 
-            // 4. Create QuestionnaireResponse with patient reference
+            // Create QuestionnaireResponse with patient reference
             const questionnaireResponseId = await this.createQuestionnaireResponse(
                 questionnaireInput.questionnaireId,
                 patientRef,
                 questionnaireInput.answers
             )
 
-            // 5. Build response
-            const response: MedplumResponse = {
+            return {
                 success: true,
                 patientId,
                 questionnaireResponseId,
                 binaryIds,
             }
-
-            console.log('✅ All resources created successfully!')
-            console.log('📊 Final response:', {
-                patientId: response.patientId,
-                questionnaireResponseId: response.questionnaireResponseId,
-                binaryIds: response.binaryIds
-            })
-
-            return response
         } catch (error) {
-            console.error('❌ Error submitting patient data:', error)
             return {
                 success: false,
                 error: error instanceof Error ? error.message : 'Unknown error occurred',
             }
         }
     }
+
+
 
     /**
      * Test connection to Medplum server
@@ -230,14 +161,9 @@ export class MedplumService {
         const medplum = await createMedplumClient();
 
         try {
-            console.log('Testing connection to Medplum server...')
-
             await medplum.searchResources('Patient', { _count: '1' })
-
-            console.log('Connection successful')
             return true
         } catch (error) {
-            console.error('Connection test failed:', error)
             return false
         }
     }

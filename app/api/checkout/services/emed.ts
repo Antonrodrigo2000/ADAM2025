@@ -1,6 +1,7 @@
 import { createOrGetEmedPatient, updateUserEmedPatientId } from '@/lib/emed'
 import { createClient } from '@/lib/supabase/server'
 import type { CheckoutRequest } from './validation'
+import { submitQuestionnaireAndCart } from './questionnaire-submission'
 
 export interface EmedIntegrationResult {
     success: boolean
@@ -79,7 +80,8 @@ export async function handleEmedIntegration(
             // The patient ID is still returned so it can be used
         }
 
-        //submit questionaire & cart
+        // Submit questionnaire & cart
+        await submitQuestionnaireAndCart(emedResult.patientId, checkoutData)
 
         return {
             success: true,
