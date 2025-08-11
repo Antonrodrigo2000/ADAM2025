@@ -82,10 +82,10 @@ export async function compressImagesForMedplum(
     options: MedplumCompressionOptions = {}
 ): Promise<MedplumCompressionResult[]> {
     const results = await Promise.all(
-        files.map((file, index) =>
+        files.map((file, index) => 
             compressImageForMedplum(
-                file,
-                descriptions?.[index],
+                file, 
+                descriptions?.[index], 
                 options
             )
         )

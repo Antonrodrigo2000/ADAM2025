@@ -5,7 +5,7 @@
  * Run with: npx tsx scripts/test-image-compression.ts
  */
 
-import { validatePhotoInputForMedplum } from '../helpers/medplum/medplum-image-compressor'
+import { validatePhotoInputForMedplum } from '../lib/emed/image-compressor'
 import { formatFileSize, getCompressionInfo } from '../helpers/image-compressor'
 import type { PhotoInput } from '../data/types'
 
@@ -199,7 +199,7 @@ async function testQuestionnaireStructure() {
   ]
 
   // Import the function we want to test
-  const { buildQuestionnaireInputFromDatabase } = await import('../helpers/medplum/build-fhir-resources')
+  const { buildQuestionnaireInputFromDatabase } = await import('../lib/emed/fhir-builders')
   
   const mockCartItems = [
     { productId: 'product-123', productName: 'Hair Growth Serum' },

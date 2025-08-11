@@ -1,5 +1,5 @@
 import type { PatientInput } from '@/data/types'
-import { medplumService } from '@/helpers/medplum/emed'
+import { medplumService } from './emed-service'
 
 /**
  * eMed Patient Service - Centralized patient management for eMed integration

@@ -6,12 +6,9 @@ import {
     buildBinaryResource,
     buildQuestionnaireResponse,
     buildQuestionnaireInputFromDatabase
-} from './build-fhir-resources'
+} from './fhir-builders'
 import { createMedplumClient } from '@/lib/medplum/client'
-import { compressExistingPhotoInput, validatePhotoInputForMedplum } from './medplum-image-compressor'
-
-// Adam Health Organization ID from FHIR config
-const ADAM_HEALTH_ORGANIZATION_ID = '019873c3-14e8-7306-9a3b-509c078689e0'
+import { compressExistingPhotoInput, validatePhotoInputForMedplum } from './image-compressor'
 
 export interface MedplumResponse {
     success: boolean
@@ -92,7 +89,7 @@ export class MedplumService {
      * Create Binary resource for photo with compression tracking
      */
     async createBinaryResourceWithCompressionInfo(
-        photo: PhotoInput, 
+        photo: PhotoInput,
         patientRef: string
     ): Promise<{
         binaryId: string
@@ -181,7 +178,7 @@ export class MedplumService {
 
                 // Use the method that returns compression info
                 const result = await this.createBinaryResourceWithCompressionInfo(photo, patientRef)
-                
+
                 binaryIds.push(result.binaryId)
                 photo.binaryId = result.binaryId
 
@@ -201,7 +198,7 @@ export class MedplumService {
                 photos,
                 'hair-loss',
                 cartItems,
-                ADAM_HEALTH_ORGANIZATION_ID,
+                process.env.EMED_ADAM_HEALTH_ORGANIZATION_ID,
                 patientId // Use patientId as customerId
             )
 
@@ -226,8 +223,6 @@ export class MedplumService {
             }
         }
     }
-
-
 
     /**
      * Test connection to Medplum server

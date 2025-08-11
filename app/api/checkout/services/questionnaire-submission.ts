@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import type { CheckoutRequest } from './validation'
-import { medplumService } from '@/helpers/medplum/emed'
+import { medplumService } from '@/lib/emed'
 import type { PhotoInput } from '@/data/types'
 
 /**
