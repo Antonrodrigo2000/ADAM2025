@@ -1,6 +1,5 @@
 import { compressImage, getCompressionInfo, getOptimalCompressionOptions, needsCompression } from '@/helpers/image-compressor'
 import { createClient } from '../supabase/client'
-import { storeImageReference } from './local-storage-references'
 
 const BUCKET_NAME = 'temp-images'
 
