@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 export default function PaymentPage({ params }: { params: Promise<{ sessionId: string }> }) {
-  const { session, progressToStep, isLoading, error } = useCheckoutSession()
+  const { session, progressToStep, isLoading, error, refresh } = useCheckoutSession()
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
   const [sessionId, setSessionId] = useState<string>('')
@@ -18,6 +18,22 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
     params.then(({ sessionId: id }) => setSessionId(id))
   }, [params])
 
+
+  // Refresh session only if really needed (fallback for edge cases)
+  useEffect(() => {
+    if (sessionId && session && !isLoading) {
+      // Only refresh if session seems stale AND we've been on this page for a bit
+      // This avoids immediate refresh conflicts with navigation from information page
+      if (session.current_step === 'payment' && !session.user_id) {
+        const timeoutId = setTimeout(() => {
+          console.log('Fallback: Refreshing session to get latest user data...')
+          refresh()
+        }, 500) // Longer delay to avoid conflicts
+        
+        return () => clearTimeout(timeoutId)
+      }
+    }
+  }, [sessionId, session, isLoading, refresh])
 
   // Redirect to information step if user is not set in session
   useEffect(() => {

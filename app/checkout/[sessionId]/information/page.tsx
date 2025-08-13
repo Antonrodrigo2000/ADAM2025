@@ -8,10 +8,10 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 export default function InformationPage({ params }: { params: Promise<{ sessionId: string }> }) {
-  const { session, updateSession, isLoading, error } = useCheckoutSession()
+  const { session, isLoading, error, refresh } = useCheckoutSession()
   const router = useRouter()
-  const [isProcessing, setIsProcessing] = useState(false)
   const [sessionId, setSessionId] = useState<string>('')
+  const [isNavigating, setIsNavigating] = useState(false)
 
   // Extract sessionId from params
   useEffect(() => {
@@ -27,32 +27,24 @@ export default function InformationPage({ params }: { params: Promise<{ sessionI
 
   const handleSignupComplete = async (result: any) => {
     if (result.success) {
-      setIsProcessing(true)
+      setIsNavigating(true)
       try {
-        // Update session with user info and progress to payment
-        await updateSession({
-          user_id: result.userId,
-          customer_info: {
-            first_name: result.firstName,
-            last_name: result.lastName,
-            email: result.email,
-            phone: result.phone,
-          },
-          shipping_address: result.address,
-          current_step: 'payment'
-        })
-
+        // Refresh the session context to pick up the new user data
+        await refresh()
         // Navigate to payment step
         router.push(`/checkout/${sessionId}/payment`)
       } catch (error) {
-        console.error('Failed to update session after signup:', error)
-      } finally {
-        setIsProcessing(false)
+        console.error('Failed to refresh session after signup:', error)
+        // Still navigate even if refresh fails - the payment page will handle the refresh
+        router.push(`/checkout/${sessionId}/payment`)
       }
+    } else {
+      // Handle form validation errors or API errors
+      console.error('Signup failed:', result.error)
     }
   }
 
-  if (isLoading) {
+  if (isLoading || isNavigating) {
     return <CheckoutLoadingSkeleton />
   }
 
@@ -85,6 +77,7 @@ export default function InformationPage({ params }: { params: Promise<{ sessionI
 
         {/* Signup Form */}
         <SinglePageCheckout 
+          sessionId={sessionId}
           onComplete={handleSignupComplete}
         />
       </div>

@@ -61,9 +61,10 @@ type ValidationErrors = Partial<Record<keyof FormData, string>>
 
 interface SinglePageCheckoutProps {
     onComplete?: (result: any) => void
+    sessionId?: string // For session-based checkout flow
 }
 
-export function SinglePageCheckout({ onComplete }: SinglePageCheckoutProps = {}) {
+export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckoutProps = {}) {
     const [showPassword, setShowPassword] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitError, setSubmitError] = useState<string | null>(null)
@@ -139,7 +140,58 @@ export function SinglePageCheckout({ onComplete }: SinglePageCheckoutProps = {})
 
 
     const processCheckout = async () => {
-        // Save checkout data before processing
+        // If sessionId is provided, use the new session-based signup flow
+        if (sessionId) {
+            const response = await fetch(`/api/checkout/${sessionId}/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: formData.email,
+                    password: formData.password,
+                    legalFirstName: formData.legalFirstName,
+                    legalSurname: formData.legalSurname,
+                    nic: formData.nic,
+                    dateOfBirth: formData.dateOfBirth,
+                    phoneNumber: formData.phoneNumber,
+                    sex: formData.sex,
+                    postcode: formData.postcode,
+                    city: formData.city,
+                    address: formData.address,
+                    agreeToTerms: formData.agreeToTerms,
+                    marketingOptOut: formData.marketingOptOut,
+                }),
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || 'Signup failed')
+            }
+
+            const result = await response.json()
+            return {
+                ...result,
+                success: result.success,
+                formData: formData, // Pass form data for callback usage
+                userDetails: {
+                    email: formData.email,
+                    firstName: formData.legalFirstName,
+                    lastName: formData.legalSurname,
+                    phone: formData.phoneNumber,
+                    dateOfBirth: formData.dateOfBirth,
+                    sex: formData.sex,
+                },
+                address: {
+                    street: formData.address,
+                    city: formData.city,
+                    postcode: formData.postcode,
+                    country: 'Sri Lanka',
+                }
+            }
+        }
+
+        // Legacy flow: Save checkout data before processing
         cartActions.saveCheckoutData({
             userDetails: {
                 email: formData.email,
@@ -160,7 +212,7 @@ export function SinglePageCheckout({ onComplete }: SinglePageCheckoutProps = {})
             agreedToMarketing: !formData.marketingOptOut,
         })
 
-        // Call the checkout API with all data
+        // Call the old checkout API with all data
         const response = await fetch('/api/checkout', {
             method: 'POST',
             headers: {

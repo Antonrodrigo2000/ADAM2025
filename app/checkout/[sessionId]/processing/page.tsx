@@ -140,7 +140,7 @@ export default function ProcessingPage({ params }: { params: Promise<{ sessionId
             </div>
             {session.cart_items.map((item, index) => (
               <div key={index} className="flex justify-between text-xs">
-                <span>{item.productName || `Product ${item.product_id.slice(-8)}`} × {item.quantity}</span>
+                <span>{`Product ${item.product_id.slice(-8)}`} × {item.quantity}</span>
                 <span>LKR {(item.price * item.quantity).toLocaleString()}</span>
               </div>
             ))}
