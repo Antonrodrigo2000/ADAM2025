@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Eye, EyeOff } from "lucide-react"
-import { OrderSummary } from "./order-summary"
+import { QuestionnaireNotice } from "./questionnaire-notice"
 import { useCart } from "@/contexts/cart-context"
 import { useQuiz } from "@/contexts/quiz-context"
 import { z } from "zod"
@@ -59,7 +59,11 @@ const formSchema = z.object({
 
 type ValidationErrors = Partial<Record<keyof FormData, string>>
 
-export function SinglePageCheckout() {
+interface SinglePageCheckoutProps {
+  onComplete?: (result: any) => void
+}
+
+export function SinglePageCheckout({ onComplete }: SinglePageCheckoutProps = {}) {
     const [showPassword, setShowPassword] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitError, setSubmitError] = useState<string | null>(null)
@@ -223,19 +227,28 @@ export function SinglePageCheckout() {
                 // Mark checkout as completed to prevent home redirect
                 setCheckoutCompleted(true)
 
-                // Clear cart and checkout data
-                cartActions.clearCart()
-                cartActions.clearCheckoutData()
-
-                // Redirect to dashboard - server-side auth will handle authentication check
-                window.location.href = result.redirectUrl || '/dashboard'
+                // If we have an onComplete callback, use it (for enhanced checkout flow)
+                if (onComplete) {
+                    onComplete(result)
+                } else {
+                    // Legacy behavior - clear cart and redirect
+                    cartActions.clearCart()
+                    cartActions.clearCheckoutData()
+                    window.location.href = result.redirectUrl || '/dashboard'
+                }
             } else {
                 throw new Error('Checkout failed')
             }
 
         } catch (error) {
             console.error('Checkout error:', error)
-            setSubmitError(error instanceof Error ? error.message : 'An unexpected error occurred')
+            const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+            setSubmitError(errorMessage)
+            
+            // If we have an onComplete callback, notify about the error too
+            if (onComplete) {
+                onComplete({ success: false, error: errorMessage })
+            }
         } finally {
             setIsSubmitting(false)
         }
@@ -254,27 +267,26 @@ export function SinglePageCheckout() {
     }
 
     return (
-        <div className="min-h-screen bg-neutral-100">
-            <div className="container mx-auto px-3 py-5">
-                <div className="grid lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
-                    {/* Left side - Forms */}
-                    <div className="lg:col-span-2 space-y-5">
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            {/* Create Account Section */}
-                            <div className="neomorphic-container p-4 md:p-5">
-                                <div className="flex items-center mb-4">
-                                    <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center font-bold mr-3 text-sm">
-                                        1
-                                    </div>
-                                    <h2 className="text-xl font-bold text-neutral-800">Create an account</h2>
-                                </div>
+        <>
+            {/* Questionnaire Notice */}
+            <QuestionnaireNotice />
+            
+            <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Create Account Section */}
+                <div className="neomorphic-container p-4 md:p-5">
+                    <div className="flex items-center mb-4">
+                        <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center font-bold mr-3 text-sm">
+                            1
+                        </div>
+                        <h2 className="text-xl font-bold text-neutral-800">Create an account</h2>
+                    </div>
 
-                                <div className="mb-4">
-                                    <span className="text-neutral-600 text-sm">Have an account? </span>
-                                    <button type="button" className="neomorphic-link text-sm">
-                                        Log in
-                                    </button>
-                                </div>
+                    <div className="mb-4">
+                        <span className="text-neutral-600 text-sm">Have an account? </span>
+                        <button type="button" className="neomorphic-link text-sm">
+                            Log in
+                        </button>
+                    </div>
 
                                 <div className="space-y-4">
                                     {/* Email */}
@@ -594,16 +606,6 @@ export function SinglePageCheckout() {
                                 </div>
                             </div>
                         </form>
-                    </div>
-
-                    {/* Right side - Order Summary */}
-                    <div className="lg:col-span-1">
-                        <div className="lg:sticky lg:top-5">
-                            <OrderSummary />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </>
     )
 }

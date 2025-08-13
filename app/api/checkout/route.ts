@@ -27,10 +27,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      flowType: result.flowType,
       orderId: result.orderId,
       userId: result.userId,
       isNewUser: result.isNewUser,
-      redirectUrl: result.redirectUrl,
+      nextStep: result.nextStep,
+      addressPaymentData: result.addressPaymentData,
       message: result.message
     })
 

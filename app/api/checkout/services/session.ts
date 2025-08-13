@@ -2,7 +2,12 @@ import { handleUserAuth, type UserAuthResult } from './auth'
 import { saveQuizResponses } from './quiz'
 import { createOrder, type OrderResult } from './order'
 import { handleEmedIntegration } from './emed'
+import { handleGenieIntegration } from './genie'
+import { determineCheckoutFlow } from './flow-determination'
+import { getUserAddressPaymentData } from './address-payment'
+import { getServerAuth } from '@/contexts/auth-server'
 import type { CheckoutRequest } from './validation'
+import type { AddressPaymentData } from './flow-types'
 
 export interface CheckoutSession {
     controller: AbortController
@@ -12,10 +17,12 @@ export interface CheckoutSession {
 
 export type CheckoutSessionResult = {
     success: true
-    orderId: string
+    flowType: 'signup_with_questionnaire' | 'signup_without_questionnaire' | 'authenticated_user'
+    orderId?: string
     userId: string
     isNewUser: boolean
-    redirectUrl: string
+    nextStep: 'address_payment' | 'dashboard'
+    addressPaymentData?: AddressPaymentData
     message: string
 } | {
     success: false
@@ -27,7 +34,44 @@ export async function executeCheckoutSession(body: CheckoutRequest): Promise<Che
     const signal = controller.signal
 
     try {
-        // Step 1: Handle user authentication
+        // Step 1: Determine checkout flow
+        const flow = await determineCheckoutFlow(body.cartItems)
+        
+        if (flow.flowType === 'authenticated_user') {
+            // Get authenticated user details
+            const { user } = await getServerAuth()
+            if (!user) {
+                return {
+                    success: false,
+                    error: 'User authentication failed'
+                }
+            }
+            
+            // Handle eMed integration for authenticated users if needed
+            if (flow.requiresQuestionnaire) {
+                try {
+                    await handleEmedIntegration(user.id, body, flow.requiresQuestionnaire, signal)
+                } catch (error) {
+                    console.error('eMed integration failed for authenticated user:', error)
+                    // Don't fail the flow, continue to address/payment
+                }
+            }
+            
+            // Get address/payment data for authenticated user
+            const addressPaymentData = await getUserAddressPaymentData(user.id)
+            
+            return {
+                success: true,
+                flowType: 'authenticated_user',
+                userId: user.id,
+                isNewUser: false,
+                nextStep: 'address_payment',
+                addressPaymentData: addressPaymentData || undefined,
+                message: 'Proceed to address and payment'
+            }
+        }
+
+        // Step 2: Handle user authentication for new users
         const authResult: UserAuthResult = await handleUserAuth(body, signal)
         if (authResult.error) {
             return {
@@ -36,34 +80,41 @@ export async function executeCheckoutSession(body: CheckoutRequest): Promise<Che
             }
         }
 
-        // Step 2: Save quiz responses (non-blocking - don't fail entire session)
-        try {
-            await saveQuizResponses(authResult.userId, body, signal)
-        } catch (error) {
-            console.error('Quiz save failed, continuing with checkout:', error)
+        // Step 3: Save quiz responses only if product requires questionnaire
+        if (flow.requiresQuestionnaire) {
+            try {
+                await saveQuizResponses(authResult.userId, body, signal)
+            } catch (error) {
+                console.error('Quiz save failed, continuing with checkout:', error)
+            }
         }
 
-        // Step 3: Create order
+        // Step 4: Handle eMed integration - always create patient, conditionally save questionnaire
+        try {
+            await handleEmedIntegration(authResult.userId, body, flow.requiresQuestionnaire, signal)
+        } catch (error) {
+            console.error('eMed integration failed:', error)
+        }
+
+        // Step 5: Create order
         const orderResult: OrderResult = await createOrder(authResult.userId, body, signal)
 
-        // Step 4: Handle eMed integration (non-blocking - don't fail entire session)
+        // Step 6: Create Genie Customer
         try {
-            await handleEmedIntegration(authResult.userId, body, signal)
+            await handleGenieIntegration(signal)
         } catch (error) {
-            // eMed integration failed, but continue with checkout
-            // Error logging is handled within handleEmedIntegration
+            console.error('Genie integration failed:', error)
         }
-
-        //step 5: Create Genie Customer
 
         return {
             success: true,
+            flowType: flow.flowType,
             orderId: orderResult.orderId,
             userId: authResult.userId,
             isNewUser: authResult.isNewUser,
-            redirectUrl: orderResult.redirectUrl,
+            nextStep: 'address_payment',
             message: authResult.isNewUser
-                ? 'Account created and order placed successfully'
+                ? 'Account created successfully. Please complete your address and payment details.'
                 : 'Order placed successfully'
         }
 

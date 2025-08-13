@@ -12,11 +12,12 @@ export interface EmedIntegrationResult {
 
 /**
  * Handle eMed patient creation/retrieval and profile update
- * This runs at the end of the checkout flow after user creation
+ * This runs for both new and existing users who need eMed integration
  */
 export async function handleEmedIntegration(
     userId: string,
     checkoutData: CheckoutRequest,
+    requiresQuestionnaire: boolean,
     signal?: AbortSignal
 ): Promise<EmedIntegrationResult> {
     if (signal?.aborted) {
@@ -41,6 +42,15 @@ export async function handleEmedIntegration(
 
         // Check if user already has eMed patient ID
         if (profile.emed_patient_id) {
+            // For existing patients, only submit questionnaire if required
+            if (requiresQuestionnaire) {
+                try {
+                    await submitQuestionnaireAndCart(profile.emed_patient_id, checkoutData)
+                } catch (error) {
+                    console.error('Failed to submit questionnaire for existing patient:', error)
+                }
+            }
+            
             return {
                 success: true,
                 patientId: profile.emed_patient_id,
@@ -48,7 +58,7 @@ export async function handleEmedIntegration(
             }
         }
 
-        // Create/get patient in eMed system
+        // Create/get patient in eMed system for users without emed_patient_id
         // Use email as fallback NIC if not provided in checkout data
         const nic = (checkoutData as any).nic || checkoutData.email
 
@@ -76,12 +86,19 @@ export async function handleEmedIntegration(
         const updateResult = await updateUserEmedPatientId(userId, emedResult.patientId)
 
         if (!updateResult.success) {
+            console.error('Failed to update user profile with eMed patient ID:', updateResult.error)
             // Don't fail the entire process if profile update fails - patient was created successfully
-            // The patient ID is still returned so it can be used
         }
 
-        // Submit questionnaire & cart
-        await submitQuestionnaireAndCart(emedResult.patientId, checkoutData)
+        // Submit questionnaire & cart only if required
+        if (requiresQuestionnaire) {
+            try {
+                await submitQuestionnaireAndCart(emedResult.patientId, checkoutData)
+            } catch (error) {
+                console.error('Failed to submit questionnaire for new patient:', error)
+                // Don't fail entire integration if questionnaire submission fails
+            }
+        }
 
         return {
             success: true,

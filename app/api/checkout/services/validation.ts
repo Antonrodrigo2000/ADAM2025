@@ -24,27 +24,32 @@ export interface ValidationResult {
 }
 
 export function validateCheckoutRequest(body: CheckoutRequest): ValidationResult {
-  // Validate required fields
-  if (!body.email || !body.password || !body.legalFirstName || !body.legalSurname ||
-      !body.dateOfBirth || !body.phoneNumber || !body.sex || !body.postcode ||
-      !body.city || !body.address || !body.cartItems || body.cartTotal === undefined) {
-    return {
-      isValid: false,
-      error: 'Missing required fields'
-    }
-  }
-
-  if (!body.agreeToTerms) {
-    return {
-      isValid: false,
-      error: 'You must agree to the terms and conditions'
-    }
-  }
-
-  if (body.cartItems.length === 0) {
+  // Check if cart is empty first
+  if (!body.cartItems || body.cartItems.length === 0) {
     return {
       isValid: false,
       error: 'Cart is empty'
+    }
+  }
+
+  // For authenticated users, we only need cart validation
+  // For new users, we need all signup fields
+  if (body.email && body.password) {
+    // New user signup validation
+    if (!body.legalFirstName || !body.legalSurname ||
+        !body.dateOfBirth || !body.phoneNumber || !body.sex || !body.postcode ||
+        !body.city || !body.address || body.cartTotal === undefined) {
+      return {
+        isValid: false,
+        error: 'Missing required fields for new user signup'
+      }
+    }
+
+    if (!body.agreeToTerms) {
+      return {
+        isValid: false,
+        error: 'You must agree to the terms and conditions'
+      }
     }
   }
 

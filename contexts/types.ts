@@ -38,6 +38,7 @@ export interface CartItem {
   totalPrice: number // Total price for the quantity * months
   consultationFee: number
   prescriptionRequired: boolean
+  requiresQuestionnaire?: boolean // Whether this product requires questionnaire completion
   subscription?: {
     frequency: string
     isActive: boolean

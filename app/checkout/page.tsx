@@ -1,5 +1,8 @@
-import { SinglePageCheckout } from "@/components/checkout/single-page-checkout"
+import { getServerAuth } from '@/contexts/auth-server'
+import { EnhancedCheckout } from "@/components/checkout/enhanced-checkout"
 
-export default function CheckoutPage() {
-  return <SinglePageCheckout />
+export default async function CheckoutPage() {
+  const { user, isAuthenticated } = await getServerAuth()
+
+  return <EnhancedCheckout user={user} isAuthenticated={isAuthenticated} />
 }

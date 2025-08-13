@@ -341,7 +341,10 @@ export function buildQuestionnaireInputFromDatabase(
             )
             if (questionPhotos.length > 0) {
                 answer.answer = questionPhotos.map(photo => ({
-                    valueString: photo.binaryId // Reference to Binary resource by ID
+                    valueAttachment: {
+                        contentType: photo.contentType,
+                        url: photo.binaryId ? `Binary/${photo.binaryId}` : undefined,
+                    }
                 }))
             }
         } else if (Array.isArray(response)) {
