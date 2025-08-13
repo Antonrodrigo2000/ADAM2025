@@ -13,7 +13,6 @@ type CheckoutStep = 'signup' | 'address_payment' | 'processing'
 
 interface CheckoutState {
     step: CheckoutStep
-    flowType?: 'signup_with_questionnaire' | 'signup_without_questionnaire' | 'authenticated_user'
     userId?: string
     isNewUser?: boolean
 }
@@ -35,7 +34,6 @@ export function EnhancedCheckout({ user, isAuthenticated }: EnhancedCheckoutProp
             // For authenticated users, skip to address/payment
             setCheckoutState({
                 step: 'address_payment',
-                flowType: 'authenticated_user',
                 userId: user.id,
                 isNewUser: false
             })
@@ -43,7 +41,6 @@ export function EnhancedCheckout({ user, isAuthenticated }: EnhancedCheckoutProp
             // For unauthenticated users, start with signup
             setCheckoutState({
                 step: 'signup',
-                flowType: 'signup_without_questionnaire',
                 isNewUser: true
             })
         }
@@ -54,9 +51,8 @@ export function EnhancedCheckout({ user, isAuthenticated }: EnhancedCheckoutProp
         if (result.success) {
             setCheckoutState({
                 step: 'address_payment',
-                flowType: result.flowType,
                 userId: result.userId,
-                isNewUser: result.isNewUser
+                isNewUser: true
             })
         } else {
             setError(result.error || 'Signup failed')

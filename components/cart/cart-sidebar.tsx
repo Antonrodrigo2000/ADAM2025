@@ -23,9 +23,49 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     }
   }
 
-  const handleCheckout = () => {
-    // Navigate to checkout page
-    window.location.href = '/checkout'
+  const handleCheckout = async () => {
+    try {
+      // Format cart items for checkout session
+      const cartItems = state.items.map(item => ({
+        product_id: item.productId,
+        quantity: item.quantity,
+        price: item.totalPrice,
+        productName: item.productName,
+        variantName: item.variantName,
+        image: item.image,
+        monthlyPrice: item.monthlyPrice,
+        months: item.months,
+        prescriptionRequired: item.prescriptionRequired,
+        consultationFee: item.consultationFee,
+      }))
+
+      // Create checkout session
+      const response = await fetch('/api/checkout/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cart_items: cartItems,
+          source: 'cart_sidebar',
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Navigate to checkout session
+        window.location.href = data.redirect_url
+      } else {
+        console.error('Failed to create checkout session:', data.error)
+        // Fallback to old checkout flow
+        window.location.href = '/checkout'
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      // Fallback to old checkout flow
+      window.location.href = '/checkout'
+    }
   }
 
   return (

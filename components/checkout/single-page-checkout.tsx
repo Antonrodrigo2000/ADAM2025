@@ -60,7 +60,7 @@ const formSchema = z.object({
 type ValidationErrors = Partial<Record<keyof FormData, string>>
 
 interface SinglePageCheckoutProps {
-  onComplete?: (result: any) => void
+    onComplete?: (result: any) => void
 }
 
 export function SinglePageCheckout({ onComplete }: SinglePageCheckoutProps = {}) {
@@ -244,7 +244,7 @@ export function SinglePageCheckout({ onComplete }: SinglePageCheckoutProps = {})
             console.error('Checkout error:', error)
             const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
             setSubmitError(errorMessage)
-            
+
             // If we have an onComplete callback, notify about the error too
             if (onComplete) {
                 onComplete({ success: false, error: errorMessage })
@@ -270,7 +270,7 @@ export function SinglePageCheckout({ onComplete }: SinglePageCheckoutProps = {})
         <>
             {/* Questionnaire Notice */}
             <QuestionnaireNotice />
-            
+
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Create Account Section */}
                 <div className="neomorphic-container p-4 md:p-5">
@@ -288,324 +288,324 @@ export function SinglePageCheckout({ onComplete }: SinglePageCheckoutProps = {})
                         </button>
                     </div>
 
-                                <div className="space-y-4">
-                                    {/* Email */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email" className="text-xs font-medium" theme="light">Email address</Label>
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            value={formData.email}
-                                            onChange={(e) => updateFormData("email", e.target.value)}
-                                            className="h-10 text-sm"
-                                            theme="light"
-                                            error={!!errors.email}
-                                            required
-                                        />
-                                        {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
-                                        <p className="text-xs text-gray-500">
-                                            We will let you know via email once your prescription has been issued.
-                                        </p>
-                                    </div>
+                    <div className="space-y-4">
+                        {/* Email */}
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className="text-xs font-medium" theme="light">Email address</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => updateFormData("email", e.target.value)}
+                                className="h-10 text-sm"
+                                theme="light"
+                                error={!!errors.email}
+                                required
+                            />
+                            {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
+                            <p className="text-xs text-gray-500">
+                                We will let you know via email once your prescription has been issued.
+                            </p>
+                        </div>
 
-                                    {/* Password */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="password" className="text-xs font-medium" theme="light">Password</Label>
-                                        <div className="relative">
-                                            <Input
-                                                id="password"
-                                                type={showPassword ? "text" : "password"}
-                                                value={formData.password}
-                                                onChange={(e) => updateFormData("password", e.target.value)}
-                                                className="h-10 text-sm pr-10"
-                                                theme="light"
-                                                error={!!errors.password}
-                                                required
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                className="absolute right-0 top-0 h-full px-3 py-2"
-                                                theme="light"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                            >
-                                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                            </Button>
-                                        </div>
-                                        {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
-                                        <p className="text-xs text-gray-500">
-                                            Password must be at least 12 characters, including a mix of letters, numbers, and special
-                                            characters.
-                                        </p>
-                                    </div>
-
-                                    {/* Identity Confirmation Notice */}
-                                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-3">
-                                        <p className="text-xs text-orange-800">
-                                            We are required to confirm the identity of our members. Any incorrect details will cause delays to
-                                            your order.
-                                        </p>
-                                    </div>
-
-                                    {/* Legal Names */}
-                                    <div className="grid md:grid-cols-2 gap-3">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="legalFirstName" className="text-xs font-medium" theme="light">Legal first name</Label>
-                                            <Input
-                                                id="legalFirstName"
-                                                type="text"
-                                                value={formData.legalFirstName}
-                                                onChange={(e) => updateFormData("legalFirstName", e.target.value)}
-                                                className="h-10 text-sm"
-                                                theme="light"
-                                                error={!!errors.legalFirstName}
-                                                required
-                                            />
-                                            {errors.legalFirstName && <p className="text-xs text-red-600">{errors.legalFirstName}</p>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="legalSurname" className="text-xs font-medium" theme="light">Legal surname</Label>
-                                            <Input
-                                                id="legalSurname"
-                                                type="text"
-                                                value={formData.legalSurname}
-                                                onChange={(e) => updateFormData("legalSurname", e.target.value)}
-                                                className="h-10 text-sm"
-                                                theme="light"
-                                                error={!!errors.legalSurname}
-                                                required
-                                            />
-                                            {errors.legalSurname && <p className="text-xs text-red-600">{errors.legalSurname}</p>}
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-gray-500 -mt-1">
-                                        Please write your name as it appears on your passport or ID. We need your full legal name to confirm
-                                        your identity.
-                                    </p>
-
-                                    {/* NIC and Date of Birth - Flexed to save space */}
-                                    <div className="grid md:grid-cols-2 gap-3">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="nic" className="text-xs font-medium" theme="light">NIC Number</Label>
-                                            <Input
-                                                id="nic"
-                                                type="text"
-                                                value={formData.nic}
-                                                onChange={(e) => updateFormData("nic", e.target.value)}
-                                                className="h-10 text-sm"
-                                                placeholder="Enter your NIC number"
-                                                theme="light"
-                                                error={!!errors.nic}
-                                                required
-                                            />
-                                            {errors.nic && <p className="text-xs text-red-600">{errors.nic}</p>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="dateOfBirth" className="text-xs font-medium" theme="light">Date of birth</Label>
-                                            <Input
-                                                id="dateOfBirth"
-                                                type="date"
-                                                value={formData.dateOfBirth}
-                                                onChange={(e) => updateFormData("dateOfBirth", e.target.value)}
-                                                className="h-10 text-sm"
-                                                theme="light"
-                                                error={!!errors.dateOfBirth}
-                                                required
-                                            />
-                                            {errors.dateOfBirth && <p className="text-xs text-red-600">{errors.dateOfBirth}</p>}
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-gray-500 -mt-1">
-                                        Please enter your National Identity Card number as it appears on your ID.
-                                    </p>
-
-                                    {/* Phone Number */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="phoneNumber" className="text-xs font-medium" theme="light">Phone number</Label>
-                                        <Input
-                                            id="phoneNumber"
-                                            type="tel"
-                                            value={formData.phoneNumber}
-                                            onChange={(e) => updateFormData("phoneNumber", e.target.value)}
-                                            className="h-10 text-sm"
-                                            theme="light"
-                                            error={!!errors.phoneNumber}
-                                            required
-                                        />
-                                        {errors.phoneNumber && <p className="text-xs text-red-600">{errors.phoneNumber}</p>}
-                                        <p className="text-xs text-gray-500">
-                                            In very rare cases our clinicians may need to call you. They will always be discreet.
-                                        </p>
-                                    </div>
-
-                                    {/* Sex */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="sex" className="text-xs font-medium" theme="light">Sex</Label>
-                                        <Select value={formData.sex} onValueChange={(value) => updateFormData("sex", value)}>
-                                            <SelectTrigger className="h-10 text-sm" theme="light" error={!!errors.sex}>
-                                                <SelectValue placeholder="Choose sex" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="male">Male</SelectItem>
-                                                <SelectItem value="female">Female</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        {errors.sex && <p className="text-xs text-red-600">{errors.sex}</p>}
-                                        <p className="text-xs text-muted-foreground">
-                                            What sex were you assigned at birth, as shown on your original birth certificate. This is
-                                            important for us to know because it allows us to provide you with treatments as safely as
-                                            possible.
-                                        </p>
-                                    </div>
-                                </div>
+                        {/* Password */}
+                        <div className="space-y-2">
+                            <Label htmlFor="password" className="text-xs font-medium" theme="light">Password</Label>
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    value={formData.password}
+                                    onChange={(e) => updateFormData("password", e.target.value)}
+                                    className="h-10 text-sm pr-10"
+                                    theme="light"
+                                    error={!!errors.password}
+                                    required
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute right-0 top-0 h-full px-3 py-2"
+                                    theme="light"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </Button>
                             </div>
+                            {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
+                            <p className="text-xs text-gray-500">
+                                Password must be at least 12 characters, including a mix of letters, numbers, and special
+                                characters.
+                            </p>
+                        </div>
 
-                            {/* Delivery Address Section */}
-                            <div className="neomorphic-container p-4 md:p-5">
-                                <div className="flex items-center mb-4">
-                                    <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center font-bold mr-3 text-sm">
-                                        2
-                                    </div>
-                                    <h2 className="text-xl font-bold text-neutral-800">Delivery address</h2>
-                                </div>
+                        {/* Identity Confirmation Notice */}
+                        <div className="bg-orange-50 border border-orange-200 rounded-xl p-3">
+                            <p className="text-xs text-orange-800">
+                                We are required to confirm the identity of our members. Any incorrect details will cause delays to
+                                your order.
+                            </p>
+                        </div>
 
-                                <div className="bg-muted border border-border rounded-xl p-3 mb-4">
-                                    <p className="text-xs text-foreground">
-                                        Please make sure your address is accurate. Try using our auto-complete option. This will help us
-                                        confirm your identity.
-                                    </p>
-                                </div>
+                        {/* Legal Names */}
+                        <div className="grid md:grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label htmlFor="legalFirstName" className="text-xs font-medium" theme="light">Legal first name</Label>
+                                <Input
+                                    id="legalFirstName"
+                                    type="text"
+                                    value={formData.legalFirstName}
+                                    onChange={(e) => updateFormData("legalFirstName", e.target.value)}
+                                    className="h-10 text-sm"
+                                    theme="light"
+                                    error={!!errors.legalFirstName}
+                                    required
+                                />
+                                {errors.legalFirstName && <p className="text-xs text-red-600">{errors.legalFirstName}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="legalSurname" className="text-xs font-medium" theme="light">Legal surname</Label>
+                                <Input
+                                    id="legalSurname"
+                                    type="text"
+                                    value={formData.legalSurname}
+                                    onChange={(e) => updateFormData("legalSurname", e.target.value)}
+                                    className="h-10 text-sm"
+                                    theme="light"
+                                    error={!!errors.legalSurname}
+                                    required
+                                />
+                                {errors.legalSurname && <p className="text-xs text-red-600">{errors.legalSurname}</p>}
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 -mt-1">
+                            Please write your name as it appears on your passport or ID. We need your full legal name to confirm
+                            your identity.
+                        </p>
 
-                                <div className="space-y-4">
-                                    {/* Postcode */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="postcode" className="text-xs font-medium" theme="light">Postcode</Label>
-                                        <Input
-                                            id="postcode"
-                                            type="text"
-                                            value={formData.postcode}
-                                            onChange={(e) => updateFormData("postcode", e.target.value)}
-                                            className="h-10 text-sm"
-                                            theme="light"
-                                            error={!!errors.postcode}
-                                            required
-                                        />
-                                        {errors.postcode && <p className="text-xs text-red-600">{errors.postcode}</p>}
-                                    </div>
+                        {/* NIC and Date of Birth - Flexed to save space */}
+                        <div className="grid md:grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label htmlFor="nic" className="text-xs font-medium" theme="light">NIC Number</Label>
+                                <Input
+                                    id="nic"
+                                    type="text"
+                                    value={formData.nic}
+                                    onChange={(e) => updateFormData("nic", e.target.value)}
+                                    className="h-10 text-sm"
+                                    placeholder="Enter your NIC number"
+                                    theme="light"
+                                    error={!!errors.nic}
+                                    required
+                                />
+                                {errors.nic && <p className="text-xs text-red-600">{errors.nic}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="dateOfBirth" className="text-xs font-medium" theme="light">Date of birth</Label>
+                                <Input
+                                    id="dateOfBirth"
+                                    type="date"
+                                    value={formData.dateOfBirth}
+                                    onChange={(e) => updateFormData("dateOfBirth", e.target.value)}
+                                    className="h-10 text-sm"
+                                    theme="light"
+                                    error={!!errors.dateOfBirth}
+                                    required
+                                />
+                                {errors.dateOfBirth && <p className="text-xs text-red-600">{errors.dateOfBirth}</p>}
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 -mt-1">
+                            Please enter your National Identity Card number as it appears on your ID.
+                        </p>
 
-                                    {/* City */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="city" className="text-xs font-medium" theme="light">City</Label>
-                                        <Input
-                                            id="city"
-                                            type="text"
-                                            value={formData.city}
-                                            onChange={(e) => updateFormData("city", e.target.value)}
-                                            className="h-10 text-sm"
-                                            theme="light"
-                                            error={!!errors.city}
-                                            required
-                                        />
-                                        {errors.city && <p className="text-xs text-red-600">{errors.city}</p>}
-                                    </div>
+                        {/* Phone Number */}
+                        <div className="space-y-2">
+                            <Label htmlFor="phoneNumber" className="text-xs font-medium" theme="light">Phone number</Label>
+                            <Input
+                                id="phoneNumber"
+                                type="tel"
+                                value={formData.phoneNumber}
+                                onChange={(e) => updateFormData("phoneNumber", e.target.value)}
+                                className="h-10 text-sm"
+                                theme="light"
+                                error={!!errors.phoneNumber}
+                                required
+                            />
+                            {errors.phoneNumber && <p className="text-xs text-red-600">{errors.phoneNumber}</p>}
+                            <p className="text-xs text-gray-500">
+                                In very rare cases our clinicians may need to call you. They will always be discreet.
+                            </p>
+                        </div>
 
-                                    {/* District */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="district" className="text-xs font-medium" theme="light">District</Label>
-                                        <Input
-                                            id="district"
-                                            type="text"
-                                            value={formData.district}
-                                            onChange={(e) => updateFormData("district", e.target.value)}
-                                            className="h-10 text-sm"
-                                            placeholder="Enter your district"
-                                            theme="light"
-                                            error={!!errors.district}
-                                            required
-                                        />
-                                        {errors.district && <p className="text-xs text-red-600">{errors.district}</p>}
-                                    </div>
+                        {/* Sex */}
+                        <div className="space-y-2">
+                            <Label htmlFor="sex" className="text-xs font-medium" theme="light">Sex</Label>
+                            <Select value={formData.sex} onValueChange={(value) => updateFormData("sex", value)}>
+                                <SelectTrigger className="h-10 text-sm" theme="light" error={!!errors.sex}>
+                                    <SelectValue placeholder="Choose sex" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="male">Male</SelectItem>
+                                    <SelectItem value="female">Female</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {errors.sex && <p className="text-xs text-red-600">{errors.sex}</p>}
+                            <p className="text-xs text-muted-foreground">
+                                What sex were you assigned at birth, as shown on your original birth certificate. This is
+                                important for us to know because it allows us to provide you with treatments as safely as
+                                possible.
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-                                    {/* Address */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="address" className="text-xs font-medium" theme="light">Address</Label>
-                                        <Textarea
-                                            id="address"
-                                            value={formData.address}
-                                            onChange={(e) => updateFormData("address", e.target.value)}
-                                            rows={2}
-                                            className="text-sm resize-none min-h-[60px]"
-                                            theme="light"
-                                            error={!!errors.address}
-                                            required
-                                        />
-                                        {errors.address && <p className="text-xs text-red-600">{errors.address}</p>}
-                                    </div>
+                {/* Delivery Address Section */}
+                <div className="neomorphic-container p-4 md:p-5">
+                    <div className="flex items-center mb-4">
+                        <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center font-bold mr-3 text-sm">
+                            2
+                        </div>
+                        <h2 className="text-xl font-bold text-neutral-800">Delivery address</h2>
+                    </div>
 
-                                    {/* Terms Agreement */}
-                                    <div className="space-y-3">
-                                        <div className="flex items-start space-x-2">
-                                            <Checkbox
-                                                id="agreeToTerms"
-                                                checked={formData.agreeToTerms}
-                                                onCheckedChange={(checked) => updateFormData("agreeToTerms", checked === true)}
-                                                theme="light"
-                                                error={!!errors.agreeToTerms}
-                                                required
-                                            />
-                                            <div className="space-y-1">
-                                                <Label htmlFor="agreeToTerms" className="text-xs font-normal leading-normal" theme="light">
-                                                    Yes, I agree to Adam's{" "}
-                                                    <Button variant="link" className="h-auto p-0 text-teal-600 hover:text-teal-700 underline text-xs" theme="light">
-                                                        Terms & Conditions
-                                                    </Button>{" "}
-                                                    and{" "}
-                                                    <Button variant="link" className="h-auto p-0 text-teal-600 hover:text-teal-700 underline text-xs" theme="light">
-                                                        Privacy Policy
-                                                    </Button>
-                                                    .
-                                                </Label>
-                                                {errors.agreeToTerms && <p className="text-xs text-red-600">{errors.agreeToTerms}</p>}
-                                            </div>
-                                        </div>
+                    <div className="bg-muted border border-border rounded-xl p-3 mb-4">
+                        <p className="text-xs text-foreground">
+                            Please make sure your address is accurate. Try using our auto-complete option. This will help us
+                            confirm your identity.
+                        </p>
+                    </div>
 
-                                        <div className="flex items-start space-x-2">
-                                            <Checkbox
-                                                id="marketingOptOut"
-                                                checked={formData.marketingOptOut}
-                                                onCheckedChange={(checked) => updateFormData("marketingOptOut", checked === true)}
-                                                theme="light"
-                                            />
-                                            <Label htmlFor="marketingOptOut" className="text-xs font-normal leading-normal" theme="light">
-                                                I do not wish to receive marketing communications that include special offers, promotions, or
-                                                educational content.
-                                            </Label>
-                                        </div>
-                                    </div>
+                    <div className="space-y-4">
+                        {/* Postcode */}
+                        <div className="space-y-2">
+                            <Label htmlFor="postcode" className="text-xs font-medium" theme="light">Postcode</Label>
+                            <Input
+                                id="postcode"
+                                type="text"
+                                value={formData.postcode}
+                                onChange={(e) => updateFormData("postcode", e.target.value)}
+                                className="h-10 text-sm"
+                                theme="light"
+                                error={!!errors.postcode}
+                                required
+                            />
+                            {errors.postcode && <p className="text-xs text-red-600">{errors.postcode}</p>}
+                        </div>
 
-                                    {/* Error Display */}
-                                    {submitError && (
-                                        <div className="bg-red-50 border border-red-200 rounded-xl p-3">
-                                            <p className="text-sm text-red-800">{submitError}</p>
-                                        </div>
-                                    )}
+                        {/* City */}
+                        <div className="space-y-2">
+                            <Label htmlFor="city" className="text-xs font-medium" theme="light">City</Label>
+                            <Input
+                                id="city"
+                                type="text"
+                                value={formData.city}
+                                onChange={(e) => updateFormData("city", e.target.value)}
+                                className="h-10 text-sm"
+                                theme="light"
+                                error={!!errors.city}
+                                required
+                            />
+                            {errors.city && <p className="text-xs text-red-600">{errors.city}</p>}
+                        </div>
 
-                                    {/* Submit Button */}
-                                    <div className="w-full">
-                                        <Button
-                                            type="submit"
-                                            disabled={isSubmitting || cartState.items.length === 0}
-                                            size="lg"
-                                            className="w-full h-10 text-base bg-teal-500 hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            theme="light"
-                                        >
-                                            {isSubmitting ? 'Processing...' : 'Continue to Payment →'}
+                        {/* District */}
+                        <div className="space-y-2">
+                            <Label htmlFor="district" className="text-xs font-medium" theme="light">District</Label>
+                            <Input
+                                id="district"
+                                type="text"
+                                value={formData.district}
+                                onChange={(e) => updateFormData("district", e.target.value)}
+                                className="h-10 text-sm"
+                                placeholder="Enter your district"
+                                theme="light"
+                                error={!!errors.district}
+                                required
+                            />
+                            {errors.district && <p className="text-xs text-red-600">{errors.district}</p>}
+                        </div>
+
+                        {/* Address */}
+                        <div className="space-y-2">
+                            <Label htmlFor="address" className="text-xs font-medium" theme="light">Address</Label>
+                            <Textarea
+                                id="address"
+                                value={formData.address}
+                                onChange={(e) => updateFormData("address", e.target.value)}
+                                rows={2}
+                                className="text-sm resize-none min-h-[60px]"
+                                theme="light"
+                                error={!!errors.address}
+                                required
+                            />
+                            {errors.address && <p className="text-xs text-red-600">{errors.address}</p>}
+                        </div>
+
+                        {/* Terms Agreement */}
+                        <div className="space-y-3">
+                            <div className="flex items-start space-x-2">
+                                <Checkbox
+                                    id="agreeToTerms"
+                                    checked={formData.agreeToTerms}
+                                    onCheckedChange={(checked) => updateFormData("agreeToTerms", checked === true)}
+                                    theme="light"
+                                    error={!!errors.agreeToTerms}
+                                    required
+                                />
+                                <div className="space-y-1">
+                                    <Label htmlFor="agreeToTerms" className="text-xs font-normal leading-normal" theme="light">
+                                        Yes, I agree to Adam's{" "}
+                                        <Button variant="link" className="h-auto p-0 text-teal-600 hover:text-teal-700 underline text-xs" theme="light">
+                                            Terms & Conditions
+                                        </Button>{" "}
+                                        and{" "}
+                                        <Button variant="link" className="h-auto p-0 text-teal-600 hover:text-teal-700 underline text-xs" theme="light">
+                                            Privacy Policy
                                         </Button>
-                                    </div>
+                                        .
+                                    </Label>
+                                    {errors.agreeToTerms && <p className="text-xs text-red-600">{errors.agreeToTerms}</p>}
                                 </div>
                             </div>
-                        </form>
+
+                            <div className="flex items-start space-x-2">
+                                <Checkbox
+                                    id="marketingOptOut"
+                                    checked={formData.marketingOptOut}
+                                    onCheckedChange={(checked) => updateFormData("marketingOptOut", checked === true)}
+                                    theme="light"
+                                />
+                                <Label htmlFor="marketingOptOut" className="text-xs font-normal leading-normal" theme="light">
+                                    I do not wish to receive marketing communications that include special offers, promotions, or
+                                    educational content.
+                                </Label>
+                            </div>
+                        </div>
+
+                        {/* Error Display */}
+                        {submitError && (
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+                                <p className="text-sm text-red-800">{submitError}</p>
+                            </div>
+                        )}
+
+                        {/* Submit Button */}
+                        <div className="w-full">
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting || cartState.items.length === 0}
+                                size="lg"
+                                className="w-full h-10 text-base bg-teal-500 hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                theme="light"
+                            >
+                                {isSubmitting ? 'Processing...' : 'Continue to Payment →'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </>
     )
 }
