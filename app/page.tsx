@@ -115,7 +115,7 @@ function ServicesSection() {
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((service) => (
-            <Link href={`#${service.id}`} key={service.id} className="group block h-full">
+            <Link href={service.id === 'hair' ? '/questionnaire/hair-loss' : service.id === 'sexual-health' ? '/questionnaire/sexual-health' : `#${service.id}`} key={service.id} className="group block h-full">
               <div className="relative flex flex-col justify-between p-6 overflow-hidden rounded-xl h-full bg-white/5 backdrop-blur-md border border-white/10 transition-all duration-300 group-hover:border-primary/60 group-hover:bg-white/10 group-hover:-translate-y-2">
                 <div className="flex-1">
                   <h3 className="font-display text-xl font-bold text-white">{service.title}</h3>

@@ -9,7 +9,7 @@ export type Category = {
 const categories: Category[] = [
   {
     title: "Hair Loss",
-    href: "/quiz", // Changed from "/hair-loss" to "/quiz"
+    href: "/questionnaire/hair-loss",
     description: "Reclaim your confidence.",
   },
   {
@@ -19,7 +19,7 @@ const categories: Category[] = [
   },
   {
     title: "Sexual Health",
-    href: "/sexual-health",
+    href: "/questionnaire/sexual-health",
     description: "Enhance your vitality.",
   },
   {

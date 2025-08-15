@@ -9,7 +9,11 @@ import { RecommendationsScreen } from "./recommendations-screen"
 import { useQuiz } from "@/contexts"
 import type { Question } from "@/data/types/question"
 
-export function ClinicalQuiz() {
+interface ClinicalQuizProps {
+    healthVertical?: string
+}
+
+export function ClinicalQuiz({ healthVertical = 'hair-loss' }: ClinicalQuizProps) {
     const { state, actions, questions } = useQuiz() // get questions from context
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [showDisclaimer, setShowDisclaimer] = useState(true)
@@ -238,6 +242,7 @@ export function ClinicalQuiz() {
                         questions={questions.filter((q) => state.questionFlow.includes(q.id))}
                         answers={state.answers}
                         onSubmit={handleSubmit}
+                        healthVertical={healthVertical}
                     />
 
                     <div className="mt-8 flex justify-between">

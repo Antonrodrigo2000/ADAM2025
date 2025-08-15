@@ -5,6 +5,7 @@ import { createUserAccount } from './services/user-creation'
 import { handleEmedIntegration } from './services/emed-integration'
 import { updateCheckoutSession } from './services/session-update'
 import { logCheckoutEvent } from './services/event-logging'
+import { saveQuestionnaireResponses } from './services/questionnaire-saving'
 
 // POST /api/checkout/[sessionId]/signup - Create new user and integrate with eMed
 export async function POST(
@@ -76,10 +77,14 @@ export async function POST(
       )
     }
 
-    // Step 2: eMed Integration - Create patient and get patient ID
+    // Step 2: Save questionnaire responses from localStorage if available
+    const questionnaireResult = await saveQuestionnaireResponses(userResult.userId, body)
+    // Continue even if questionnaire saving fails - don't break the signup flow
+
+    // Step 3: eMed Integration - Create patient and get patient ID
     const emedResult = await handleEmedIntegration(userResult.userId, body)
 
-    // Step 3: Update checkout session with user information
+    // Step 4: Update checkout session with user information
     const customerInfo = {
       first_name: body.legalFirstName,
       last_name: body.legalSurname,
@@ -102,11 +107,13 @@ export async function POST(
       )
     }
 
-    // Step 4: Log signup event
+    // Step 5: Log signup event
     const eventData = {
       user_id: userResult.userId,
       emed_patient_id: emedResult.patientId,
       emed_integration_success: emedResult.success,
+      questionnaire_saved: questionnaireResult.success,
+      questionnaire_health_vertical: body.questionnaireData?.healthVertical,
       is_new_user: true,
       ip_address: request.headers.get('x-forwarded-for') || '0.0.0.0',
       user_agent: request.headers.get('user-agent') || ''

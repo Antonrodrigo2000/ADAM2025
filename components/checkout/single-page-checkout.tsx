@@ -7,6 +7,7 @@ import { Eye, EyeOff } from "lucide-react"
 import { QuestionnaireNotice } from "./questionnaire-notice"
 import { useCart } from "@/contexts/cart-context"
 import { useQuiz } from "@/contexts/quiz-context"
+import QuestionnaireLocalStorageCollector from "@/lib/services/questionnaire-localStorage-collector"
 import { z } from "zod"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -142,6 +143,9 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
     const processCheckout = async () => {
         // If sessionId is provided, use the new session-based signup flow
         if (sessionId) {
+            // Collect questionnaire data from localStorage
+            const questionnaireData = QuestionnaireLocalStorageCollector.getMostRecentQuestionnaireData()
+            
             const response = await fetch(`/api/checkout/${sessionId}/signup`, {
                 method: 'POST',
                 headers: {
@@ -161,6 +165,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                     address: formData.address,
                     agreeToTerms: formData.agreeToTerms,
                     marketingOptOut: formData.marketingOptOut,
+                    questionnaireData: questionnaireData, // Include questionnaire data from localStorage
                 }),
             })
 
@@ -170,6 +175,12 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
             }
 
             const result = await response.json()
+            
+            // If signup was successful and we had questionnaire data, clear it from localStorage
+            if (result.success && questionnaireData) {
+                QuestionnaireLocalStorageCollector.clearQuestionnaireData(questionnaireData.healthVertical)
+            }
+            
             return {
                 ...result,
                 success: result.success,

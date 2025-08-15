@@ -21,6 +21,13 @@ export interface SignupRequest {
   
   // Optional NIC for eMed
   nic?: string
+  
+  // Optional questionnaire data from localStorage
+  questionnaireData?: {
+    healthVertical: string
+    responses: Record<string, any>
+    sessionId?: string
+  }
 }
 
 export function validateSignupRequest(body: SignupRequest) {

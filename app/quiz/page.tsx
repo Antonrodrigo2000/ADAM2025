@@ -1,5 +1,6 @@
-import { ClinicalQuiz } from "@/components/quiz/clinical-quiz"
+import { redirect } from 'next/navigation'
 
 export default function QuizPage() {
-  return <ClinicalQuiz />
+  // Redirect to the new dynamic questionnaire route
+  redirect('/questionnaire/hair-loss')
 }

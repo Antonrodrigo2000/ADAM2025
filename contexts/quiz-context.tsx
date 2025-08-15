@@ -6,6 +6,7 @@ import recommendTreatment from '@/lib/algorithm/hairloss-recommendations'
 import { Question } from '@/data/types/question'
 import { createClient } from '../lib/supabase/client'
 import supabaseImageStorage from '@/lib/storage/supabase-image-storage'
+import QuestionnaireStateService from '@/lib/services/questionnaire-state-service'
 
 // Initial state
 const initialQuizState: QuizState = {
@@ -298,17 +299,40 @@ interface QuizContextType {
 const QuizContext = createContext<QuizContextType | null>(null)
 
 // Provider
-export function QuizProvider({ children }: { children: React.ReactNode }) {
+export function QuizProvider({ children, healthVertical = 'hair-loss' }: { children: React.ReactNode; healthVertical?: string }) {
     const [state, dispatch] = useReducer(quizReducer, initialQuizState)
     const [questions, setQuestions] = useState<Question[]>([])
+    const [stateService] = useState(() => new QuestionnaireStateService(healthVertical))
 
-    // Initialize image storage and fetch questions from Supabase
+    // Initialize and check for existing responses
     useEffect(() => {
-        const initializeServices = async () => {
+        const initializeQuiz = async () => {
             try {
-                await supabaseImageStorage.cleanupOldImages()
+                // Clean up old localStorage entries
+                QuestionnaireStateService.cleanupOldStates()
+
+                // Check for existing user response in database
+                const { hasResponse, response } = await stateService.checkExistingUserResponse()
+
+                if (hasResponse && response) {
+                    console.log('User has existing response for this questionnaire:', response)
+                    // The existing algorithm logic will handle the redirect
+                    // We just need to load their previous responses if they want to review/modify
+                }
+
+                // Initialize image storage
+                // await supabaseImageStorage.cleanupOldImages() // Commented out to keep images for longer period
+
+                // Check for saved state for this health vertical
+                const savedState = stateService.getSavedState()
+                if (savedState) {
+                    dispatch({ type: 'LOAD_SAVED_QUIZ', savedState })
+                } else {
+                    dispatch({ type: 'SET_SESSION_ID', sessionId: generateSessionId() })
+                }
             } catch (error) {
-                console.error('Failed to initialize image storage:', error)
+                console.error('Failed to initialize quiz:', error)
+                dispatch({ type: 'SET_SESSION_ID', sessionId: generateSessionId() })
             }
         }
 
@@ -331,7 +355,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
                         health_verticals!inner(slug)
                         )
                     `)
-                    .eq('questionnaires.health_verticals.slug', 'hair-loss')
+                    .eq('questionnaires.health_verticals.slug', healthVertical)
                     .order('order_index', { ascending: true })
                 if (error) throw error
                 setQuestions(
@@ -349,46 +373,19 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
             }
         }
 
-        initializeServices()
+        initializeQuiz()
         fetchQuestions()
-    }, [])
+    }, [healthVertical, stateService])
 
-    // Initialize quiz
-    useEffect(() => {
-        // Try to load saved quiz from localStorage
-        const savedQuiz = localStorage.getItem('clinical-quiz-state')
-        if (savedQuiz) {
-            try {
-                const savedState = JSON.parse(savedQuiz)
-                dispatch({ type: 'LOAD_SAVED_QUIZ', savedState })
-            } catch (error) {
-                console.error('Failed to load saved quiz:', error)
-                dispatch({ type: 'SET_SESSION_ID', sessionId: generateSessionId() })
-            }
-        } else {
-            dispatch({ type: 'SET_SESSION_ID', sessionId: generateSessionId() })
-        }
-    }, [])
+    // This effect has been replaced by the initialization logic above
 
-    // Save to localStorage whenever state changes (excluding raw images)
+    // Save to health vertical specific localStorage whenever state changes
     useEffect(() => {
         if (state.sessionId) {
-            // Create a version of state safe for localStorage (without raw images)
             const safeState = createSafeStateForStorage(state)
-            try {
-                localStorage.setItem('clinical-quiz-state', JSON.stringify(safeState))
-            } catch (error) {
-                console.error('Failed to save quiz state to localStorage:', error)
-                // If it still fails, try saving without answers entirely
-                try {
-                    const minimalState = { ...safeState, answers: {} }
-                    localStorage.setItem('clinical-quiz-state', JSON.stringify(minimalState))
-                } catch (fallbackError) {
-                    console.error('Failed to save even minimal quiz state:', fallbackError)
-                }
-            }
+            stateService.saveState(safeState)
         }
-    }, [state])
+    }, [state, stateService])
 
     // Update question flow when answers or questions change
     useEffect(() => {
@@ -448,34 +445,16 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
         },
         submitQuiz: async () => {
             dispatch({ type: 'SUBMIT_QUIZ', questions })
-            localStorage.removeItem('clinical-quiz-state')
-            // Clean up images after submission
-            try {
-                await supabaseImageStorage.deleteImagesBySession(state.sessionId)
-            } catch (error) {
-                console.error('Failed to cleanup images after quiz submission:', error)
-            }
+            stateService.clearSavedState()
         },
         resetQuiz: async () => {
-            const oldSessionId = state.sessionId
             dispatch({ type: 'RESET_QUIZ' })
-            localStorage.removeItem('clinical-quiz-state')
-            // Clean up images from the old session
-            try {
-                await supabaseImageStorage.deleteImagesBySession(oldSessionId)
-            } catch (error) {
-                console.error('Failed to cleanup images after quiz reset:', error)
-            }
+            stateService.clearSavedState()
         },
         loadSavedQuiz: () => {
-            const savedQuiz = localStorage.getItem('clinical-quiz-state')
-            if (savedQuiz) {
-                try {
-                    const savedState = JSON.parse(savedQuiz)
-                    dispatch({ type: 'LOAD_SAVED_QUIZ', savedState })
-                } catch (error) {
-                    console.error('Failed to load saved quiz:', error)
-                }
+            const savedState = stateService.getSavedState()
+            if (savedState) {
+                dispatch({ type: 'LOAD_SAVED_QUIZ', savedState })
             }
         },
     }

@@ -1,14 +1,49 @@
 "use client"
 
-import type { Question } from "@/data/hairlossquestions"
+import { useState } from "react"
+import type { Question } from "@/data/types/question"
 
 interface ReviewScreenProps {
   questions: Question[]
   answers: Record<string, any>
   onSubmit: () => void
+  healthVertical?: string
 }
 
-export function ReviewScreen({ questions, answers, onSubmit }: ReviewScreenProps) {
+export function ReviewScreen({ questions, answers, onSubmit, healthVertical = 'hair-loss' }: ReviewScreenProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    try {
+      // First, try to save to database via API
+      const response = await fetch('/api/questionnaire/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          healthVertical,
+          responses: answers,
+        }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.saveToDatabase) {
+          console.log('Responses saved to database successfully')
+        } else {
+          console.log('Responses stored for later (user not authenticated)')
+        }
+      }
+    } catch (error) {
+      console.error('Failed to save responses:', error)
+    } finally {
+      setIsSubmitting(false)
+      // Continue with original onSubmit logic
+      onSubmit()
+    }
+  }
   const formatAnswer = (question: Question, answer: any) => {
     if (!answer) return "Not answered"
 
@@ -79,10 +114,11 @@ export function ReviewScreen({ questions, answers, onSubmit }: ReviewScreenProps
           By submitting this assessment, you confirm that all information provided is accurate and complete.
         </p>
         <button
-          onClick={onSubmit}
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-5 rounded-lg transition-colors duration-200 text-sm" // Reduced py-4 px-6 to py-3 px-5, rounded-xl to rounded-lg, text-base to text-sm
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-5 rounded-lg transition-colors duration-200 text-sm" // Reduced py-4 px-6 to py-3 px-5, rounded-xl to rounded-lg, text-base to text-sm
         >
-          Submit Assessment
+          {isSubmitting ? 'Submitting...' : 'Submit Assessment'}
         </button>
       </div>
     </div>
