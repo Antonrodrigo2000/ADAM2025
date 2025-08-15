@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { AuthenticatedUserNotice } from "./authenticated-user-notice"
 import type { User } from "@/contexts/types"
 import { createClient } from "@/lib/supabase/client"
 
@@ -175,9 +174,6 @@ export function AddressPaymentView({ user, onPayNow, isProcessing = false }: Add
 
     return (
         <div className="space-y-5">
-            {/* Authenticated User Notice */}
-            <AuthenticatedUserNotice user={user} />
-
             {/* Delivery Address Section */}
             <div className="neomorphic-container p-4 md:p-5">
                 <div className="flex items-center justify-between mb-4">
