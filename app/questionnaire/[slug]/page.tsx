@@ -3,13 +3,13 @@ import { QuizProvider } from "@/contexts/quiz-context"
 import { notFound } from "next/navigation"
 
 interface QuestionnairePageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default function QuestionnairePage({ params }: QuestionnairePageProps) {
-  const { slug } = params
+export default async function QuestionnairePage({ params }: QuestionnairePageProps) {
+  const { slug } = await params
   // Validate that the slug is supported
   const supportedVerticals = ['hair-loss', 'sexual-health'] // Add more as needed
   
