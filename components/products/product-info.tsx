@@ -39,6 +39,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 totalPrice: selectedOption.price,
                 consultationFee: product.consultation_fee,
                 prescriptionRequired: product.prescription_required,
+                health_vertical_slug: product.health_vertical.slug, // Add health vertical slug
                 image: product.images?.[0]?.url || '',
             })
 

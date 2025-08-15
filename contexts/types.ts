@@ -39,6 +39,7 @@ export interface CartItem {
   consultationFee: number
   prescriptionRequired: boolean
   requiresQuestionnaire?: boolean // Whether this product requires questionnaire completion
+  health_vertical_slug?: string // Health vertical slug (e.g., hair-loss)
   subscription?: {
     frequency: string
     isActive: boolean
