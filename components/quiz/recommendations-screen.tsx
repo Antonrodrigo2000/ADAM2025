@@ -21,9 +21,9 @@ export function RecommendationsScreen({ recommendations, patientData: _patientDa
 
   const getProductSlug = () => {
     if (recommendations.recommendation === "Minoxidil 5% Standalone") {
-      return "minoxidil-topical-usp-5"
+      return process.env.NEXT_PUBLIC_GENIE_MINOXIDIL_TOPICAL_PRODUCT_ID
     } else if (recommendations.recommendation === "Minoxidil + Finasteride Spray") {
-      return "6888fa5ae4b41311603613c9"
+      return process.env.NEXT_PUBLIC_GENIE_COMBINATION_SPRAY_PRODUCT_ID
     }
     return null
   }
