@@ -12,6 +12,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import type { User } from "@/contexts/types"
 import { createClient } from "@/lib/supabase/client"
+import { ConsultationWarning } from "./consultation-warning"
+import { ConsultationValidationService, type ConsultationValidationResult } from "@/lib/services/consultation-validation"
+import { CartEnrichmentService, type EnrichedCartItem } from "@/lib/services/cart-enrichment"
 
 interface Address {
     street: string
@@ -29,13 +32,27 @@ interface PaymentCard {
     isDefault: boolean
 }
 
+interface CartItem {
+    product_id: string
+    quantity: number
+    price: number
+    productName?: string
+    variantName?: string
+    image?: string
+    monthlyPrice?: number
+    months?: number
+    prescriptionRequired?: boolean
+    consultationFee?: number
+}
+
 interface AddressPaymentViewProps {
     user: User | null
+    cartItems?: CartItem[]
     onPayNow: (addressId?: string, paymentMethodId?: string) => void
     isProcessing?: boolean
 }
 
-export function AddressPaymentView({ user, onPayNow, isProcessing = false }: AddressPaymentViewProps) {
+export function AddressPaymentView({ user, cartItems = [], onPayNow, isProcessing = false }: AddressPaymentViewProps) {
     const [userAddress, setUserAddress] = useState<Address | null>(null)
     const [paymentCards, setPaymentCards] = useState<PaymentCard[]>([])
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null)
@@ -47,6 +64,12 @@ export function AddressPaymentView({ user, onPayNow, isProcessing = false }: Add
         country: 'Sri Lanka'
     })
     const [isLoadingPayments, setIsLoadingPayments] = useState(true)
+    const [consultationValidation, setConsultationValidation] = useState<ConsultationValidationResult>({
+        isValid: true,
+        missingHealthVerticals: [],
+        requiresConsultation: false
+    })
+    const [isValidatingConsultation, setIsValidatingConsultation] = useState(false)
 
     // Initialize address data immediately from server-side auth
     useEffect(() => {
@@ -146,6 +169,40 @@ export function AddressPaymentView({ user, onPayNow, isProcessing = false }: Add
         loadAddressFromDB()
     }, [user?.id])
 
+    // Validate consultation requirements when cartItems or user changes
+    useEffect(() => {
+        const validateConsultation = async () => {
+            if (!cartItems || cartItems.length === 0) return
+
+            setIsValidatingConsultation(true)
+            try {
+                // Enrich cart items with health vertical information
+                const enrichedItems = await CartEnrichmentService.enrichCartItemsWithHealthVerticals(cartItems)
+                
+                // Validate consultation requirements
+                const validation = await ConsultationValidationService.validateConsultationRequirements(
+                    enrichedItems,
+                    user?.id
+                )
+                
+                setConsultationValidation(validation)
+            } catch (error) {
+                console.error('Error validating consultation requirements:', error)
+                // On error, assume validation failed for safety
+                const consultationItems = cartItems.filter(item => item.prescriptionRequired)
+                setConsultationValidation({
+                    isValid: false,
+                    missingHealthVerticals: ['hair-loss'], // Default fallback
+                    requiresConsultation: consultationItems.length > 0
+                })
+            } finally {
+                setIsValidatingConsultation(false)
+            }
+        }
+
+        validateConsultation()
+    }, [cartItems, user?.id])
+
     const handleAddressUpdate = async () => {
         try {
             if (!user) return
@@ -169,6 +226,11 @@ export function AddressPaymentView({ user, onPayNow, isProcessing = false }: Add
     }
 
     const handlePayNow = () => {
+        // Don't proceed if consultation validation is failing
+        if (consultationValidation.requiresConsultation && !consultationValidation.isValid) {
+            return
+        }
+        
         onPayNow('user-address', selectedPaymentMethod || undefined)
     }
 
@@ -335,20 +397,37 @@ export function AddressPaymentView({ user, onPayNow, isProcessing = false }: Add
                 </div>
             </div>
 
+            {/* Consultation Warning */}
+            {consultationValidation.requiresConsultation && !consultationValidation.isValid && (
+                <ConsultationWarning missingHealthVerticals={consultationValidation.missingHealthVerticals} />
+            )}
+
             {/* Pay Now Button */}
             <div className="neomorphic-container p-4 md:p-5">
                 <Button
                     onClick={handlePayNow}
-                    disabled={!userAddress || !selectedPaymentMethod || isProcessing}
+                    disabled={
+                        !userAddress || 
+                        !selectedPaymentMethod || 
+                        isProcessing || 
+                        isValidatingConsultation ||
+                        (consultationValidation.requiresConsultation && !consultationValidation.isValid)
+                    }
                     size="lg"
                     className="w-full h-12 text-base bg-teal-500 hover:bg-teal-600 disabled:opacity-50"
                 >
-                    {isProcessing ? 'Processing Payment...' : 'Pay Now →'}
+                    {isProcessing ? 'Processing Payment...' : 
+                     isValidatingConsultation ? 'Validating Requirements...' :
+                     'Pay Now →'}
                 </Button>
 
-                {(!userAddress || !selectedPaymentMethod) && (
+                {(!userAddress || !selectedPaymentMethod || 
+                  (consultationValidation.requiresConsultation && !consultationValidation.isValid)) && (
                     <p className="text-xs text-orange-600 mt-2 text-center">
-                        Please complete your delivery address and select a payment method
+                        {!userAddress || !selectedPaymentMethod 
+                            ? 'Please complete your delivery address and select a payment method'
+                            : 'Please complete the required questionnaires before proceeding'
+                        }
                     </p>
                 )}
             </div>

@@ -127,6 +127,7 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
         {/* Address & Payment Form */}
         <AddressPaymentView
           user={session.user_id ? { id: session.user_id, email: '' } : null}
+          cartItems={session.cart_items}
           onPayNow={handlePayNow}
           isProcessing={isProcessing}
         />

@@ -6,7 +6,7 @@ export interface EventLoggingResult {
 }
 
 export async function logCheckoutEvent(
-  sessionId: string,
+  sessionToken: string,
   eventType: string,
   eventData: any
 ): Promise<EventLoggingResult> {
@@ -15,13 +15,27 @@ export async function logCheckoutEvent(
     
     const adminClient = createServiceRoleClient()
     
+    // First, get the session ID from the session token
+    const { data: session, error: sessionError } = await adminClient
+      .from('checkout_sessions')
+      .select('id')
+      .eq('session_token', sessionToken)
+      .single()
+
+    if (sessionError || !session) {
+      console.error('Failed to find checkout session:', sessionError)
+      return {
+        success: false,
+        error: 'Session not found'
+      }
+    }
+    
     const { error: logError } = await adminClient
       .from('checkout_session_events')
       .insert({
-        session_token: sessionId,
+        session_id: session.id,
         event_type: eventType,
-        event_data: eventData,
-        timestamp: new Date().toISOString()
+        event_data: eventData
       })
 
     if (logError) {
