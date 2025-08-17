@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getEnvironmentImageUrl } from '@/lib/image-utils'
 
 interface GenieProduct {
     id: string
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest) {
 
         if (productId) {
             // Fetch single product by ID (more efficient)
-            const response = await fetch(`https://api.geniebiz.lk/public/shops/${shopId}/products/${productId}`, {
+            const response = await fetch(`${apiUrl}/public/shops/${shopId}/products/${productId}`, {
                 headers: {
                     'Authorization': apiKey,
                     'Content-Type': 'application/json',
@@ -178,7 +179,7 @@ export async function GET(request: NextRequest) {
             price: genieProduct.price / 100, // Convert from cents
             images: genieProduct.image.map((imageUrl, index) => ({
                 id: `${genieProduct.id}-${index}`,
-                url: imageUrl.startsWith('http') ? imageUrl : `https://res.cloudinary.com/dialog-production/image/upload/${imageUrl}`,
+                url: getEnvironmentImageUrl(imageUrl),
                 alt_text: `${genieProduct.name} - Image ${index + 1}`,
                 is_primary: index === 0,
             })),

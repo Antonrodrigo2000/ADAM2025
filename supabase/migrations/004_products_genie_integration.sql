@@ -209,7 +209,7 @@ CREATE TRIGGER update_product_reviews_updated_at
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================================
--- 10. SAMPLE DATA FOR TESTING
+-- 10. HEALTH VERTICALS SETUP
 -- ============================================================================
 
 -- Insert sample hair loss vertical if it doesn't exist
@@ -217,55 +217,8 @@ INSERT INTO health_verticals (name, slug, description, is_active)
 VALUES ('Hair Loss', 'hair-loss', 'Hair loss treatment and prevention', true)
 ON CONFLICT (slug) DO NOTHING;
 
--- Sample product metadata for a Genie product
-INSERT INTO product_metadata (
-    genie_product_id,
-    health_vertical_id,
-    prescription_required,
-    active_ingredient,
-    dosage,
-    benefits,
-    how_it_works,
-    expected_timeline,
-    side_effects,
-    contraindications,
-    warnings
-) VALUES (
-    '6888fa5ae4b41311603613c9',
-    (SELECT id FROM health_verticals WHERE slug = 'hair-loss'),
-    false,
-    'Minoxidil 5%',
-    'Apply twice daily to affected areas',
-    '["Clinically proven hair regrowth", "FDA approved formula", "Visible results in 3-4 months"]'::jsonb,
-    'Minoxidil works by widening blood vessels and opening potassium channels, allowing more oxygen, blood, and nutrients to the follicle.',
-    'Initial shedding may occur in weeks 2-6. New hair growth typically begins around month 3-4.',
-    '["Scalp irritation", "Unwanted facial hair growth", "Dizziness (rare)"]'::jsonb,
-    '["Pregnancy or breastfeeding", "Under 18 years of age", "Scalp infections"]'::jsonb,
-    '["For external use only", "Avoid contact with eyes", "Wash hands after application"]'::jsonb
-) ON CONFLICT (genie_product_id) DO NOTHING;
-
--- Add sample ingredients
-INSERT INTO product_ingredients (genie_product_id, name, dosage, description, display_order)
-VALUES 
-    ('6888fa5ae4b41311603613c9', 'Minoxidil', '5%', 'Active ingredient that promotes hair growth', 1),
-    ('6888fa5ae4b41311603613c9', 'Propylene Glycol', '30%', 'Helps minoxidil penetrate the scalp', 2),
-    ('6888fa5ae4b41311603613c9', 'Ethanol', '60%', 'Solvent for active ingredient delivery', 3)
-ON CONFLICT DO NOTHING;
-
--- Add sample clinical studies
-INSERT INTO product_clinical_studies (genie_product_id, title, description, efficacy_rate, display_order)
-VALUES 
-    ('6888fa5ae4b41311603613c9', 'FDA Clinical Trial Results', '48-week study showing significant hair regrowth', 85, 1),
-    ('6888fa5ae4b41311603613c9', 'European Hair Research Study', 'Improvement in hair density after 6 months', 78, 2)
-ON CONFLICT DO NOTHING;
-
--- Add sample FAQs
-INSERT INTO product_faqs (genie_product_id, question, answer, display_order)
-VALUES 
-    ('6888fa5ae4b41311603613c9', 'How long does it take to see results?', 'Most users see initial results within 3-4 months of consistent use.', 1),
-    ('6888fa5ae4b41311603613c9', 'Do I need a prescription?', 'No, this is an over-the-counter treatment.', 2),
-    ('6888fa5ae4b41311603613c9', 'What happens if I stop using it?', 'Hair loss will gradually return within 3-4 months of discontinuing.', 3)
-ON CONFLICT DO NOTHING;
+-- NOTE: Sample product data has been moved to migrations 019 and 020
+-- This ensures the environment-aware functions exist before product insertion
 
 -- ============================================================================
 -- USAGE NOTES
