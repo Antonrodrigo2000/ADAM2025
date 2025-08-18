@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Plus, Edit2, CreditCard, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -48,11 +48,12 @@ interface CartItem {
 interface AddressPaymentViewProps {
     user: User | null
     cartItems?: CartItem[]
+    sessionId?: string
     onPayNow: (addressId?: string, paymentMethodId?: string) => void
     isProcessing?: boolean
 }
 
-export function AddressPaymentView({ user, cartItems = [], onPayNow, isProcessing = false }: AddressPaymentViewProps) {
+export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, isProcessing = false }: AddressPaymentViewProps) {
     const [userAddress, setUserAddress] = useState<Address | null>(null)
     const [paymentCards, setPaymentCards] = useState<PaymentCard[]>([])
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null)
@@ -79,65 +80,67 @@ export function AddressPaymentView({ user, cartItems = [], onPayNow, isProcessin
         // }
     }, [user])
 
-    // Load payment methods from Supabase
-    useEffect(() => {
-        const loadPaymentMethods = async () => {
-            if (!user) {
-                setIsLoadingPayments(false)
-                return
+    // Function to load payment methods
+    const loadPaymentMethods = useCallback(async () => {
+        if (!user) {
+            setIsLoadingPayments(false)
+            return
+        }
+
+        try {
+            console.log('Fetching payment methods for user:', user.id)
+
+            const response = await fetch('/api/payment-methods')
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch payment methods')
             }
 
-            try {
-                const supabase = createClient()
+            const result = await response.json()
 
-                console.log('Fetching payment methods for user:', user.id)
+            if (result.success) {
+                const formattedCards = (result.paymentMethods || []).map((method: any) => ({
+                    id: method.id,
+                    last4: method.card_last_four,
+                    brand: method.card_brand || 'unknown',
+                    expiryMonth: method.expiry_month,
+                    expiryYear: method.expiry_year,
+                    isDefault: method.is_default
+                }))
 
-                const { data: paymentMethods, error: paymentError } = await supabase
-                    .from('user_payment_methods')
-                    .select(`
-                        id,
-                        card_last_four,
-                        card_brand,
-                        expiry_month,
-                        expiry_year,
-                        is_default
-                    `)
-                    .eq('user_id', user.id)
-                    .eq('is_active', true)
-                    .order('is_default', { ascending: false })
-                    .order('created_at', { ascending: false })
+                setPaymentCards(formattedCards)
 
-                console.log('Payment methods fetched:', paymentMethods)
-
-                if (paymentError) {
-                    console.error('Error fetching payment methods:', paymentError)
-                } else {
-                    const formattedCards = (paymentMethods || []).map(method => ({
-                        id: method.id,
-                        last4: method.card_last_four,
-                        brand: method.card_brand || 'unknown',
-                        expiryMonth: method.expiry_month,
-                        expiryYear: method.expiry_year,
-                        isDefault: method.is_default
-                    }))
-
-                    setPaymentCards(formattedCards)
-
-                    // Auto-select default payment method
-                    const defaultMethod = formattedCards.find(card => card.isDefault)
-                    if (defaultMethod) {
-                        setSelectedPaymentMethod(defaultMethod.id)
-                    }
+                // Auto-select default payment method
+                const defaultMethod = formattedCards.find((card: { isDefault: any }) => card.isDefault)
+                if (defaultMethod) {
+                    setSelectedPaymentMethod(defaultMethod.id)
                 }
-            } catch (error) {
-                console.error('Error loading payment methods:', error)
-            } finally {
-                setIsLoadingPayments(false)
+            } else {
+                console.error('Failed to fetch payment methods:', result.error)
+            }
+        } catch (error) {
+            console.error('Error loading payment methods:', error)
+        } finally {
+            setIsLoadingPayments(false)
+        }
+    }, [user])
+
+    // Load payment methods from API on component mount
+    useEffect(() => {
+        loadPaymentMethods()
+    }, [loadPaymentMethods])
+
+    // Listen for window focus to refresh payment methods (when user returns from adding a card)
+    useEffect(() => {
+        const handleFocus = () => {
+            if (user) {
+                loadPaymentMethods()
             }
         }
 
-        loadPaymentMethods()
-    }, [user?.id])
+        window.addEventListener('focus', handleFocus)
+        return () => window.removeEventListener('focus', handleFocus)
+    }, [user, loadPaymentMethods])
 
     // Fetch address from DB if not available in server auth
     useEffect(() => {
@@ -222,6 +225,36 @@ export function AddressPaymentView({ user, cartItems = [], onPayNow, isProcessin
             }
         } catch (error) {
             console.error('Error updating address:', error)
+        }
+    }
+
+    const handleAddCard = async () => {
+        if (!user) return
+
+        try {
+            const url = sessionId 
+                ? `/api/payment-methods/add-card?sessionId=${sessionId}`
+                : '/api/payment-methods/add-card'
+                
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+
+            const result = await response.json()
+
+            if (result.success && result.redirectUrl) {
+                // Redirect to Genie IPG portal
+                window.location.href = result.redirectUrl
+            } else {
+                console.error('Failed to initiate add card flow:', result.error)
+                // You could show a toast notification here
+            }
+        } catch (error) {
+            console.error('Error initiating add card flow:', error)
+            // You could show a toast notification here
         }
     }
 
@@ -329,7 +362,13 @@ export function AddressPaymentView({ user, cartItems = [], onPayNow, isProcessin
                         </div>
                         <h2 className="text-xl font-bold text-neutral-800">Payment method</h2>
                     </div>
-                    <Button variant="outline" size="sm" className="text-xs">
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs"
+                        onClick={handleAddCard}
+                        disabled={!user}
+                    >
                         <Plus className="w-3 h-3 mr-1" />
                         Add Card
                     </Button>
@@ -352,8 +391,8 @@ export function AddressPaymentView({ user, cartItems = [], onPayNow, isProcessin
                             <Card
                                 key={card.id}
                                 className={`p-4 cursor-pointer transition-all ${selectedPaymentMethod === card.id
-                                    ? 'ring-2 ring-teal-500 bg-teal-50'
-                                    : 'hover:bg-neutral-50'
+                                    ? 'ring-2 ring-teal-500 bg-teal-50 dark:bg-teal-950'
+                                    : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
                                     }`}
                                 onClick={() => setSelectedPaymentMethod(card.id)}
                             >
@@ -364,17 +403,17 @@ export function AddressPaymentView({ user, cartItems = [], onPayNow, isProcessin
                                         </div>
                                         <div>
                                             <div className="flex items-center space-x-2">
-                                                <span className="text-sm font-medium">•••• •••• •••• {card.last4}</span>
+                                                <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">•••• •••• •••• {card.last4}</span>
                                                 <Badge variant="secondary" className="text-xs">
                                                     {card.brand.toUpperCase()}
                                                 </Badge>
                                                 {card.isDefault && (
-                                                    <Badge variant="default" className="text-xs bg-teal-500">
+                                                    <Badge variant="default" className="text-xs bg-teal-500 text-white">
                                                         Default
                                                     </Badge>
                                                 )}
                                             </div>
-                                            <p className="text-xs text-neutral-600">
+                                            <p className="text-xs text-neutral-600 dark:text-neutral-400">
                                                 Expires {card.expiryMonth.toString().padStart(2, '0')}/{card.expiryYear}
                                             </p>
                                         </div>
@@ -388,7 +427,11 @@ export function AddressPaymentView({ user, cartItems = [], onPayNow, isProcessin
                     ) : (
                         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
                             <p className="text-sm text-orange-800 mb-3">No payment methods found. Please add a payment method.</p>
-                            <Button size="sm">
+                            <Button 
+                                size="sm"
+                                onClick={handleAddCard}
+                                disabled={!user}
+                            >
                                 <Plus className="w-3 h-3 mr-1" />
                                 Add Payment Method
                             </Button>
