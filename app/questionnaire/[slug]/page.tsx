@@ -11,7 +11,7 @@ interface QuestionnairePageProps {
 export default async function QuestionnairePage({ params }: QuestionnairePageProps) {
   const { slug } = await params
   // Validate that the slug is supported
-  const supportedVerticals = ['hair-loss', 'sexual-health'] // Add more as needed
+  const supportedVerticals = ['hair-loss', 'sexual-health', 'erectile-dysfunction'] // Add more as needed
   
   if (!supportedVerticals.includes(slug)) {
     notFound()
@@ -28,6 +28,7 @@ export async function generateStaticParams() {
   // Generate static params for known health verticals
   return [
     { slug: 'hair-loss' },
-    { slug: 'sexual-health' }
+    { slug: 'sexual-health' },
+    { slug: 'erectile-dysfunction' }
   ]
 }

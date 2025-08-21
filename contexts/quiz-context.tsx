@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react'
 import { QuizState, QuizActions } from './types'
-import recommendTreatment from '@/lib/algorithm/hairloss-recommendations'
+// Removed recommendation imports since we're doing server-side processing
 import { Question } from '@/data/types/question'
 import { createClient } from '../lib/supabase/client'
 import supabaseImageStorage from '@/lib/storage/supabase-image-storage'
@@ -19,6 +19,7 @@ const initialQuizState: QuizState = {
     sessionId: '',
     startedAt: null,
     completedAt: null,
+    healthVertical: 'hair-loss', // Default health vertical
 }
 
 // Action types
@@ -74,25 +75,11 @@ function quizReducer(state: QuizState & { questions?: Question[] }, action: Quiz
             return { ...state, isReviewMode: false }
 
         case 'SUBMIT_QUIZ': {
-            const questions = action.questions
-
-            // Map answers keyed by question.id to question_property for recommendTreatment
-            const mapAnswersToProperties = (answers: Record<string, any>, questions: any) => {
-                const result: any = {}
-                for (const q of questions) {
-                    if (q.question_property) {
-                        result[q.question_property] = answers[q.id]
-                    }
-                }
-                return result
-            }
-            // Use the mapped answers for recommendations
-            const patientData = mapAnswersToProperties(state.answers, questions)
-            const recommendations = recommendTreatment(patientData)
+            // Simplified - just mark as completed
+            // Recommendations are now processed server-side during submission
             return {
                 ...state,
                 isCompleted: true,
-                recommendations,
                 completedAt: new Date(),
             }
         }
@@ -300,7 +287,10 @@ const QuizContext = createContext<QuizContextType | null>(null)
 
 // Provider
 export function QuizProvider({ children, healthVertical = 'hair-loss' }: { children: React.ReactNode; healthVertical?: string }) {
-    const [state, dispatch] = useReducer(quizReducer, initialQuizState)
+    const [state, dispatch] = useReducer(quizReducer, {
+        ...initialQuizState,
+        healthVertical
+    })
     const [questions, setQuestions] = useState<Question[]>([])
     const [stateService] = useState(() => new QuestionnaireStateService(healthVertical))
 
@@ -316,8 +306,45 @@ export function QuizProvider({ children, healthVertical = 'hair-loss' }: { child
 
                 if (hasResponse && response) {
                     console.log('User has existing response for this questionnaire:', response)
-                    // The existing algorithm logic will handle the redirect
-                    // We just need to load their previous responses if they want to review/modify
+                    
+                    // Process existing responses to get recommendations and redirect
+                    try {
+                        const { getRecommendations } = await import('@/lib/algorithm')
+                        
+                        // Get questions for this health vertical
+                        const supabase = createClient()
+                        const { data: questions } = await supabase
+                            .from('questions')
+                            .select(`
+                                id,
+                                question_property,
+                                question_text,
+                                question_type,
+                                questionnaires!inner(
+                                    health_verticals!inner(slug)
+                                )
+                            `)
+                            .eq('questionnaires.health_verticals.slug', healthVertical)
+                            .order('order_index', { ascending: true })
+
+                        if (questions && questions.length > 0) {
+                            const recommendationResult = getRecommendations(healthVertical, response.responses, questions)
+                            
+                            // Redirect based on existing recommendations
+                            if (recommendationResult.canPurchase && recommendationResult.redirectPath) {
+                                console.log('🔄 Redirecting existing user to product:', recommendationResult.redirectPath)
+                                window.location.href = recommendationResult.redirectPath
+                                return // Stop initialization
+                            } else {
+                                console.log('🔄 Redirecting existing user to consultation page')
+                                window.location.href = `/questionnaire/${healthVertical}/consultation-required`
+                                return // Stop initialization
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error processing existing response for redirect:', error)
+                        // Continue with normal flow if redirect fails
+                    }
                 }
 
                 // Initialize image storage

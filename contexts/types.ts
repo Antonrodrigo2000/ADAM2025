@@ -5,10 +5,11 @@ export interface QuizState {
   questionFlow: string[]
   isReviewMode: boolean
   isCompleted: boolean
-  recommendations: any | null
+  recommendations: any | null // Support both legacy and new recommendation formats
   sessionId: string
   startedAt: Date | null
   completedAt: Date | null
+  healthVertical: string // Add health vertical to state
 }
 
 export interface QuizActions {

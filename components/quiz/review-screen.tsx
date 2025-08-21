@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import type { Question } from "@/data/types/question"
 
 interface ReviewScreenProps {
@@ -12,11 +13,15 @@ interface ReviewScreenProps {
 
 export function ReviewScreen({ questions, answers, onSubmit, healthVertical = 'hair-loss' }: ReviewScreenProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter()
 
   const handleSubmit = async () => {
+    console.log('🚀 Submit button clicked')
+    console.log('📝 Submitting data:', { healthVertical, answerCount: Object.keys(answers).length })
     setIsSubmitting(true)
     try {
       // First, try to save to database via API
+      console.log('📞 Making API call to /api/questionnaire/submit')
       const response = await fetch('/api/questionnaire/submit', {
         method: 'POST',
         headers: {
@@ -27,22 +32,41 @@ export function ReviewScreen({ questions, answers, onSubmit, healthVertical = 'h
           responses: answers,
         }),
       })
+      
+      console.log('📞 API Response status:', response.status)
 
       if (response.ok) {
         const result = await response.json()
-        if (result.saveToDatabase) {
-          console.log('Responses saved to database successfully')
-        } else {
-          console.log('Responses stored for later (user not authenticated)')
+        console.log('📞 API Response data:', result)
+        
+        // Handle direct redirect from server
+        if (result.redirect) {
+          console.log('🔄 Redirecting to:', result.redirect)
+          router.push(result.redirect)
+          return // Don't continue with onSubmit
         }
+        
+        if (result.saveToDatabase) {
+          console.log('✅ Responses saved to database successfully')
+        } else {
+          console.log('💾 Responses stored for later (user not authenticated)')
+        }
+      } else {
+        console.error('❌ API Response not ok:', response.status, response.statusText)
+        const errorText = await response.text()
+        console.error('❌ Error response:', errorText)
       }
     } catch (error) {
       console.error('Failed to save responses:', error)
-    } finally {
       setIsSubmitting(false)
-      // Continue with original onSubmit logic
+      // Fallback to original onSubmit logic if there's an error
       onSubmit()
+      return
     }
+    
+    setIsSubmitting(false)
+    // Only call onSubmit if no redirect occurred
+    onSubmit()
   }
   const formatAnswer = (question: Question, answer: any) => {
     if (!answer) return "Not answered"

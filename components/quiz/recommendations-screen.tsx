@@ -1,108 +1,34 @@
 "use client"
 
-import { ArrowRight, Loader2 } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import type { RecommendationResult } from "@/lib/algorithm/hairloss-recommendations"
+import { ArrowRight } from "lucide-react"
+import type { BaseRecommendationResult } from "@/lib/algorithm/types"
 
 interface RecommendationsScreenProps {
-  recommendations: RecommendationResult
-  patientData: Record<string, any>
+  recommendations: BaseRecommendationResult
   onBack: () => void
 }
 
-export function RecommendationsScreen({ recommendations, patientData: _patientData, onBack }: RecommendationsScreenProps) {
-  const router = useRouter()
-  const [isRedirecting, setIsRedirecting] = useState(false)
-  
-  const canPurchase =
-    recommendations.recommendation === "Minoxidil 5% Standalone" ||
-    recommendations.recommendation === "Minoxidil + Finasteride Spray"
+export function RecommendationsScreen({ recommendations, onBack }: RecommendationsScreenProps) {
+  // This component should rarely be shown now since we do direct redirects
+  // It's only used for consultation/referral cases
 
-  const getProductSlug = () => {
-    if (recommendations.recommendation === "Minoxidil 5% Standalone") {
-      return process.env.NEXT_PUBLIC_GENIE_MINOXIDIL_TOPICAL_PRODUCT_ID
-    } else if (recommendations.recommendation === "Minoxidil + Finasteride Spray") {
-      return process.env.NEXT_PUBLIC_GENIE_COMBINATION_SPRAY_PRODUCT_ID
-    }
-    return null
-  }
 
-  // Auto-redirect if recommendation is successful (purchasable)
-  useEffect(() => {
-    if (canPurchase) {
-      const slug = getProductSlug()
-      if (slug) {
-        // Add recommendation parameter to indicate this is from quiz recommendation
-        const productUrl = `/products/${slug}?recommended=true&from=quiz`
-        
-        // Set loading state immediately
-        setIsRedirecting(true)
-        
-        // Prefetch the route to start loading data in the background
-        router.prefetch(`/products/${slug}`)
-        
-        // Start navigation after a brief moment to ensure loading state is visible
-        // The loading state will persist until the new page is fully loaded
-        setTimeout(() => {
-          router.push(productUrl)
-        }, 300) // Small delay to ensure spinner is visible
-      }
-    }
-  }, [canPurchase, router])
 
   const getReferralContent = () => {
-    if (recommendations.recommendation === "Refer to dermatologist") {
-      return {
-        title: "Specialist Consultation Required",
-        subtitle: "Your case requires specialized attention",
-        description:
-          "Based on your assessment, we recommend consulting with a dermatologist for the most appropriate treatment approach.",
-        cta: "Find a Dermatologist",
-      }
-    } else if (recommendations.recommendation === "Deny treatment") {
-      return {
-        title: "Alternative Options Available",
-        subtitle: "Let's explore other solutions",
-        description:
-          "Our standard treatments aren't suitable for your specific case, but there are other effective options we can discuss.",
-        cta: "Explore Alternatives",
-      }
+    return {
+      title: "Consultation Required",
+      subtitle: "Let's discuss your options",
+      description: recommendations.message || "Based on your responses, we recommend a consultation to determine the best treatment approach.",
+      cta: "Book Consultation",
     }
-    return null
   }
 
   const referralContent = getReferralContent()
 
-  // If it's a purchasable recommendation, show loading state
-  if (canPurchase && isRedirecting) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center space-y-6">
-          <div className="relative">
-            <div className="w-16 h-16 mx-auto">
-              <Loader2 className="w-16 h-16 animate-spin text-white" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold font-display">Preparing Your Treatment</h2>
-            <p className="text-neutral-400">Getting your personalized product details ready...</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // If it's a purchasable recommendation but not redirecting yet, return null
-  // Only render referral content for non-purchasable cases
-  if (canPurchase) {
-    return null
-  }
-
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="w-full">
-        {referralContent && <ReferralSection referralContent={referralContent} />}
+        <ReferralSection referralContent={referralContent} />
         <BackButton onBack={onBack} />
       </div>
     </div>
