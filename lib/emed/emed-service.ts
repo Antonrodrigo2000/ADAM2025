@@ -116,7 +116,8 @@ export class MedplumService {
         patientId: string,
         photos: PhotoInput[],
         questionnaireData: { quizResponses: Record<string, any>; questions: any[] },
-        cartItems: any[]
+        cartItems: any[],
+        healthVertical?: string
     ): Promise<MedplumResponse> {
         try {
             const binaryIds: string[] = []
@@ -135,11 +136,16 @@ export class MedplumService {
             }
 
             // Build questionnaire input using database questions with proper linkId and text
+            // Determine health vertical from questions or use provided parameter
+            const detectedHealthVertical = healthVertical || 
+                this.detectHealthVerticalFromQuestions(questionnaireData.questions) ||
+                'hair-loss' // fallback
+            
             const questionnaireInput = buildQuestionnaireInputFromDatabase(
                 questionnaireData.quizResponses,
                 questionnaireData.questions,
                 photos,
-                'hair-loss',
+                detectedHealthVertical,
                 cartItems,
                 process.env.EMED_ADAM_HEALTH_ORGANIZATION_ID,
                 patientId // Use patientId as customerId
@@ -183,6 +189,21 @@ export class MedplumService {
     /**
      * Get configuration info
      */
+    /**
+     * Detect health vertical from questions data
+     */
+    private detectHealthVerticalFromQuestions(questions: any[]): string | null {
+        if (!questions || questions.length === 0) return null
+        
+        // Check if questions have health vertical info from join
+        const firstQuestion = questions[0]
+        if (firstQuestion?.questionnaires?.health_verticals?.slug) {
+            return firstQuestion.questionnaires.health_verticals.slug
+        }
+        
+        return null
+    }
+
     getConfigInfo() {
         return {
             baseUrl: process.env.MEDPLUM_BASE_URL,

@@ -6,6 +6,8 @@
 export interface QuestionnaireData {
   healthVertical: string
   responses: Record<string, any>
+  photos?: any[]
+  questions?: any[]
   sessionId?: string
 }
 
@@ -57,6 +59,8 @@ export class QuestionnaireLocalStorageCollector {
       return {
         healthVertical,
         responses: quizState.answers,
+        photos: quizState.photos || [],
+        questions: quizState.questions || [],
         sessionId: quizState.sessionId
       }
     } catch (error) {
@@ -86,6 +90,8 @@ export class QuestionnaireLocalStorageCollector {
       return {
         healthVertical: 'hair-loss',
         responses: quizState.answers,
+        photos: quizState.photos || [],
+        questions: quizState.questions || [],
         sessionId: quizState.sessionId
       }
     } catch (error) {
@@ -97,7 +103,12 @@ export class QuestionnaireLocalStorageCollector {
   /**
    * Get the most recent questionnaire data (prioritizing the most recently updated)
    */
-  static getMostRecentQuestionnaireData(): QuestionnaireData | null {
+  static getMostRecentQuestionnaireData(specificHealthVertical?: string): QuestionnaireData | null {
+    if (specificHealthVertical) {
+      // If a specific health vertical is requested, get only that one
+      return this.collectQuestionnaireData(specificHealthVertical)
+    }
+    
     const allData = this.collectAllQuestionnaireData()
     
     if (allData.length === 0) return null
@@ -119,7 +130,7 @@ export class QuestionnaireLocalStorageCollector {
       localStorage.removeItem(`clinical-quiz-state-${healthVertical}`)
     } else {
       // Clear all known questionnaire data
-      const knownVerticals = ['hair-loss', 'sexual-health']
+      const knownVerticals = ['hair-loss', 'sexual-health', 'erectile-dysfunction']
       
       for (const vertical of knownVerticals) {
         localStorage.removeItem(`clinical-quiz-state-${vertical}`)

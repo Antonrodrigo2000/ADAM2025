@@ -38,8 +38,8 @@ const sriLankanNICRegex = /^(?:19|20|[0-9]{2})[0-9]{2}[0-9]{8}|[0-9]{9}[xXvV]$/
 const formSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
     password: z.string()
-        .min(12, "Password must be at least 12 characters")
-        .regex(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/, "Password must include uppercase, lowercase, number, and special character"),
+        .min(10, "Password must be at least 12 characters")
+        .regex(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s])/, "Password must include uppercase, lowercase, number, and special character"),
     legalFirstName: z.string().min(1, "Legal first name is required"),
     legalSurname: z.string().min(1, "Legal surname is required"),
     nic: z.string()

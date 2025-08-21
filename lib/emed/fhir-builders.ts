@@ -305,7 +305,7 @@ export function buildQuestionnaireInputFromDatabase(
     customerId?: string
 ): QuestionnaireInput {
 
-    const questionnaireId = assessmentType === 'hair-loss' ? 'hair-loss-questionnaire' : 'erectile-dysfunction-questionnaire'
+    const questionnaireId = getEmedHealthVerticleId(assessmentType)
 
     // Create a map of question IDs to their properties and metadata
     const questionMap = new Map<string, { property: string; text: string; type: string }>()
@@ -377,16 +377,15 @@ export function buildQuestionnaireInputFromDatabase(
 
     // Add cart items as a single questionnaire item
     if (cartItems && cartItems.length > 0) {
-        // Create linkId in format: organizationId_customerId_cart
-        const cartLinkId = organizationId && customerId
-            ? `${organizationId}_${customerId}_cart`
-            : 'cart'
-
         const cartAnswer: any = {
-            linkId: cartLinkId,
+            linkId: "selectedProducts",
             text: 'Selected products for purchase',
             answer: cartItems.map(item => ({
-                valueString: item.productId // All product IDs as separate answer items
+                valueCoding:{
+                    system: "https://api.emed.lk/adamhealth/products",
+                    code: item.productId,
+                    display: item.productName
+                }
             }))
         }
         answers.push(cartAnswer)
@@ -396,4 +395,21 @@ export function buildQuestionnaireInputFromDatabase(
         questionnaireId,
         answers
     }
+}
+
+function getEmedHealthVerticleId(assessmentType: string): string {
+    if (assessmentType === 'hair-loss') {
+        const id = process.env.EMED_HAIR_LOSS_VERTICLE_ID
+        if (!id) {
+            throw new Error('EMED_HAIR_LOSS_VERTICLE_ID environment variable is not set')
+        }
+        return id
+    } else if (assessmentType === 'erectile-dysfunction') {
+        const id = process.env.EMED_ERECTILE_DYSFUNCTION_VERTICLE_ID
+        if (!id) {
+            throw new Error('EMED_ERECTILE_DYSFUNCTION_VERTICLE_ID environment variable is not set')
+        }
+        return id
+    }
+    throw new Error(`Unknown assessment type: ${assessmentType}`)
 }
