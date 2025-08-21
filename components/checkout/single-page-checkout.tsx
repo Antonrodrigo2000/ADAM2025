@@ -346,9 +346,9 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
 
                     <div className="mb-4">
                         <span className="text-neutral-600 text-sm">Have an account? </span>
-                        <button type="button" className="neomorphic-link text-sm">
+                        <Link href="/login" className="text-teal-600 hover:text-teal-700 underline text-sm">
                             Log in
-                        </button>
+                        </Link>
                     </div>
 
                     <div className="space-y-4">
