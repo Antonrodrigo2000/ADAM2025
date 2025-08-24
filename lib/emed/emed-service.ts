@@ -8,7 +8,6 @@ import {
     buildQuestionnaireInputFromDatabase
 } from './fhir-builders'
 import { createMedplumClient } from '@/lib/medplum/client'
-import { compressExistingPhotoInput, validatePhotoInputForMedplum } from './image-compressor'
 
 export interface MedplumResponse {
     success: boolean

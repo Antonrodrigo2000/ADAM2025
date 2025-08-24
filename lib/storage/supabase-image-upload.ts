@@ -1,7 +1,7 @@
 import { compressImage, getCompressionInfo, getOptimalCompressionOptions, needsCompression } from '@/helpers/image-compressor'
 import { createClient } from '../supabase/client'
 
-const BUCKET_NAME = 'temp-images'
+const BUCKET_NAME = process.env.NEXT_PUBLIC_SUPABASE_QUESTIONNAIRE_BUCKET!
 
 export async function uploadImageToSupabase(
     sessionId: string,
@@ -43,7 +43,7 @@ export async function uploadImageToSupabase(
     if (error) {
         // If bucket doesn't exist, try to create it first
         if (error.message.includes('Bucket not found')) {
-            console.warn('temp-images bucket not found, attempting to create it...')
+            console.warn('bucket not found, attempting to create it...')
 
             const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
                 public: true,

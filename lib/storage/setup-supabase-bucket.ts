@@ -1,6 +1,6 @@
 import { createClient } from '../supabase/client'
 
-const BUCKET_NAME = 'temp-images'
+const BUCKET_NAME = process.env.NEXT_PUBLIC_SUPABASE_QUESTIONNAIRE_BUCKET!
 
 export async function createTempImagesBucket(): Promise<{ success: boolean; message: string }> {
   const supabase = createClient()

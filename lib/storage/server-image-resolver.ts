@@ -1,6 +1,6 @@
 import { createClient } from '../supabase/server'
 
-const BUCKET_NAME = 'temp-images'
+const BUCKET_NAME = process.env.SUPABASE_QUESTIONNAIRE_BUCKET!
 
 export async function resolveImageReference(imageReference: any): Promise<string | null> {
     if (!imageReference || imageReference.type !== 'image_reference') {
