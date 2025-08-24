@@ -15,7 +15,7 @@ export interface CartItemWithHealthVertical {
   image?: string
   monthlyPrice?: number
   months?: number
-  prescriptionRequired?: boolean
+  consultationRequired?: boolean
   consultationFee?: number
   health_vertical_slug?: string
 }
@@ -27,7 +27,7 @@ export class ConsultationValidationService {
   ): Promise<ConsultationValidationResult> {
     try {
       // Filter items that require consultation
-      const consultationItems = cartItems.filter(item => item.prescriptionRequired)
+      const consultationItems = cartItems.filter(item => item.consultationRequired)
       
       if (consultationItems.length === 0) {
         return {
@@ -108,14 +108,14 @@ export class ConsultationValidationService {
       console.error('Error validating consultation requirements:', error)
       // On error, assume validation failed for safety
       const healthVerticals = cartItems
-        .filter(item => item.prescriptionRequired)
+        .filter(item => item.consultationRequired)
         .map(item => item.health_vertical_slug)
         .filter((slug, index, array) => slug && array.indexOf(slug) === index) as string[]
       
       return {
         isValid: false,
         missingHealthVerticals: healthVerticals,
-        requiresConsultation: cartItems.some(item => item.prescriptionRequired)
+        requiresConsultation: cartItems.some(item => item.consultationRequired)
       }
     }
   }

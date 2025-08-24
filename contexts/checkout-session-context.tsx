@@ -12,6 +12,13 @@ interface CheckoutSession {
     product_id: string
     quantity: number
     price: number
+    productName?: string
+    variantName?: string
+    image?: string
+    monthlyPrice?: number
+    months?: number
+    consultationRequired?: boolean
+    consultationFee?: number
   }>
   cart_total: number
   customer_info?: any

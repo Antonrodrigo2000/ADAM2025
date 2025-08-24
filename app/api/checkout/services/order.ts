@@ -73,7 +73,7 @@ export async function createOrder(
       months: item.months,
       monthlyPrice: item.monthlyPrice,
       consultationFee: item.consultationFee,
-      prescriptionRequired: item.prescriptionRequired,
+      consultationRequired: item.consultationRequired,
       selectedOptions: item.selectedOptions
     }
   }))

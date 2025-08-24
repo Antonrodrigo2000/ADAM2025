@@ -31,7 +31,7 @@ export function OrderItem({ item, index }: OrderItemProps) {
         <div className="flex items-center gap-4 text-sm text-neutral-600">
           <span>Qty: {item.quantity}</span>
           
-          {item.prescriptionRequired && (
+          {item.consultationRequired && (
             <span className="text-blue-600 text-xs bg-blue-50 px-2 py-1 rounded">
               Requires consultation
             </span>

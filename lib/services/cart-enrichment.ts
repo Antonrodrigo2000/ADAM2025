@@ -9,7 +9,7 @@ export interface EnrichedCartItem {
   image?: string
   monthlyPrice?: number
   months?: number
-  prescriptionRequired?: boolean
+  consultationRequired?: boolean
   consultationFee?: number
   health_vertical_slug?: string
 }
@@ -25,7 +25,7 @@ export class CartEnrichmentService {
       image?: string
       monthlyPrice?: number
       months?: number
-      prescriptionRequired?: boolean
+      consultationRequired?: boolean
       consultationFee?: number
     }>
   ): Promise<EnrichedCartItem[]> {

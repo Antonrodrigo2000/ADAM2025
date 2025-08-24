@@ -12,7 +12,7 @@ interface CreateSessionRequest {
     image?: string
     monthlyPrice?: number
     months?: number
-    prescriptionRequired?: boolean
+    consultationRequired?: boolean
     consultationFee?: number
   }>
   source?: string

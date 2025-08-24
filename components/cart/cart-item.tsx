@@ -15,7 +15,7 @@ interface CartItemData {
   monthlyPrice: number
   months: number
   quantity: number
-  prescriptionRequired: boolean
+  consultationRequired: boolean
   consultationFee: number
 }
 
@@ -61,7 +61,7 @@ export function CartItem({ item, onQuantityChange, onRemove }: CartItemProps) {
             </span>
           )}
         </div>
-        {item.prescriptionRequired && (
+        {item.consultationRequired && (
           <p className="text-xs text-blue-600 mt-1">
             Consultation required
           </p>

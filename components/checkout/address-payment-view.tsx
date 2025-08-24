@@ -36,7 +36,7 @@ interface CartItem {
     image?: string
     monthlyPrice?: number
     months?: number
-    prescriptionRequired?: boolean
+    consultationRequired?: boolean
     consultationFee?: number
 }
 
@@ -59,9 +59,6 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
         requiresConsultation: false
     })
     const [isValidatingConsultation, setIsValidatingConsultation] = useState(false)
-    
-    // Check if any items require consultation
-    const hasConsultationItems = cartItems.some(item => item.prescriptionRequired)
 
     // Initialize address data immediately from server-side auth or session data
     useEffect(() => {
@@ -82,15 +79,15 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
             console.log('Fetching payment methods for user:', user.id)
 
             const response = await fetch('/api/payment-methods')
-            
+
             if (!response.ok) {
                 throw new Error('Failed to fetch payment methods')
             }
 
             const result = await response.json()
 
-            if (result.success) {
-                const formattedCards = (result.paymentMethods || []).map((method: any) => ({
+            if (result.success && result.paymentMethods && result.paymentMethods.length > 0) {
+                const formattedCards = result.paymentMethods.map((method: any) => ({
                     id: method.id,
                     last4: method.card_last_four,
                     brand: method.card_brand || 'unknown',
@@ -107,7 +104,7 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
                     setSelectedPaymentMethod(defaultMethod.id)
                 }
             } else {
-                console.error('Failed to fetch payment methods:', result.error)
+                console.log('No payment methods found')
             }
         } catch (error) {
             console.error('Error loading payment methods:', error)
@@ -156,7 +153,7 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
                     if (profile.address) {
                         setUserAddress(profile.address)
                     }
-                    
+
                     // Log user info for debugging reload issues
                     console.log('User profile data available:', {
                         hasProfile: !!user.profile,
@@ -181,18 +178,18 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
             try {
                 // Enrich cart items with health vertical information
                 const enrichedItems = await CartEnrichmentService.enrichCartItemsWithHealthVerticals(cartItems)
-                
+
                 // Validate consultation requirements
                 const validation = await ConsultationValidationService.validateConsultationRequirements(
                     enrichedItems,
                     user?.id
                 )
-                
+
                 setConsultationValidation(validation)
             } catch (error) {
                 console.error('Error validating consultation requirements:', error)
                 // On error, assume validation failed for safety
-                const consultationItems = cartItems.filter(item => item.prescriptionRequired)
+                const consultationItems = cartItems.filter(item => item.consultationRequired)
                 setConsultationValidation({
                     isValid: false,
                     missingHealthVerticals: ['hair-loss'], // Default fallback
@@ -231,10 +228,10 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
         if (!user) return
 
         try {
-            const url = sessionId 
+            const url = sessionId
                 ? `/api/payment-methods/add-card?sessionId=${sessionId}`
                 : '/api/payment-methods/add-card'
-                
+
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -262,14 +259,14 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
         if (consultationValidation.requiresConsultation && !consultationValidation.isValid) {
             return
         }
-        
+
         onPayNow('user-address', selectedPaymentMethod || undefined)
     }
 
     return (
         <div className="space-y-6">
             {/* Delivery Address Section */}
-            <DeliveryAddress 
+            <DeliveryAddress
                 userAddress={userAddress}
                 onAddressUpdate={handleAddressUpdate}
             />

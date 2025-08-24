@@ -7,7 +7,7 @@ export interface Product {
   dosage: string
   price: number
   consultation_fee: number
-  prescription_required: boolean
+  consultation_required: boolean
   health_vertical_id: string
   health_vertical: {
     name: string

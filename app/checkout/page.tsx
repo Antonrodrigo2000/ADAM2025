@@ -81,7 +81,7 @@ export default function CheckoutPage() {
           {isCreatingSession ? (
             <>
               {/* Loading State */}
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
               <h2 className="text-xl font-bold text-neutral-800 mb-2">Setting up your checkout...</h2>
               <p className="text-neutral-600">Please wait while we prepare your secure checkout session.</p>
             </>
@@ -100,7 +100,7 @@ export default function CheckoutPage() {
                 {cartState.items.length > 0 ? (
                   <Button 
                     onClick={handleCreateSession}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                    className="w-full bg-neutral-900 hover:bg-neutral-800 text-white"
                     disabled={isCreatingSession}
                   >
                     Try Again
@@ -108,7 +108,7 @@ export default function CheckoutPage() {
                 ) : (
                   <Button 
                     onClick={() => router.push('/products')}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                    className="w-full bg-neutral-900 hover:bg-neutral-800 text-white"
                   >
                     Browse Products
                   </Button>
@@ -136,7 +136,7 @@ export default function CheckoutPage() {
               
               <Button 
                 onClick={() => router.push('/products')}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                className="w-full bg-neutral-900 hover:bg-neutral-800 text-white"
               >
                 Browse Products
               </Button>
@@ -144,8 +144,8 @@ export default function CheckoutPage() {
           ) : (
             <>
               {/* Manual Creation State */}
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
               </div>
@@ -157,7 +157,7 @@ export default function CheckoutPage() {
               
               <Button 
                 onClick={handleCreateSession}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                className="w-full bg-neutral-900 hover:bg-neutral-800 text-white"
                 disabled={isCreatingSession}
               >
                 Start Checkout

@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
                 active_ingredient: metadata?.active_ingredient || '',
                 dosage: metadata?.dosage || '',
                 consultation_fee: metadata?.consultation_fee || 2000,
-                prescription_required: metadata?.consultation_required || false, // Use renamed field
+                consultation_required: metadata?.consultation_required || false,
                 health_vertical_id: metadata?.health_vertical_id || '',
                 health_vertical: metadata?.health_verticals ? {
                     name: metadata.health_verticals.name,

@@ -10,7 +10,7 @@ export function calculateOrderTotals(items: CartItem[]): OrderCalculation {
   }, 0)
 
   // Check if any items require consultation
-  const hasConsultationItems = items.some(item => item.prescriptionRequired)
+  const hasConsultationItems = items.some(item => item.consultationRequired)
   
   // Single consultation fee if any items require it
   const consultationFee = hasConsultationItems ? CONSULTATION_FEE : 0

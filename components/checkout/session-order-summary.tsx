@@ -11,7 +11,7 @@ interface CartItem {
   image?: string
   monthlyPrice?: number
   months?: number
-  prescriptionRequired?: boolean
+  consultationRequired?: boolean
   consultationFee?: number
 }
 

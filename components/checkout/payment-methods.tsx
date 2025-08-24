@@ -109,22 +109,24 @@ export function PaymentMethods({
                         </Card>
                     ))
                 ) : (
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                        <p className="text-sm text-orange-800 mb-4">No payment methods found. Please add a payment method to continue.</p>
-                        {/* Bottom Add Payment Method button - only shown when no cards */}
-                        <div className="flex justify-center">
+                    <>
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <p className="text-sm text-gray-700">No payment methods found. Please add a payment method to continue.</p>
+                        </div>
+                        {/* Add Payment Method button - outside container, smaller */}
+                        <div className="flex justify-center mt-4">
                             <Button 
-                                size="lg"
+                                size="sm"
                                 onClick={onAddCard}
                                 variant={"default"}
                                 disabled={!user}
-                                className="w-full px-8"
+                                className="px-6 bg-orange-500 hover:bg-orange-600 text-white"
                             >
                                 <Plus className="w-4 h-4 mr-2" />
                                 Add Payment Method
                             </Button>
                         </div>
-                    </div>
+                    </>
                 )}
             </div>
         </div>

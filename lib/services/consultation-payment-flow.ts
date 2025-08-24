@@ -26,7 +26,7 @@ export interface CartItemWithConsultation {
     price: number
     productName?: string
     variantName?: string
-    prescriptionRequired?: boolean
+    consultationRequired?: boolean
     consultationFee?: number
     health_vertical_slug?: string
 }
@@ -44,8 +44,8 @@ export class ConsultationPaymentFlowService {
         const enrichedItems = await CartEnrichmentService.enrichCartItemsWithHealthVerticals(cartItems)
 
         // Separate consultation items from regular items
-        const consultationItems = enrichedItems.filter(item => item.prescriptionRequired)
-        const regularItems = enrichedItems.filter(item => !item.prescriptionRequired)
+        const consultationItems = enrichedItems.filter(item => item.consultationRequired)
+        const regularItems = enrichedItems.filter(item => !item.consultationRequired)
 
         // Calculate product totals (no consultation fee calculations)
         const productTotal = enrichedItems.reduce((total, item) => {

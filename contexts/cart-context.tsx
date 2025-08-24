@@ -32,7 +32,7 @@ type CartActionType =
 function calculateTotals(items: CartItem[], discount: number) {
   const subtotal = items.reduce((sum, item) => sum + item.totalPrice, 0)
   const consultationFees = items.reduce((sum, item) => {
-    return sum + (item.prescriptionRequired ? item.consultationFee : 0)
+    return sum + (item.consultationRequired ? item.consultationFee : 0)
   }, 0)
   const tax = 0 // No tax
   const shipping = 400 // Fixed delivery fee of LKR 400
@@ -146,7 +146,7 @@ function cartReducer(state: CartState, action: CartActionType): CartState {
     case 'CALCULATE_TOTALS': {
       const subtotal = state.items.reduce((sum, item) => sum + item.totalPrice, 0)
       const consultationFees = state.items.reduce((sum, item) => {
-        return sum + (item.prescriptionRequired ? item.consultationFee : 0)
+        return sum + (item.consultationRequired ? item.consultationFee : 0)
       }, 0)
       const tax = 0 // No tax
       const shipping = 400 // Fixed delivery fee of LKR 400

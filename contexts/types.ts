@@ -38,7 +38,7 @@ export interface CartItem {
   monthlyPrice: number // Price per month
   totalPrice: number // Total price for the quantity * months
   consultationFee: number
-  prescriptionRequired: boolean
+  consultationRequired: boolean
   requiresQuestionnaire?: boolean // Whether this product requires questionnaire completion
   health_vertical_slug?: string // Health vertical slug (e.g., hair-loss)
   subscription?: {

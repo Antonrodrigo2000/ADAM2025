@@ -131,7 +131,7 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
   }, [session, sessionId, router])
 
   // Check if any items require consultation
-  const hasConsultationItems = session?.cart_items.some(item => item.prescriptionRequired) || false
+  const hasConsultationItems = session?.cart_items.some(item => item.consultationRequired) || false
 
   const handlePayNow = async (addressId?: string, paymentMethodId?: string) => {
     if (!session) return
@@ -184,7 +184,7 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
           <p className="text-neutral-600 mb-4">{error || 'Session not found'}</p>
           <button
             onClick={() => router.push('/cart')}
-            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+            className="px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800"
           >
             Return to Cart
           </button>

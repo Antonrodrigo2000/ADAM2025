@@ -41,7 +41,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
         image: item.image,
         monthlyPrice: item.monthlyPrice,
         months: item.months,
-        prescriptionRequired: item.prescriptionRequired,
+        consultationRequired: item.consultationRequired,
         consultationFee: item.consultationFee,
       }))
 

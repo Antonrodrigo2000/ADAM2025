@@ -35,7 +35,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 months: 1,
                 totalPrice: totalPrice,
                 consultationFee: 1000,
-                prescriptionRequired: product.prescription_required,
+                consultationRequired: product.consultation_required,
                 health_vertical_slug: product.health_vertical.slug,
                 image: product.images?.[0]?.url || '',
             })
@@ -77,7 +77,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
             </div>
 
             {/* Prescription Badge */}
-            {product.prescription_required && (
+            {product.consultation_required && (
                 <Card className="border-blue-200 bg-blue-50/50">
                     <CardContent className="p-4">
                         <div className="flex items-center space-x-3">
@@ -100,7 +100,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                         <span className="text-gray-600">Total price:</span>
                         <span className="font-semibold text-gray-900">LKR {totalPrice.toLocaleString()}</span>
                     </div>
-                    {product.prescription_required && (
+                    {product.consultation_required && (
                         <div className="flex justify-between items-center">
                             <span className="text-gray-600">Consultation:</span>
                             <span className="font-semibold text-gray-900">LKR 1,000 (1 time)</span>
