@@ -28,6 +28,24 @@ type CartActionType =
   | { type: 'SET_LOADING'; loading: boolean }
   | { type: 'LOAD_CART'; cartData: CartState }
 
+// Helper function to calculate totals
+function calculateTotals(items: CartItem[], discount: number) {
+  const subtotal = items.reduce((sum, item) => sum + item.totalPrice, 0)
+  const consultationFees = items.reduce((sum, item) => {
+    return sum + (item.prescriptionRequired ? item.consultationFee : 0)
+  }, 0)
+  const tax = 0 // No tax
+  const shipping = 400 // Fixed delivery fee of LKR 400
+  const total = subtotal + consultationFees + shipping - discount
+
+  return {
+    subtotal: subtotal + consultationFees,
+    tax,
+    shipping,
+    total: Math.max(0, total), // Ensure total is never negative
+  }
+}
+
 // Reducer
 function cartReducer(state: CartState, action: CartActionType): CartState {
   switch (action.type) {
@@ -61,58 +79,64 @@ function cartReducer(state: CartState, action: CartActionType): CartState {
         newItems = [...state.items, newItem]
       }
 
-      return { ...state, items: newItems }
+      const newTotals = calculateTotals(newItems, state.discount)
+      return { ...state, items: newItems, ...newTotals }
     }
 
-    case 'REMOVE_ITEM':
-      return {
-        ...state,
-        items: state.items.filter(item => item.id !== action.itemId),
-      }
+    case 'REMOVE_ITEM': {
+      const newItems = state.items.filter(item => item.id !== action.itemId)
+      const newTotals = calculateTotals(newItems, state.discount)
+      return { ...state, items: newItems, ...newTotals }
+    }
 
-    case 'UPDATE_QUANTITY':
+    case 'UPDATE_QUANTITY': {
       if (action.quantity <= 0) {
-        return {
-          ...state,
-          items: state.items.filter(item => item.id !== action.itemId),
-        }
+        const newItems = state.items.filter(item => item.id !== action.itemId)
+        const newTotals = calculateTotals(newItems, state.discount)
+        return { ...state, items: newItems, ...newTotals }
       }
-      return {
-        ...state,
-        items: state.items.map(item =>
-          item.id === action.itemId
-            ? { 
-                ...item, 
-                quantity: action.quantity,
-                totalPrice: action.quantity * item.months * item.monthlyPrice
-              }
-            : item
-        ),
-      }
+      const newItems = state.items.map(item =>
+        item.id === action.itemId
+          ? { 
+              ...item, 
+              quantity: action.quantity,
+              totalPrice: action.quantity * item.months * item.monthlyPrice
+            }
+          : item
+      )
+      const newTotals = calculateTotals(newItems, state.discount)
+      return { ...state, items: newItems, ...newTotals }
+    }
 
-    case 'UPDATE_ITEM':
-      return {
-        ...state,
-        items: state.items.map(item =>
-          item.id === action.itemId
-            ? { ...item, ...action.updates }
-            : item
-        ),
-      }
+    case 'UPDATE_ITEM': {
+      const newItems = state.items.map(item =>
+        item.id === action.itemId
+          ? { ...item, ...action.updates }
+          : item
+      )
+      const newTotals = calculateTotals(newItems, state.discount)
+      return { ...state, items: newItems, ...newTotals }
+    }
 
-    case 'APPLY_DISCOUNT':
+    case 'APPLY_DISCOUNT': {
+      const newTotals = calculateTotals(state.items, action.amount)
       return {
         ...state,
         discountCode: action.code,
         discount: action.amount,
+        ...newTotals
       }
+    }
 
-    case 'REMOVE_DISCOUNT':
+    case 'REMOVE_DISCOUNT': {
+      const newTotals = calculateTotals(state.items, 0)
       return {
         ...state,
         discountCode: undefined,
         discount: 0,
+        ...newTotals
       }
+    }
 
     case 'CLEAR_CART':
       return {
@@ -143,8 +167,11 @@ function cartReducer(state: CartState, action: CartActionType): CartState {
         isLoading: action.loading,
       }
 
-    case 'LOAD_CART':
-      return action.cartData
+    case 'LOAD_CART': {
+      // Recalculate totals when loading cart data to ensure consistency
+      const newTotals = calculateTotals(action.cartData.items, action.cartData.discount)
+      return { ...action.cartData, ...newTotals }
+    }
 
     default:
       return state
@@ -195,10 +222,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(timeoutId)
   }, [state])
 
-  // Recalculate totals whenever items, discount, or shipping changes
-  useEffect(() => {
-    dispatch({ type: 'CALCULATE_TOTALS' })
-  }, [state.items, state.discount])
+  // Calculate totals after state changes (removed automatic useEffect to prevent loops)
+  // Totals are calculated in each reducer case that modifies items or discount
 
   // Actions
   const actions: CartActions = {

@@ -291,7 +291,6 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
 
             {/* Payment Action Section */}
             <PaymentAction
-                hasConsultationItems={hasConsultationItems}
                 hasAddress={!!userAddress}
                 hasSelectedPaymentMethod={!!selectedPaymentMethod}
                 isProcessing={isProcessing}

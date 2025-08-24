@@ -22,7 +22,18 @@ interface CreateSessionRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: CreateSessionRequest = await request.json()
+    let body: CreateSessionRequest
+    
+    try {
+      body = await request.json()
+    } catch (jsonError) {
+      console.error('Invalid JSON in request body:', jsonError)
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      )
+    }
+    
     const { cart_items, source = 'web', marketing_source, campaign_id } = body
 
     // Validate cart items

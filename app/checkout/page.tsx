@@ -24,7 +24,7 @@ export default function CheckoutPage() {
     if (cartState.items.length > 0 && !isCreatingSession && !error) {
       handleCreateSession()
     }
-  }, [cartState.items.length])
+  }, [cartState.items.length, isCreatingSession, error])
 
   const handleCreateSession = async () => {
     if (cartState.items.length === 0) {
@@ -33,7 +33,10 @@ export default function CheckoutPage() {
     }
 
     setIsCreatingSession(true)
-    setError(null)
+    // Only clear error when user manually retries, not on auto-creation
+    if (error) {
+      setError(null)
+    }
 
     try {
       // Format cart items for checkout session

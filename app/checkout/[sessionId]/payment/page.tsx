@@ -4,6 +4,7 @@ import { useCheckoutSession } from '@/contexts/checkout-session-context'
 import { AddressPaymentView } from '@/components/checkout/address-payment-view'
 import { CheckoutProgressIndicator } from '@/components/checkout/checkout-progress-indicator'
 import { SessionOrderSummary } from '@/components/checkout/session-order-summary'
+import { ConsultationPaymentWarning } from '@/components/checkout/consultation-payment-warning'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -29,7 +30,7 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
       setShowCardAddedMessage(true)
       // Hide message after 5 seconds
       setTimeout(() => setShowCardAddedMessage(false), 5000)
-      
+
       // Clean up URL
       const url = new URL(window.location.href)
       url.searchParams.delete('cardAdded')
@@ -48,7 +49,7 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
           console.log('Fallback: Refreshing session to get latest user data...')
           refresh()
         }, 500) // Longer delay to avoid conflicts
-        
+
         return () => clearTimeout(timeoutId)
       }
     }
@@ -72,22 +73,22 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
       })
 
       // Check if we have meaningful customer info (not just empty object)
-      const hasSessionCustomerInfo = session?.customer_info && 
-                                    Object.keys(session.customer_info).length > 0 &&
-                                    session.customer_info.first_name
+      const hasSessionCustomerInfo = session?.customer_info &&
+        Object.keys(session.customer_info).length > 0 &&
+        session.customer_info.first_name
 
       if (!session?.user_id || customerInfo || hasSessionCustomerInfo) {
         console.log('Skipping customer info load:', {
-          reason: !session?.user_id ? 'no user_id' : 
-                  customerInfo ? 'already have customerInfo' : 
-                  'already have valid session.customer_info'
+          reason: !session?.user_id ? 'no user_id' :
+            customerInfo ? 'already have customerInfo' :
+              'already have valid session.customer_info'
         })
         return
       }
 
       try {
         console.log('Loading customer info from database for user:', session.user_id)
-        
+
         const supabase = createClient()
         const { data: profile, error: profileError } = await supabase
           .from('user_profiles')
@@ -101,10 +102,10 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
           console.error('Error fetching user profile:', profileError)
         } else if (profile) {
           console.log('Setting customer info from DB:', profile)
-          
+
           // Get email from auth user if available
           const { data: authUser } = await supabase.auth.getUser()
-          
+
           setCustomerInfo({
             first_name: profile.first_name,
             last_name: profile.last_name,
@@ -129,6 +130,9 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
     }
   }, [session, sessionId, router])
 
+  // Check if any items require consultation
+  const hasConsultationItems = session?.cart_items.some(item => item.prescriptionRequired) || false
+
   const handlePayNow = async (addressId?: string, paymentMethodId?: string) => {
     if (!session) return
 
@@ -136,7 +140,7 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
     try {
       // Update session to processing step
       await progressToStep('processing')
-      
+
       // Call payment API
       const response = await fetch('/api/checkout/address-payment/process-payment', {
         method: 'POST',
@@ -178,7 +182,7 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
         <div className="bg-white rounded-lg shadow-sm p-6 text-center">
           <h2 className="text-xl font-bold text-red-600 mb-2">Session Error</h2>
           <p className="text-neutral-600 mb-4">{error || 'Session not found'}</p>
-          <button 
+          <button
             onClick={() => router.push('/cart')}
             className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
           >
@@ -193,9 +197,9 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
     <div className="grid lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
       {/* Left side - Address & Payment */}
       <div className="lg:col-span-2 space-y-5">
-        <CheckoutProgressIndicator 
-          currentStep="payment" 
-          isAuthenticated={!!session.user_id} 
+        <CheckoutProgressIndicator
+          currentStep="payment"
+          isAuthenticated={!!session.user_id}
         />
 
         {/* Card Added Success Message */}
@@ -215,6 +219,8 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
           </div>
         )}
 
+        {/* Consultation Payment Warning */}
+        <ConsultationPaymentWarning hasConsultationItems={hasConsultationItems} />
 
         {/* Customer Info Summary (from information step or database) */}
         {(customerInfo || (session.customer_info && session.customer_info.first_name)) && (
@@ -234,8 +240,8 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
 
         {/* Address & Payment Form */}
         <AddressPaymentView
-          user={session.user_id ? { 
-            id: session.user_id, 
+          user={session.user_id ? {
+            id: session.user_id,
             email: (customerInfo || session.customer_info)?.email || '',
             firstName: (customerInfo || session.customer_info)?.first_name,
             lastName: (customerInfo || session.customer_info)?.last_name,

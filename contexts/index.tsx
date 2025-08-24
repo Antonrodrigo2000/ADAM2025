@@ -6,15 +6,13 @@ import { CartProvider } from './cart-context'
 // import { AuthProvider } from './auth-context'
 import { AppProvider } from './app-context'
 
-// Combined provider that wraps all contexts
+// Combined provider that wraps all contexts (excluding QuizProvider - that's only for questionnaire pages)
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <AppProvider>
       {/* <AuthProvider> */}
         <CartProvider>
-          <QuizProvider>
-            {children}
-          </QuizProvider>
+          {children}
         </CartProvider>
       {/* </AuthProvider> */}
     </AppProvider>
