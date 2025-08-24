@@ -159,7 +159,7 @@ export function LoginForm({ onComplete }: LoginFormProps) {
 
                     {/* Forgot Password Link */}
                     <div className="text-right">
-                        <Link href="/forgot-password" className="text-sm text-teal-600 hover:text-teal-700 underline">
+                        <Link href="/forgot-password" className="text-sm text-orange-600 hover:text-orange-700 underline">
                             Forgot your password?
                         </Link>
                     </div>
@@ -179,7 +179,7 @@ export function LoginForm({ onComplete }: LoginFormProps) {
                     type="submit"
                     disabled={isSubmitting}
                     size="lg"
-                    className="w-full h-12 text-base bg-teal-500 hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+                    className="w-full h-12 text-base bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
                     theme="light"
                 >
                     {isSubmitting ? 'Signing In...' : 'Sign In'}
@@ -187,7 +187,7 @@ export function LoginForm({ onComplete }: LoginFormProps) {
                 
                 <div className="text-center">
                     <span className="text-sm text-neutral-600">Don't have an account? </span>
-                    <Link href="/signup" className="text-sm text-teal-600 hover:text-teal-700 underline font-medium">
+                    <Link href="/signup" className="text-sm text-orange-600 hover:text-orange-700 underline font-medium">
                         Create one here
                     </Link>
                 </div>

@@ -159,7 +159,7 @@ export function SignupForm({ onComplete }: SignupFormProps) {
             {/* Account Information Section */}
             <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex items-center mb-6">
-                    <div className="w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center font-semibold mr-3">
+                    <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold mr-3">
                         1
                     </div>
                     <h2 className="text-xl font-semibold text-neutral-800">Account Information</h2>
@@ -221,7 +221,7 @@ export function SignupForm({ onComplete }: SignupFormProps) {
             {/* Personal Information Section */}
             <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex items-center mb-6">
-                    <div className="w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center font-semibold mr-3">
+                    <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold mr-3">
                         2
                     </div>
                     <h2 className="text-xl font-semibold text-neutral-800">Personal Information</h2>
@@ -303,42 +303,43 @@ export function SignupForm({ onComplete }: SignupFormProps) {
                         </div>
                     </div>
 
-                    {/* Phone Number */}
-                    <div className="space-y-2">
-                        <Label htmlFor="phoneNumber" className="text-sm font-medium" theme="light">Phone number</Label>
-                        <Input
-                            id="phoneNumber"
-                            type="tel"
-                            value={formData.phoneNumber}
-                            onChange={(e) => updateFormData("phoneNumber", e.target.value)}
-                            className="h-10"
-                            theme="light"
-                            error={!!errors.phoneNumber}
-                            required
-                        />
-                        {errors.phoneNumber && <p className="text-xs text-red-600">{errors.phoneNumber}</p>}
-                        <p className="text-xs text-gray-500">
-                            In very rare cases our clinicians may need to call you. They will always be discreet.
-                        </p>
-                    </div>
-
                     {/* Sex */}
-                    <div className="space-y-2">
-                        <Label htmlFor="sex" className="text-sm font-medium" theme="light">Sex</Label>
-                        <Select value={formData.sex} onValueChange={(value) => updateFormData("sex", value)}>
-                            <SelectTrigger className="h-10" theme="light" error={!!errors.sex}>
-                                <SelectValue placeholder="Choose sex" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="male">Male</SelectItem>
-                                <SelectItem value="female">Female</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        {errors.sex && <p className="text-xs text-red-600">{errors.sex}</p>}
-                        <p className="text-xs text-gray-500">
-                            What sex were you assigned at birth, as shown on your original birth certificate. 
-                            This is important for us to know because it allows us to provide you with treatments as safely as possible.
-                        </p>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        {/* Phone Number */}
+                        <div className="space-y-2">
+                            <Label htmlFor="phoneNumber" className="text-sm font-medium" theme="light">Phone number</Label>
+                            <Input
+                                id="phoneNumber"
+                                type="tel"
+                                value={formData.phoneNumber}
+                                onChange={(e) => updateFormData("phoneNumber", e.target.value)}
+                                className="h-10"
+                                theme="light"
+                                error={!!errors.phoneNumber}
+                                required
+                            />
+                            {errors.phoneNumber && <p className="text-xs text-red-600">{errors.phoneNumber}</p>}
+                            <p className="text-xs text-gray-500">
+                                In very rare cases our clinicians may need to call you. They will always be discreet.
+                            </p>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="sex" className="text-sm font-medium" theme="light">Sex</Label>
+                            <Select value={formData.sex} onValueChange={(value) => updateFormData("sex", value)}>
+                                <SelectTrigger className="h-10" theme="light" error={!!errors.sex}>
+                                    <SelectValue placeholder="Choose sex" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="male">Male</SelectItem>
+                                    <SelectItem value="female">Female</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {errors.sex && <p className="text-xs text-red-600">{errors.sex}</p>}
+                            <p className="text-xs text-gray-500">
+                                What sex were you assigned at birth, as shown on your original birth certificate.
+                                This is important for us to know because it allows us to provide you with treatments as safely as possible.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -346,7 +347,7 @@ export function SignupForm({ onComplete }: SignupFormProps) {
             {/* Address Information Section */}
             <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex items-center mb-6">
-                    <div className="w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center font-semibold mr-3">
+                    <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold mr-3">
                         3
                     </div>
                     <h2 className="text-xl font-semibold text-neutral-800">Address Information</h2>
@@ -438,11 +439,11 @@ export function SignupForm({ onComplete }: SignupFormProps) {
                             <div className="space-y-1">
                                 <Label htmlFor="agreeToTerms" className="text-sm font-normal leading-normal" theme="light">
                                     Yes, I agree to Adam's{" "}
-                                    <Button variant="link" className="h-auto p-0 text-teal-600 hover:text-teal-700 underline text-sm" theme="light">
+                                    <Button variant="link" className="h-auto p-0 text-orange-600 hover:text-orange-700 underline text-sm" theme="light">
                                         Terms & Conditions
                                     </Button>{" "}
                                     and{" "}
-                                    <Button variant="link" className="h-auto p-0 text-teal-600 hover:text-teal-700 underline text-sm" theme="light">
+                                    <Button variant="link" className="h-auto p-0 text-orange-600 hover:text-orange-700 underline text-sm" theme="light">
                                         Privacy Policy
                                     </Button>
                                     .
@@ -479,7 +480,7 @@ export function SignupForm({ onComplete }: SignupFormProps) {
                     type="submit"
                     disabled={isSubmitting}
                     size="lg"
-                    className="w-full h-12 text-base bg-teal-500 hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full h-12 text-base bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     theme="light"
                 >
                     {isSubmitting ? 'Creating Account...' : 'Create Account'}

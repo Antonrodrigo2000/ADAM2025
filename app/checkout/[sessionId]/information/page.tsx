@@ -56,7 +56,7 @@ export default function InformationPage({ params }: { params: Promise<{ sessionI
           <p className="text-neutral-600 mb-4">{error || 'Session not found'}</p>
           <button 
             onClick={() => router.push('/cart')}
-            className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600"
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
           >
             Return to Cart
           </button>

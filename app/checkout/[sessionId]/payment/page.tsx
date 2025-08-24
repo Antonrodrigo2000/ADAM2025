@@ -6,6 +6,7 @@ import { CheckoutProgressIndicator } from '@/components/checkout/checkout-progre
 import { SessionOrderSummary } from '@/components/checkout/session-order-summary'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function PaymentPage({ params }: { params: Promise<{ sessionId: string }> }) {
   const { session, progressToStep, isLoading, error, refresh } = useCheckoutSession()
@@ -14,6 +15,7 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
   const [isProcessing, setIsProcessing] = useState(false)
   const [sessionId, setSessionId] = useState<string>('')
   const [showCardAddedMessage, setShowCardAddedMessage] = useState(false)
+  const [customerInfo, setCustomerInfo] = useState<any>(null)
 
   // Extract sessionId from params
   useEffect(() => {
@@ -51,6 +53,74 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
       }
     }
   }, [sessionId, session, isLoading, refresh])
+
+  // Load customer information from database if session has user but no customer_info
+  useEffect(() => {
+    const loadCustomerInfo = async () => {
+      // Don't run if session is still loading
+      if (isLoading) {
+        console.log('Skipping customer info load: session still loading')
+        return
+      }
+
+      console.log('useEffect triggered:', {
+        hasUserId: !!session?.user_id,
+        hasCustomerInfo: !!customerInfo,
+        hasSessionCustomerInfo: !!session?.customer_info,
+        userId: session?.user_id,
+        isLoading
+      })
+
+      // Check if we have meaningful customer info (not just empty object)
+      const hasSessionCustomerInfo = session?.customer_info && 
+                                    Object.keys(session.customer_info).length > 0 &&
+                                    session.customer_info.first_name
+
+      if (!session?.user_id || customerInfo || hasSessionCustomerInfo) {
+        console.log('Skipping customer info load:', {
+          reason: !session?.user_id ? 'no user_id' : 
+                  customerInfo ? 'already have customerInfo' : 
+                  'already have valid session.customer_info'
+        })
+        return
+      }
+
+      try {
+        console.log('Loading customer info from database for user:', session.user_id)
+        
+        const supabase = createClient()
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('first_name, last_name, phone')
+          .eq('id', session.user_id)
+          .single()
+
+        console.log('Database query result:', { profile, profileError })
+
+        if (profileError) {
+          console.error('Error fetching user profile:', profileError)
+        } else if (profile) {
+          console.log('Setting customer info from DB:', profile)
+          
+          // Get email from auth user if available
+          const { data: authUser } = await supabase.auth.getUser()
+          
+          setCustomerInfo({
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            email: authUser?.user?.email || '', // Get email from auth
+            phone: profile.phone
+          })
+        }
+      } catch (error) {
+        console.error('Error loading customer info:', error)
+      }
+    }
+
+    // Add a small delay to ensure session is fully loaded
+    const timeoutId = setTimeout(loadCustomerInfo, 300)
+    return () => clearTimeout(timeoutId)
+  }, [session?.user_id, customerInfo, session, isLoading])
 
   // Redirect to information step if user is not set in session
   useEffect(() => {
@@ -105,12 +175,12 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
   if (error || !session) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="neomorphic-container p-6 text-center">
+        <div className="bg-white rounded-lg shadow-sm p-6 text-center">
           <h2 className="text-xl font-bold text-red-600 mb-2">Session Error</h2>
           <p className="text-neutral-600 mb-4">{error || 'Session not found'}</p>
           <button 
             onClick={() => router.push('/cart')}
-            className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600"
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
           >
             Return to Cart
           </button>
@@ -146,21 +216,50 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
         )}
 
 
-        {/* Customer Info Summary (if from information step) */}
-        {session.customer_info && (
-          <div className="neomorphic-container p-4">
-            <h3 className="text-sm font-semibold text-neutral-800 mb-2">Customer Information</h3>
-            <div className="text-sm text-neutral-600">
-              <p>{session.customer_info.first_name} {session.customer_info.last_name}</p>
-              <p>{session.customer_info.email}</p>
-              {session.customer_info.phone && <p>{session.customer_info.phone}</p>}
+        {/* Customer Info Summary (from information step or database) */}
+        {(customerInfo || (session.customer_info && session.customer_info.first_name)) && (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h3 className="text-lg font-semibold text-neutral-800 mb-4">Customer Information</h3>
+            <div className="text-sm text-neutral-600 space-y-1">
+              <p className="font-medium">
+                {(customerInfo || session.customer_info).first_name} {(customerInfo || session.customer_info).last_name}
+              </p>
+              <p>{(customerInfo || session.customer_info).email}</p>
+              {(customerInfo || session.customer_info).phone && (
+                <p>{(customerInfo || session.customer_info).phone}</p>
+              )}
             </div>
           </div>
         )}
 
         {/* Address & Payment Form */}
         <AddressPaymentView
-          user={session.user_id ? { id: session.user_id, email: '' } : null}
+          user={session.user_id ? { 
+            id: session.user_id, 
+            email: (customerInfo || session.customer_info)?.email || '',
+            firstName: (customerInfo || session.customer_info)?.first_name,
+            lastName: (customerInfo || session.customer_info)?.last_name,
+            profile: (customerInfo || (session.customer_info && session.customer_info.first_name)) ? {
+              id: session.user_id,
+              firstName: (customerInfo || session.customer_info).first_name,
+              lastName: (customerInfo || session.customer_info).last_name,
+              phone: (customerInfo || session.customer_info).phone,
+              verificationStatus: 'pending' as const,
+              accountStatus: 'active' as const,
+              agreedToTerms: true,
+              agreedToMarketing: false,
+              marketingPreferences: {
+                email: false,
+                sms: false,
+                push: false
+              },
+              privacyPreferences: {},
+              emailVerified: false,
+              phoneVerified: false,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            } : undefined
+          } : null}
           cartItems={session.cart_items}
           sessionId={sessionId}
           onPayNow={handlePayNow}
@@ -183,10 +282,10 @@ function PaymentLoadingSkeleton() {
   return (
     <div className="grid lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
       <div className="lg:col-span-2 space-y-5">
-        <div className="neomorphic-container p-4">
+        <div className="bg-white rounded-lg shadow-sm p-4">
           <div className="animate-pulse h-16 bg-neutral-200 rounded"></div>
         </div>
-        <div className="neomorphic-container p-4 md:p-5">
+        <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="animate-pulse space-y-4">
             <div className="h-6 bg-neutral-200 rounded w-1/3"></div>
             <div className="h-32 bg-neutral-200 rounded w-full"></div>
@@ -194,7 +293,7 @@ function PaymentLoadingSkeleton() {
         </div>
       </div>
       <div className="lg:col-span-1">
-        <div className="neomorphic-container p-4">
+        <div className="bg-white rounded-lg shadow-sm p-4">
           <div className="animate-pulse space-y-3">
             <div className="h-6 bg-neutral-200 rounded w-1/2"></div>
             <div className="h-4 bg-neutral-200 rounded w-full"></div>

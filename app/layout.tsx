@@ -37,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={cn("bg-black text-white font-sans", inter.variable, spaceGrotesk.variable, museoModerno.variable)}
+        className={cn("bg-white text-gray-900 font-sans", inter.variable, spaceGrotesk.variable, museoModerno.variable)}
       >
         <AppProviders>
           {children}

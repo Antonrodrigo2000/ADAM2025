@@ -2,6 +2,10 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
 import type { ProductImage } from "@/data/types/product"
 
 interface ProductImageGalleryProps {
@@ -22,10 +26,10 @@ export function ProductImageGallery({ images, selectedIndex, onImageSelect }: Pr
   }
 
   return (
-    <div className="space-y-6">
-      {/* Main Image - Neumorphic Container */}
-      <div className="relative aspect-square bg-gray-100 rounded-3xl overflow-hidden group shadow-[inset_8px_8px_16px_rgba(0,0,0,0.1),inset_-8px_-8px_16px_rgba(255,255,255,0.8)] border border-gray-200/30">
-        <div className="absolute inset-2 bg-white rounded-2xl shadow-[4px_4px_8px_rgba(0,0,0,0.05),-4px_-4px_8px_rgba(255,255,255,0.9)] overflow-hidden">
+    <div className="space-y-4">
+      {/* Main Image */}
+      <Card className="relative aspect-square overflow-hidden group border shadow-sm">
+        <div className="relative w-full h-full bg-gray-50">
           <Image
             src={images[selectedIndex]?.url || "/placeholder.svg"}
             alt={images[selectedIndex]?.alt_text || "Product image"}
@@ -35,52 +39,71 @@ export function ProductImageGallery({ images, selectedIndex, onImageSelect }: Pr
             }`}
             onClick={() => setIsZoomed(!isZoomed)}
           />
+          
+          {/* Zoom Button */}
+          <Button
+            variant="secondary"
+            size="icon"
+            className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg hover:bg-white"
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsZoomed(!isZoomed)
+            }}
+          >
+            {isZoomed ? <ZoomOut className="h-4 w-4 text-gray-700" /> : <ZoomIn className="h-4 w-4 text-gray-700" />}
+          </Button>
         </div>
 
-        {/* Navigation Arrows - Neumorphic Buttons */}
+        {/* Navigation Arrows */}
         {images.length > 1 && (
           <>
-            <button
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={prevImage}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-gray-100 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[6px_6px_12px_rgba(0,0,0,0.15),-6px_-6px_12px_rgba(255,255,255,0.9)] hover:shadow-[4px_4px_8px_rgba(0,0,0,0.2),-4px_-4px_8px_rgba(255,255,255,0.95)] active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)] flex items-center justify-center"
+              className="absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg hover:bg-white hover:shadow-xl"
             >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button
+              <ChevronLeft className="h-4 w-4 text-gray-700" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={nextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-gray-100 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[6px_6px_12px_rgba(0,0,0,0.15),-6px_-6px_12px_rgba(255,255,255,0.9)] hover:shadow-[4px_4px_8px_rgba(0,0,0,0.2),-4px_-4px_8px_rgba(255,255,255,0.95)] active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)] flex items-center justify-center"
+              className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg hover:bg-white hover:shadow-xl"
             >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+              <ChevronRight className="h-4 w-4 text-gray-700" />
+            </Button>
           </>
         )}
 
-        {/* Image Counter - Neumorphic Badge */}
-        <div className="absolute bottom-4 right-4 bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium shadow-[4px_4px_8px_rgba(0,0,0,0.1),-4px_-4px_8px_rgba(255,255,255,0.8)]">
+        {/* Image Counter */}
+        <Badge
+          variant="secondary"
+          className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg text-gray-700"
+        >
           {selectedIndex + 1} / {images.length}
-        </div>
-      </div>
+        </Badge>
+      </Card>
 
-      {/* Thumbnail Gallery - Neumorphic Thumbnails */}
+      {/* Thumbnail Gallery */}
       {images.length > 1 && (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-3">
           {images.map((image, index) => (
             <button
               key={image.id}
               onClick={() => onImageSelect(index)}
-              className={`relative aspect-square bg-gray-100 rounded-2xl overflow-hidden transition-all duration-300 ${
+              className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                 index === selectedIndex
-                  ? "shadow-[inset_4px_4px_8px_rgba(0,0,0,0.15),inset_-4px_-4px_8px_rgba(255,255,255,0.9)] border-2 border-blue-300/50"
-                  : "shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.8)] hover:shadow-[4px_4px_8px_rgba(0,0,0,0.15),-4px_-4px_8px_rgba(255,255,255,0.9)]"
+                  ? "border-blue-500 ring-2 ring-blue-200/50"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
-              <div className="absolute inset-1 bg-white rounded-xl overflow-hidden shadow-[2px_2px_4px_rgba(0,0,0,0.05)]">
-                <Image src={image.url || "/placeholder.svg"} alt={image.alt_text} fill className="object-cover" />
-              </div>
+              <Image 
+                src={image.url || "/placeholder.svg"} 
+                alt={image.alt_text} 
+                fill 
+                className="object-cover" 
+              />
             </button>
           ))}
         </div>

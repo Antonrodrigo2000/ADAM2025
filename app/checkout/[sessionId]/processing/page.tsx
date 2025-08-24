@@ -188,7 +188,7 @@ export default function ProcessingPage({ params }: { params: Promise<{ sessionId
           <p className="text-neutral-600 mb-4">{error || 'Session not found'}</p>
           <button 
             onClick={() => router.push('/cart')}
-            className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600"
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
           >
             Return to Cart
           </button>
@@ -206,7 +206,7 @@ export default function ProcessingPage({ params }: { params: Promise<{ sessionId
           <div className="space-x-3">
             <button 
               onClick={() => router.push(`/checkout/${sessionId}/payment`)}
-              className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600"
+              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
             >
               Try Again
             </button>
@@ -232,11 +232,11 @@ export default function ProcessingPage({ params }: { params: Promise<{ sessionId
       <div className="neomorphic-container p-8 text-center">
         {/* Processing Animation */}
         <div className="mb-6">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto mb-4"></div>
           <div className="flex justify-center space-x-1 mb-4">
-            <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
           </div>
         </div>
 
@@ -269,7 +269,7 @@ export default function ProcessingPage({ params }: { params: Promise<{ sessionId
             <div className="space-y-3">
               <button
                 onClick={() => router.push(`/checkout/${sessionId}/payment`)}
-                className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600"
+                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
               >
                 Try Again
               </button>

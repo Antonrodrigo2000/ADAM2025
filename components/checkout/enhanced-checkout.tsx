@@ -134,7 +134,7 @@ export function EnhancedCheckout({ user, isAuthenticated }: EnhancedCheckoutProp
                         {checkoutState.step === 'processing' && (
                             <div className="neomorphic-container p-4 md:p-5">
                                 <div className="text-center py-8">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto mb-4"></div>
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
                                     <h2 className="text-xl font-bold text-neutral-800 mb-2">Processing your order...</h2>
                                     <p className="text-neutral-600">Please wait while we complete your purchase.</p>
                                 </div>
@@ -151,27 +151,27 @@ export function EnhancedCheckout({ user, isAuthenticated }: EnhancedCheckoutProp
                             <div className="neomorphic-container p-4 mt-4">
                                 <h3 className="text-sm font-semibold text-neutral-800 mb-3">Checkout Progress</h3>
                                 <div className="space-y-2">
-                                    <div className={`flex items-center space-x-2 ${checkoutState.step === 'signup' ? 'text-teal-600' :
+                                    <div className={`flex items-center space-x-2 ${checkoutState.step === 'signup' ? 'text-orange-600' :
                                         checkoutState.step === 'address_payment' || checkoutState.step === 'processing' ? 'text-green-600' : 'text-neutral-400'
                                         }`}>
-                                        <div className={`w-4 h-4 rounded-full border-2 ${checkoutState.step === 'signup' ? 'border-teal-600 bg-teal-100' :
+                                        <div className={`w-4 h-4 rounded-full border-2 ${checkoutState.step === 'signup' ? 'border-orange-600 bg-orange-100' :
                                             checkoutState.step === 'address_payment' || checkoutState.step === 'processing' ? 'border-green-600 bg-green-600' : 'border-neutral-300'
                                             }`}></div>
                                         <span className="text-xs">
                                             {isAuthenticated ? 'Account Verified' : 'Account Setup'}
                                         </span>
                                     </div>
-                                    <div className={`flex items-center space-x-2 ${checkoutState.step === 'address_payment' ? 'text-teal-600' :
+                                    <div className={`flex items-center space-x-2 ${checkoutState.step === 'address_payment' ? 'text-orange-600' :
                                         checkoutState.step === 'processing' ? 'text-green-600' : 'text-neutral-400'
                                         }`}>
-                                        <div className={`w-4 h-4 rounded-full border-2 ${checkoutState.step === 'address_payment' ? 'border-teal-600 bg-teal-100' :
+                                        <div className={`w-4 h-4 rounded-full border-2 ${checkoutState.step === 'address_payment' ? 'border-orange-600 bg-orange-100' :
                                             checkoutState.step === 'processing' ? 'border-green-600 bg-green-600' : 'border-neutral-300'
                                             }`}></div>
                                         <span className="text-xs">Address & Payment</span>
                                     </div>
-                                    <div className={`flex items-center space-x-2 ${checkoutState.step === 'processing' ? 'text-teal-600' : 'text-neutral-400'
+                                    <div className={`flex items-center space-x-2 ${checkoutState.step === 'processing' ? 'text-orange-600' : 'text-neutral-400'
                                         }`}>
-                                        <div className={`w-4 h-4 rounded-full border-2 ${checkoutState.step === 'processing' ? 'border-teal-600 bg-teal-100' : 'border-neutral-300'
+                                        <div className={`w-4 h-4 rounded-full border-2 ${checkoutState.step === 'processing' ? 'border-orange-600 bg-orange-100' : 'border-neutral-300'
                                             }`}></div>
                                         <span className="text-xs">Order Completion</span>
                                     </div>

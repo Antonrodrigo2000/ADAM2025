@@ -24,10 +24,10 @@ export function ConsultationWarning({ missingHealthVerticals }: ConsultationWarn
             Questionnaire Required
           </h3>
           <p className="text-sm text-orange-700 mb-3">
-            Your cart contains prescription products that require consultation. 
+            Your cart contains prescription products that require consultation.
             You must complete the questionnaires for the following areas before proceeding:
           </p>
-          
+
           <div className="space-y-2">
             {missingHealthVerticals.map((vertical) => (
               <div key={vertical} className="flex items-center justify-between">
@@ -37,8 +37,7 @@ export function ConsultationWarning({ missingHealthVerticals }: ConsultationWarn
                 <Button
                   asChild
                   size="sm"
-                  variant="outline"
-                  className="text-xs h-8 border-orange-300 text-orange-700 hover:bg-orange-100"
+                  variant="default"
                 >
                   <Link href={`/questionnaire/${vertical}`}>
                     Complete <ArrowRight className="w-3 h-3 ml-1" />
@@ -47,7 +46,7 @@ export function ConsultationWarning({ missingHealthVerticals }: ConsultationWarn
               </div>
             ))}
           </div>
-          
+
           <p className="text-xs text-orange-600 mt-3">
             After completing the required questionnaires, return to checkout to proceed with your order.
           </p>

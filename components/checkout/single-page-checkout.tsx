@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import Link from "next/link"
 
 interface FormData {
     email: string
@@ -336,17 +337,17 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Create Account Section */}
-                <div className="neomorphic-container p-4 md:p-5">
-                    <div className="flex items-center mb-4">
-                        <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center font-bold mr-3 text-sm">
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex items-center mb-6">
+                        <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold mr-3">
                             1
                         </div>
-                        <h2 className="text-xl font-bold text-neutral-800">Create an account</h2>
+                        <h2 className="text-xl font-semibold text-neutral-800">Create an account</h2>
                     </div>
 
                     <div className="mb-4">
                         <span className="text-neutral-600 text-sm">Have an account? </span>
-                        <Link href="/login" className="text-teal-600 hover:text-teal-700 underline text-sm">
+                        <Link href="/login" className="text-orange-600 hover:text-orange-700 underline text-sm">
                             Log in
                         </Link>
                     </div>
@@ -354,13 +355,13 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                     <div className="space-y-4">
                         {/* Email */}
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-xs font-medium" theme="light">Email address</Label>
+                            <Label htmlFor="email" className="text-sm font-medium" theme="light">Email address</Label>
                             <Input
                                 id="email"
                                 type="email"
                                 value={formData.email}
                                 onChange={(e) => updateFormData("email", e.target.value)}
-                                className="h-10 text-sm"
+                                className="h-10"
                                 theme="light"
                                 error={!!errors.email}
                                 required
@@ -373,14 +374,14 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
 
                         {/* Password */}
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="text-xs font-medium" theme="light">Password</Label>
+                            <Label htmlFor="password" className="text-sm font-medium" theme="light">Password</Label>
                             <div className="relative">
                                 <Input
                                     id="password"
                                     type={showPassword ? "text" : "password"}
                                     value={formData.password}
                                     onChange={(e) => updateFormData("password", e.target.value)}
-                                    className="h-10 text-sm pr-10"
+                                    className="h-10 pr-10"
                                     theme="light"
                                     error={!!errors.password}
                                     required
@@ -389,7 +390,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                                     type="button"
                                     variant="ghost"
                                     size="icon"
-                                    className="absolute right-0 top-0 h-full px-3 py-2"
+                                    className="absolute right-0 top-0 h-full px-3"
                                     theme="light"
                                     onClick={() => setShowPassword(!showPassword)}
                                 >
@@ -398,8 +399,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                             </div>
                             {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
                             <p className="text-xs text-gray-500">
-                                Password must be at least 12 characters, including a mix of letters, numbers, and special
-                                characters.
+                                Password must be at least 10 characters, including a mix of letters, numbers, and special characters.
                             </p>
                         </div>
 
@@ -412,15 +412,15 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                         </div>
 
                         {/* Legal Names */}
-                        <div className="grid md:grid-cols-2 gap-3">
+                        <div className="grid md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="legalFirstName" className="text-xs font-medium" theme="light">Legal first name</Label>
+                                <Label htmlFor="legalFirstName" className="text-sm font-medium" theme="light">Legal first name</Label>
                                 <Input
                                     id="legalFirstName"
                                     type="text"
                                     value={formData.legalFirstName}
                                     onChange={(e) => updateFormData("legalFirstName", e.target.value)}
-                                    className="h-10 text-sm"
+                                    className="h-10"
                                     theme="light"
                                     error={!!errors.legalFirstName}
                                     required
@@ -428,13 +428,13 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                                 {errors.legalFirstName && <p className="text-xs text-red-600">{errors.legalFirstName}</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="legalSurname" className="text-xs font-medium" theme="light">Legal surname</Label>
+                                <Label htmlFor="legalSurname" className="text-sm font-medium" theme="light">Legal surname</Label>
                                 <Input
                                     id="legalSurname"
                                     type="text"
                                     value={formData.legalSurname}
                                     onChange={(e) => updateFormData("legalSurname", e.target.value)}
-                                    className="h-10 text-sm"
+                                    className="h-10"
                                     theme="light"
                                     error={!!errors.legalSurname}
                                     required
@@ -442,21 +442,20 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                                 {errors.legalSurname && <p className="text-xs text-red-600">{errors.legalSurname}</p>}
                             </div>
                         </div>
-                        <p className="text-xs text-gray-500 -mt-1">
-                            Please write your name as it appears on your passport or ID. We need your full legal name to confirm
-                            your identity.
+                        <p className="text-xs text-gray-500 -mt-2">
+                            Please write your name as it appears on your passport or ID. We need your full legal name to confirm your identity.
                         </p>
 
-                        {/* NIC and Date of Birth - Flexed to save space */}
-                        <div className="grid md:grid-cols-2 gap-3">
+                        {/* NIC and Date of Birth */}
+                        <div className="grid md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="nic" className="text-xs font-medium" theme="light">NIC Number</Label>
+                                <Label htmlFor="nic" className="text-sm font-medium" theme="light">NIC Number</Label>
                                 <Input
                                     id="nic"
                                     type="text"
                                     value={formData.nic}
                                     onChange={(e) => updateFormData("nic", e.target.value)}
-                                    className="h-10 text-sm"
+                                    className="h-10"
                                     placeholder="Enter your NIC number"
                                     theme="light"
                                     error={!!errors.nic}
@@ -465,13 +464,13 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                                 {errors.nic && <p className="text-xs text-red-600">{errors.nic}</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="dateOfBirth" className="text-xs font-medium" theme="light">Date of birth</Label>
+                                <Label htmlFor="dateOfBirth" className="text-sm font-medium" theme="light">Date of birth</Label>
                                 <Input
                                     id="dateOfBirth"
                                     type="date"
                                     value={formData.dateOfBirth}
                                     onChange={(e) => updateFormData("dateOfBirth", e.target.value)}
-                                    className="h-10 text-sm"
+                                    className="h-10"
                                     theme="light"
                                     error={!!errors.dateOfBirth}
                                     required
@@ -479,58 +478,53 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                                 {errors.dateOfBirth && <p className="text-xs text-red-600">{errors.dateOfBirth}</p>}
                             </div>
                         </div>
-                        <p className="text-xs text-gray-500 -mt-1">
-                            Please enter your National Identity Card number as it appears on your ID.
-                        </p>
 
-                        {/* Phone Number */}
-                        <div className="space-y-2">
-                            <Label htmlFor="phoneNumber" className="text-xs font-medium" theme="light">Phone number</Label>
-                            <Input
-                                id="phoneNumber"
-                                type="tel"
-                                value={formData.phoneNumber}
-                                onChange={(e) => updateFormData("phoneNumber", e.target.value)}
-                                className="h-10 text-sm"
-                                theme="light"
-                                error={!!errors.phoneNumber}
-                                required
-                            />
-                            {errors.phoneNumber && <p className="text-xs text-red-600">{errors.phoneNumber}</p>}
-                            <p className="text-xs text-gray-500">
-                                In very rare cases our clinicians may need to call you. They will always be discreet.
-                            </p>
-                        </div>
-
-                        {/* Sex */}
-                        <div className="space-y-2">
-                            <Label htmlFor="sex" className="text-xs font-medium" theme="light">Sex</Label>
-                            <Select value={formData.sex} onValueChange={(value) => updateFormData("sex", value)}>
-                                <SelectTrigger className="h-10 text-sm" theme="light" error={!!errors.sex}>
-                                    <SelectValue placeholder="Choose sex" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="male">Male</SelectItem>
-                                    <SelectItem value="female">Female</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            {errors.sex && <p className="text-xs text-red-600">{errors.sex}</p>}
-                            <p className="text-xs text-muted-foreground">
-                                What sex were you assigned at birth, as shown on your original birth certificate. This is
-                                important for us to know because it allows us to provide you with treatments as safely as
-                                possible.
-                            </p>
+                        {/* Phone Number and Sex */}
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="phoneNumber" className="text-sm font-medium" theme="light">Phone number</Label>
+                                <Input
+                                    id="phoneNumber"
+                                    type="tel"
+                                    value={formData.phoneNumber}
+                                    onChange={(e) => updateFormData("phoneNumber", e.target.value)}
+                                    className="h-10"
+                                    theme="light"
+                                    error={!!errors.phoneNumber}
+                                    required
+                                />
+                                {errors.phoneNumber && <p className="text-xs text-red-600">{errors.phoneNumber}</p>}
+                                <p className="text-xs text-gray-500">
+                                    In very rare cases our clinicians may need to call you. They will always be discreet.
+                                </p>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="sex" className="text-sm font-medium" theme="light">Sex</Label>
+                                <Select value={formData.sex} onValueChange={(value) => updateFormData("sex", value)}>
+                                    <SelectTrigger className="h-10" theme="light" error={!!errors.sex}>
+                                        <SelectValue placeholder="Choose sex" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="male">Male</SelectItem>
+                                        <SelectItem value="female">Female</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {errors.sex && <p className="text-xs text-red-600">{errors.sex}</p>}
+                                <p className="text-xs text-gray-500">
+                                    What sex were you assigned at birth, as shown on your original birth certificate. This is important for us to know because it allows us to provide you with treatments as safely as possible.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Delivery Address Section */}
-                <div className="neomorphic-container p-4 md:p-5">
-                    <div className="flex items-center mb-4">
-                        <div className="w-6 h-6 bg-black text-white rounded-full flex items-center justify-center font-bold mr-3 text-sm">
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex items-center mb-6">
+                        <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold mr-3">
                             2
                         </div>
-                        <h2 className="text-xl font-bold text-neutral-800">Delivery address</h2>
+                        <h2 className="text-xl font-semibold text-neutral-800">Delivery address</h2>
                     </div>
 
                     <div className="bg-muted border border-border rounded-xl p-3 mb-4">
@@ -541,47 +535,47 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                     </div>
 
                     <div className="space-y-4">
-                        {/* Postcode */}
-                        <div className="space-y-2">
-                            <Label htmlFor="postcode" className="text-xs font-medium" theme="light">Postcode</Label>
-                            <Input
-                                id="postcode"
-                                type="text"
-                                value={formData.postcode}
-                                onChange={(e) => updateFormData("postcode", e.target.value)}
-                                className="h-10 text-sm"
-                                theme="light"
-                                error={!!errors.postcode}
-                                required
-                            />
-                            {errors.postcode && <p className="text-xs text-red-600">{errors.postcode}</p>}
-                        </div>
-
-                        {/* City */}
-                        <div className="space-y-2">
-                            <Label htmlFor="city" className="text-xs font-medium" theme="light">City</Label>
-                            <Input
-                                id="city"
-                                type="text"
-                                value={formData.city}
-                                onChange={(e) => updateFormData("city", e.target.value)}
-                                className="h-10 text-sm"
-                                theme="light"
-                                error={!!errors.city}
-                                required
-                            />
-                            {errors.city && <p className="text-xs text-red-600">{errors.city}</p>}
+                        {/* Postcode and City */}
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="postcode" className="text-sm font-medium" theme="light">Postcode</Label>
+                                <Input
+                                    id="postcode"
+                                    type="text"
+                                    value={formData.postcode}
+                                    onChange={(e) => updateFormData("postcode", e.target.value)}
+                                    className="h-10"
+                                    theme="light"
+                                    error={!!errors.postcode}
+                                    required
+                                />
+                                {errors.postcode && <p className="text-xs text-red-600">{errors.postcode}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="city" className="text-sm font-medium" theme="light">City</Label>
+                                <Input
+                                    id="city"
+                                    type="text"
+                                    value={formData.city}
+                                    onChange={(e) => updateFormData("city", e.target.value)}
+                                    className="h-10"
+                                    theme="light"
+                                    error={!!errors.city}
+                                    required
+                                />
+                                {errors.city && <p className="text-xs text-red-600">{errors.city}</p>}
+                            </div>
                         </div>
 
                         {/* District */}
                         <div className="space-y-2">
-                            <Label htmlFor="district" className="text-xs font-medium" theme="light">District</Label>
+                            <Label htmlFor="district" className="text-sm font-medium" theme="light">District</Label>
                             <Input
                                 id="district"
                                 type="text"
                                 value={formData.district}
                                 onChange={(e) => updateFormData("district", e.target.value)}
-                                className="h-10 text-sm"
+                                className="h-10"
                                 placeholder="Enter your district"
                                 theme="light"
                                 error={!!errors.district}
@@ -592,13 +586,13 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
 
                         {/* Address */}
                         <div className="space-y-2">
-                            <Label htmlFor="address" className="text-xs font-medium" theme="light">Address</Label>
+                            <Label htmlFor="address" className="text-sm font-medium" theme="light">Address</Label>
                             <Textarea
                                 id="address"
                                 value={formData.address}
                                 onChange={(e) => updateFormData("address", e.target.value)}
-                                rows={2}
-                                className="text-sm resize-none min-h-[60px]"
+                                rows={3}
+                                className="resize-none"
                                 theme="light"
                                 error={!!errors.address}
                                 required
@@ -607,8 +601,8 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                         </div>
 
                         {/* Terms Agreement */}
-                        <div className="space-y-3">
-                            <div className="flex items-start space-x-2">
+                        <div className="space-y-4 pt-4">
+                            <div className="flex items-start space-x-3">
                                 <Checkbox
                                     id="agreeToTerms"
                                     checked={formData.agreeToTerms}
@@ -618,13 +612,13 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                                     required
                                 />
                                 <div className="space-y-1">
-                                    <Label htmlFor="agreeToTerms" className="text-xs font-normal leading-normal" theme="light">
+                                    <Label htmlFor="agreeToTerms" className="text-sm font-normal leading-normal" theme="light">
                                         Yes, I agree to Adam's{" "}
-                                        <Button variant="link" className="h-auto p-0 text-teal-600 hover:text-teal-700 underline text-xs" theme="light">
+                                        <Button variant="link" className="h-auto p-0 text-orange-600 hover:text-orange-700 underline text-sm" theme="light">
                                             Terms & Conditions
                                         </Button>{" "}
                                         and{" "}
-                                        <Button variant="link" className="h-auto p-0 text-teal-600 hover:text-teal-700 underline text-xs" theme="light">
+                                        <Button variant="link" className="h-auto p-0 text-orange-600 hover:text-orange-700 underline text-sm" theme="light">
                                             Privacy Policy
                                         </Button>
                                         .
@@ -633,40 +627,39 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                                 </div>
                             </div>
 
-                            <div className="flex items-start space-x-2">
+                            <div className="flex items-start space-x-3">
                                 <Checkbox
                                     id="marketingOptOut"
                                     checked={formData.marketingOptOut}
                                     onCheckedChange={(checked) => updateFormData("marketingOptOut", checked === true)}
                                     theme="light"
                                 />
-                                <Label htmlFor="marketingOptOut" className="text-xs font-normal leading-normal" theme="light">
-                                    I do not wish to receive marketing communications that include special offers, promotions, or
-                                    educational content.
+                                <Label htmlFor="marketingOptOut" className="text-sm font-normal leading-normal" theme="light">
+                                    I do not wish to receive marketing communications that include special offers, promotions, or educational content.
                                 </Label>
                             </div>
                         </div>
 
                         {/* Error Display */}
                         {submitError && (
-                            <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                                 <p className="text-sm text-red-800">{submitError}</p>
                             </div>
                         )}
-
-                        {/* Submit Button */}
-                        <div className="w-full">
-                            <Button
-                                type="submit"
-                                disabled={isSubmitting || cartState.items.length === 0}
-                                size="lg"
-                                className="w-full h-10 text-base bg-teal-500 hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                                theme="light"
-                            >
-                                {isSubmitting ? 'Processing...' : 'Continue to Payment →'}
-                            </Button>
-                        </div>
                     </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting || cartState.items.length === 0}
+                        size="lg"
+                        className="w-full h-12 text-base bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        theme="light"
+                    >
+                        {isSubmitting ? 'Processing...' : 'Continue to Payment →'}
+                    </Button>
                 </div>
             </form>
         </>

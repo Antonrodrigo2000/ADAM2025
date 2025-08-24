@@ -1,32 +1,56 @@
 "use client"
 
 import { useCart } from "@/contexts"
+import { calculateOrderTotals, formatPrice } from './order-summary/calculations'
+import { OrderItem } from './order-summary/order-item'
+import { SummaryBreakdown } from './order-summary/summary-breakdown'
 
 export function OrderSummary() {
   const { state, actions } = useCart()
 
+  // Convert cart state to session format
+  const sessionData = {
+    cart_items: state.items.map(item => ({
+      product_id: item.id,
+      quantity: item.quantity,
+      price: item.monthlyPrice || item.price,
+      productName: item.productName,
+      variantName: item.variantName,
+      image: item.image,
+      monthlyPrice: item.monthlyPrice,
+      months: item.months,
+      prescriptionRequired: item.prescriptionRequired,
+      consultationFee: item.consultationFee
+    })),
+    cart_total: state.total,
+    user_id: undefined
+  }
+
+  const calculation = calculateOrderTotals(sessionData.cart_items)
+
   return (
-    <div className="neomorphic-container p-4">
-      <h2 className="text-xl font-bold text-neutral-800 mb-4">Your order</h2>
+    <div className="bg-white rounded-lg shadow-sm p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-neutral-800">Your order</h2>
+        <p className="text-sm text-neutral-600 mt-1">
+          {state.items.length} {state.items.length === 1 ? 'item' : 'items'}
+        </p>
+      </div>
 
-      {/* Cart Items */}
-      <div className="space-y-4 mb-4">
-        {state.items.map((item) => (
-          <div key={item.id} className="flex items-start space-x-3">
-            <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <img src={item.image || "/placeholder.svg"} alt={item.productName} className="w-8 h-8 object-contain" />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-neutral-800 text-xs leading-tight mb-1">{item.productName}</h3>
-              <p className="text-xs text-neutral-600 mb-1">{item.variantName}</p>
-              <p className="text-xs text-neutral-600 mb-1">Quantity: {item.quantity}</p>
-
-              {item.subscription && (
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-neutral-600">{item.subscription.frequency}</span>
+      {/* Order Items with Cart Actions */}
+      <div className="space-y-4 mb-6">
+        {sessionData.cart_items.map((item, index) => {
+          const cartItem = state.items.find(i => i.id === item.product_id)
+          return (
+            <div key={`${item.product_id}-${index}`}>
+              <OrderItem item={item} index={index} />
+              
+              {/* Cart Actions */}
+              {cartItem?.subscription && (
+                <div className="mt-2 flex justify-end">
                   <button
-                    onClick={() => actions.removeItem(item.id)}
+                    onClick={() => actions.removeItem(cartItem.id)}
                     className="text-xs text-neutral-500 hover:text-red-600 underline transition-colors"
                   >
                     Remove
@@ -34,63 +58,37 @@ export function OrderSummary() {
                 </div>
               )}
             </div>
-
-            <div className="text-right flex-shrink-0">
-              <div className="font-bold text-neutral-800 text-sm">LKR {item.totalPrice.toLocaleString()}</div>
-              {item.months > 1 && (
-                <div className="text-xs text-neutral-500">
-                  LKR {item.monthlyPrice.toLocaleString()}/month × {item.months}
-                </div>
-              )}
-              {item.prescriptionRequired && (
-                <div className="text-xs text-blue-600">
-                  + LKR {item.consultationFee.toLocaleString()} consultation
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
-      {/* Order Summary */}
-      <div className="space-y-2 border-t border-neutral-200 pt-3">
-        <div className="flex justify-between text-neutral-700 text-sm">
-          <span>Subtotal</span>
-          <span>LKR {state.subtotal.toLocaleString()}</span>
-        </div>
+      {/* Summary Breakdown */}
+      <SummaryBreakdown calculation={calculation} />
 
-        {state.discount > 0 && (
-          <div className="flex justify-between text-neutral-700 text-sm">
-            <div>
-              <div>Promo discount</div>
-              {state.discountCode && (
-                <button 
-                  onClick={actions.removeDiscount}
-                  className="text-xs text-neutral-500 hover:text-neutral-700 underline"
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-            <div className="text-right">
-              <div>-LKR {state.discount.toLocaleString()}</div>
-              {state.discountCode && (
-                <div className="text-xs text-neutral-500">Code: {state.discountCode}</div>
-              )}
-            </div>
+      {/* Promo Code Section */}
+      {state.discount > 0 && state.discountCode && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-neutral-600">Promo code: {state.discountCode}</span>
+            <button 
+              onClick={actions.removeDiscount}
+              className="text-neutral-500 hover:text-neutral-700 underline"
+            >
+              Remove
+            </button>
           </div>
-        )}
-
-        <div className="flex justify-between text-neutral-700 text-sm">
-          <span>Delivery</span>
-          <span>LKR {state.shipping.toLocaleString()}</span>
         </div>
+      )}
 
-        <div className="flex justify-between text-lg font-bold text-neutral-800 pt-2 border-t border-neutral-200">
-          <span>Total</span>
-          <span>LKR {state.total.toLocaleString()}</span>
+      {/* Additional Info */}
+      {calculation.hasConsultationItems && (
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-xs text-blue-800">
+            <strong>Note:</strong> Items requiring consultation will be processed after physician approval. 
+            The consultation fee covers all prescription items in your order.
+          </p>
         </div>
-      </div>
+      )}
     </div>
   )
 }

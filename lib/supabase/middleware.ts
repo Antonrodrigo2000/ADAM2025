@@ -44,7 +44,7 @@ export async function updateSession(request: NextRequest) {
     )
 
     // Auth routes that should redirect if already logged in
-    const authPaths = ['/auth', '/login', '/signup']
+    const authPaths = ['/login', '/signup']
     const isAuthPath = authPaths.some(path => 
         request.nextUrl.pathname.startsWith(path)
     )
@@ -52,7 +52,7 @@ export async function updateSession(request: NextRequest) {
     // Redirect to auth if accessing protected route without user
     if (isProtectedPath && !user) {
         const url = request.nextUrl.clone()
-        url.pathname = '/auth'
+        url.pathname = '/login'
         url.searchParams.set('redirectTo', request.nextUrl.pathname)
         return NextResponse.redirect(url)
     }

@@ -2,21 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Package, Clock, MapPin, Phone, Mail, Calendar, LogOut } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-// Removed useAuth import since we're using server-side auth
-
-interface UserProfile {
-    id: string
-    first_name?: string
-    last_name?: string
-    email?: string
-    phone?: string
-    date_of_birth?: string
-    sex?: string
-    address?: any
-    created_at: string
-}
+import { DashboardLayout } from '@/components/dashboard'
+import type { UserProfile } from '@/components/dashboard/types'
 
 interface Order {
     id: string
@@ -108,17 +95,35 @@ export default function DashboardClient({ user }: { user: any }) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* ...existing dashboard JSX, use profile and orders as before... */}
-            {/* You can use user prop if needed */}
-            <div className="container mx-auto p-6">
-                <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-                    <Button onClick={handleSignOut} variant="outline" className="flex items-center">
-                        <LogOut className="mr-2" />
-                        Sign Out    </Button>
+        <DashboardLayout user={user} onSignOut={handleSignOut} theme="light">
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+                    <p className="text-gray-600">
+                        Welcome back, {user?.user_metadata?.first_name || 'User'}
+                    </p>
+                </div>
+                
+                {/* Dashboard Content Placeholder */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-6">
+                        <h3 className="text-2xl font-bold text-gray-900">0</h3>
+                        <p className="text-sm text-gray-600">Active Orders</p>
+                    </div>
+                    <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-6">
+                        <h3 className="text-2xl font-bold text-gray-900">0</h3>
+                        <p className="text-sm text-gray-600">Consultations</p>
+                    </div>
+                    <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-6">
+                        <h3 className="text-2xl font-bold text-gray-900">0</h3>
+                        <p className="text-sm text-gray-600">Prescriptions</p>
+                    </div>
+                    <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-6">
+                        <h3 className="text-2xl font-bold text-gray-900">0</h3>
+                        <p className="text-sm text-gray-600">Messages</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </DashboardLayout>
     )
 }

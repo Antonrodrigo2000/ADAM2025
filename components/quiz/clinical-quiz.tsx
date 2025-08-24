@@ -189,7 +189,7 @@ export function ClinicalQuiz({ healthVertical = 'hair-loss' }: ClinicalQuizProps
                         </div>
                         <p className="text-neutral-700 leading-relaxed text-sm">
                             Are aware that you may be prescribed an{" "}
-                            <span className="text-teal-600 underline">unlicensed treatment</span>.
+                            <span className="text-orange-600 underline">unlicensed treatment</span>.
                         </p>
                     </div>
                     <div className="flex items-start space-x-3">
@@ -197,15 +197,15 @@ export function ClinicalQuiz({ healthVertical = 'hair-loss' }: ClinicalQuizProps
                             <div className="w-1.5 h-1.5 bg-neutral-800 transform rotate-45"></div>
                         </div>
                         <p className="text-neutral-700 leading-relaxed text-sm">
-                            Are accepting our <span className="text-teal-600 underline cursor-pointer">Terms & Conditions</span> and{" "}
-                            <span className="text-teal-600 underline cursor-pointer">Terms of Sale</span>.
+                            Are accepting our <span className="text-orange-600 underline cursor-pointer">Terms & Conditions</span> and{" "}
+                            <span className="text-orange-600 underline cursor-pointer">Terms of Sale</span>.
                         </p>
                     </div>
                 </div>
                 {/* Next Button */}
                 <button
                     onClick={() => setShowDisclaimer(false)}
-                    className="w-full hover:bg-teal-600 text-white font-bold text-base py-3 px-5 rounded-xl transition-colors duration-200 flex items-center justify-center group bg-black" // Scaled text-lg to text-base, py-4 px-6 to py-3 px-5
+                    className="w-full hover:bg-orange-600 text-white font-bold text-base py-3 px-5 rounded-xl transition-colors duration-200 flex items-center justify-center group bg-black" // Scaled text-lg to text-base, py-4 px-6 to py-3 px-5
                 >
                     Next
                     <ChevronRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" />{" "}

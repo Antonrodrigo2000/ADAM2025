@@ -1,0 +1,8 @@
+export { DashboardLayout } from './layout'
+export { Navbar } from './navbar'
+export { Sidebar } from './sidebar'
+export { MobileNav } from './mobile-nav'
+export { NavItem } from './nav-item'
+export { UserMenu } from './user-menu'
+export { dashboardNavConfig } from './nav-config'
+export type { NavItem as NavItemType, UserProfile, NavSection } from './types'

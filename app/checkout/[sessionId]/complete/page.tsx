@@ -39,7 +39,7 @@ export default function CompletePage({ params }: { params: Promise<{ sessionId: 
           <p className="text-neutral-600 mb-4">{error || 'Session not found'}</p>
           <button 
             onClick={() => router.push('/dashboard')}
-            className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600"
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
           >
             Go to Dashboard
           </button>
@@ -59,7 +59,7 @@ export default function CompletePage({ params }: { params: Promise<{ sessionId: 
         {/* Success Icon */}
         <div className="mb-6">
           <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-teal-500 rounded-full mx-auto"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-orange-500 rounded-full mx-auto"></div>
         </div>
 
         {/* Success Message */}
@@ -139,7 +139,7 @@ export default function CompletePage({ params }: { params: Promise<{ sessionId: 
         <div className="space-y-3">
           <button
             onClick={() => router.push('/dashboard')}
-            className="w-full px-6 py-3 bg-teal-500 text-white font-medium rounded-lg hover:bg-teal-600 transition-colors"
+            className="w-full px-6 py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors"
           >
             Go to Dashboard
           </button>
@@ -156,7 +156,7 @@ export default function CompletePage({ params }: { params: Promise<{ sessionId: 
         <div className="mt-6 pt-4 border-t border-neutral-200">
           <p className="text-xs text-neutral-500">
             Need help? Contact our support team at{' '}
-            <a href="mailto:support@adam.lk" className="text-teal-600 hover:underline">
+            <a href="mailto:support@adam.lk" className="text-orange-600 hover:underline">
               support@adam.lk
             </a>
           </p>

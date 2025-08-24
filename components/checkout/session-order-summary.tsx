@@ -1,3 +1,7 @@
+import { calculateOrderTotals, formatPrice } from './order-summary/calculations'
+import { OrderItem } from './order-summary/order-item'
+import { SummaryBreakdown } from './order-summary/summary-breakdown'
+
 interface CartItem {
   product_id: string
   quantity: number
@@ -22,71 +26,37 @@ interface SessionOrderSummaryProps {
 }
 
 export function SessionOrderSummary({ session }: SessionOrderSummaryProps) {
+  const calculation = calculateOrderTotals(session.cart_items)
+
   return (
-    <div className="neomorphic-container p-4">
-      <h2 className="text-xl font-bold text-neutral-800 mb-4">Your order</h2>
+    <div className="bg-white rounded-lg shadow-sm p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-neutral-800">Your order</h2>
+        <p className="text-sm text-neutral-600 mt-1">
+          {session.cart_items.length} {session.cart_items.length === 1 ? 'item' : 'items'}
+        </p>
+      </div>
 
-      {/* Cart Items */}
-      <div className="space-y-4 mb-4">
-        {session.cart_items.map((item: CartItem, index: number) => (
-          <div key={index} className="flex items-start space-x-3">
-            <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <img 
-                src={item.image || "/placeholder.svg"} 
-                alt={item.productName || `Product ${item.product_id.slice(-8)}`} 
-                className="w-8 h-8 object-contain" 
-              />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-neutral-800 text-xs leading-tight mb-1">
-                {item.productName || `Product ${item.product_id.slice(-8).toUpperCase()}`}
-              </h3>
-              {item.variantName && (
-                <p className="text-xs text-neutral-600 mb-1">{item.variantName}</p>
-              )}
-              <p className="text-xs text-neutral-600 mb-1">Quantity: {item.quantity}</p>
-              {item.prescriptionRequired && (
-                <p className="text-xs text-blue-600">Requires consultation</p>
-              )}
-            </div>
-
-            <div className="text-right flex-shrink-0">
-              <div className="font-bold text-neutral-800 text-sm">
-                LKR {(item.price * item.quantity).toLocaleString()}
-              </div>
-              {item.months && item.months > 1 && item.monthlyPrice && (
-                <div className="text-xs text-neutral-500">
-                  LKR {item.monthlyPrice.toLocaleString()}/month × {item.months}
-                </div>
-              )}
-              {item.prescriptionRequired && item.consultationFee && (
-                <div className="text-xs text-blue-600">
-                  + LKR {item.consultationFee.toLocaleString()} consultation
-                </div>
-              )}
-            </div>
-          </div>
+      {/* Order Items */}
+      <div className="space-y-4 mb-6">
+        {session.cart_items.map((item, index) => (
+          <OrderItem key={`${item.product_id}-${index}`} item={item} index={index} />
         ))}
       </div>
 
-      {/* Order Summary */}
-      <div className="space-y-2 border-t border-neutral-200 pt-3">
-        <div className="flex justify-between text-neutral-700 text-sm">
-          <span>Subtotal</span>
-          <span>LKR {session.cart_total.toLocaleString()}</span>
-        </div>
+      {/* Summary Breakdown */}
+      <SummaryBreakdown calculation={calculation} />
 
-        <div className="flex justify-between text-neutral-700 text-sm">
-          <span>Delivery</span>
-          <span>Free</span>
+      {/* Additional Info */}
+      {calculation.hasConsultationItems && (
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-xs text-blue-800">
+            <strong>Note:</strong> Items requiring consultation will be processed after physician approval. 
+            The consultation fee covers all prescription items in your order.
+          </p>
         </div>
-
-        <div className="flex justify-between text-lg font-bold text-neutral-800 pt-2 border-t border-neutral-200">
-          <span>Total</span>
-          <span>LKR {session.cart_total.toLocaleString()}</span>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

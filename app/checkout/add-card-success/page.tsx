@@ -52,7 +52,7 @@ export default function AddCardSuccessPage() {
       <Card className="max-w-md w-full p-6 text-center">
         {status === 'loading' && (
           <>
-            <Loader2 className="w-16 h-16 text-teal-500 mx-auto mb-4 animate-spin" />
+            <Loader2 className="w-16 h-16 text-orange-500 mx-auto mb-4 animate-spin" />
             <h1 className="text-xl font-bold text-neutral-800 mb-2">
               Processing Payment Method
             </h1>
@@ -72,7 +72,7 @@ export default function AddCardSuccessPage() {
             <p className="text-neutral-600 mb-6">{message}</p>
             <Button 
               onClick={handleContinue}
-              className="w-full bg-teal-500 hover:bg-teal-600"
+              className="w-full bg-orange-500 hover:bg-orange-600"
             >
               Continue to Checkout
             </Button>
@@ -89,7 +89,7 @@ export default function AddCardSuccessPage() {
             <div className="space-y-2">
               <Button 
                 onClick={handleContinue}
-                className="w-full bg-teal-500 hover:bg-teal-600"
+                className="w-full bg-orange-500 hover:bg-orange-600"
               >
                 Return to Checkout
               </Button>

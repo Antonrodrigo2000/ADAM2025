@@ -13,14 +13,14 @@ export function CheckoutProgressIndicator({ currentStep, isAuthenticated }: Chec
   // For authenticated users: Payment -> Complete (2 steps)
   if (isAuthenticated) {
     return (
-      <div className="neomorphic-container p-4">
+      <div className="bg-white rounded-lg shadow-sm p-4">
         <div className="flex items-center space-x-4">
           <div className={`flex items-center space-x-2 ${
-            currentStep === 'payment' ? 'text-teal-600' : 'text-green-600'
+            currentStep === 'payment' ? 'text-orange-600' : 'text-green-600'
           }`}>
             <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
               currentStep === 'payment' 
-                ? 'border-teal-600 bg-teal-100' 
+                ? 'border-orange-600 bg-orange-100' 
                 : 'border-green-600 bg-green-600'
             }`}>
               {currentStep === 'payment' ? (
@@ -57,15 +57,15 @@ export function CheckoutProgressIndicator({ currentStep, isAuthenticated }: Chec
 
   // For guest users: Information -> Payment -> Complete (3 steps)
   return (
-    <div className="neomorphic-container p-4">
+    <div className="bg-white rounded-lg shadow-sm p-4">
       <div className="flex items-center space-x-4">
         {/* Information Step */}
         <div className={`flex items-center space-x-2 ${
-          currentStep === 'information' ? 'text-teal-600' : 'text-green-600'
+          currentStep === 'information' ? 'text-orange-600' : 'text-green-600'
         }`}>
           <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
             currentStep === 'information'
-              ? 'border-teal-600 bg-teal-100'
+              ? 'border-orange-600 bg-orange-100'
               : 'border-green-600 bg-green-600'
           }`}>
             {currentStep === 'information' ? (
@@ -83,12 +83,12 @@ export function CheckoutProgressIndicator({ currentStep, isAuthenticated }: Chec
 
         {/* Payment Step */}
         <div className={`flex items-center space-x-2 ${
-          currentStep === 'payment' ? 'text-teal-600' : 
+          currentStep === 'payment' ? 'text-orange-600' : 
           ['processing', 'complete'].includes(currentStep) ? 'text-green-600' : 'text-neutral-400'
         }`}>
           <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
             currentStep === 'payment'
-              ? 'border-teal-600 bg-teal-100'
+              ? 'border-orange-600 bg-orange-100'
               : ['processing', 'complete'].includes(currentStep)
               ? 'border-green-600 bg-green-600'
               : 'border-neutral-300'

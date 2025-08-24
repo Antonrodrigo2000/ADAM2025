@@ -55,7 +55,7 @@ export default function LoginPage() {
               <h1 className="text-3xl font-bold text-neutral-800 mb-2">Welcome Back</h1>
               <p className="text-neutral-600">
                 Sign in to your Adam account. Don't have an account?{" "}
-                <Link href="/signup" className="text-teal-600 hover:text-teal-700 underline">
+                <Link href="/signup" className="text-orange-600 hover:text-orange-700 underline">
                   Create one here
                 </Link>
               </p>
@@ -66,9 +66,9 @@ export default function LoginPage() {
 
           {/* Right side - Image/Illustration */}
           <div className="lg:block hidden">
-            <div className="bg-gradient-to-br from-teal-50 to-blue-50 rounded-2xl p-8 text-center">
-              <div className="w-32 h-32 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-16 h-16 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-br from-orange-50 to-blue-50 rounded-2xl p-8 text-center">
+              <div className="w-32 h-32 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-16 h-16 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
