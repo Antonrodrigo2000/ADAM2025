@@ -29,7 +29,8 @@ interface GenieTransaction {
         hideTermsAndConditions?: boolean
     }
     webhook?: string
-    redirectUrl?: string
+    redirectUrl?: string,
+    sendCustomerEmailReceipt?: boolean
 }
 
 interface GenieTransactionResponse {
@@ -304,6 +305,7 @@ export class GeniePaymentService {
                         numberOfItems: product.quantity
                     }))
                 },
+                sendCustomerEmailReceipt: true
             }
 
             console.log('📦 Creating order-based transaction - Genie will calculate amount from products')

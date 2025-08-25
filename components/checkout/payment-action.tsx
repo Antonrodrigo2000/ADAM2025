@@ -49,7 +49,7 @@ export function PaymentAction({
             // Small delay to ensure webhook processing is complete
             await new Promise(resolve => setTimeout(resolve, 1000))
             // Use redirect_url from response if available, otherwise fallback to default
-            const redirectUrl = result.redirect_url || `/checkout/${sessionId}/complete`
+            const redirectUrl = result?.redirect_url || `/checkout/${sessionId}/complete`
             window.location.href = redirectUrl
         } catch (error) {
             console.error('Mock payment failed:', error)
