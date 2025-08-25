@@ -4,7 +4,7 @@ import { submitQuestionnaireToEmed } from './emed-questionnaire'
 export async function createOrderFromConsultationPayment(
     supabase: any,
     data: ConsultationOrderData
-): Promise<{ success: boolean; orderId?: string; error?: string }> {
+): Promise<{ success: boolean; orderId?: string; sessionId?: string; error?: string }> {
     try {
         console.log('🏥 Creating consultation order for user:', data.userId)
 
@@ -21,9 +21,12 @@ export async function createOrderFromConsultationPayment(
                 payment_method_id: data.paymentMethodId,
                 consultation_payment_id: data.consultationTransactionId,
                 consultation_status: 'paid',
-                payment_status: 'consultation_paid',
+                payment_status: 'pending',
                 status: 'physician_review',
-                delivery_address: data.deliveryAddress,
+                delivery_address: data.deliveryAddress || {
+                    type: 'consultation_pending',
+                    note: 'Address will be collected after physician approval'
+                },
                 payment_metadata: data.paymentMetadata
             })
             .select()
@@ -69,6 +72,24 @@ export async function createOrderFromConsultationPayment(
                 payment_metadata: data.paymentMetadata
             })
 
+        // Update checkout session to processing status (consultation paid, awaiting physician review)
+        console.log('🔄 DEBUG: Updating session to processing:', { sessionId: data.sessionId, userId: data.userId })
+        const { error: sessionUpdateError } = await supabase
+            .from('checkout_sessions')
+            .update({
+                status: 'active',
+                current_step: 'processing',
+                updated_at: new Date().toISOString()
+            })
+            .eq('session_token', data.sessionId)
+            .eq('user_id', data.userId)
+        
+        if (sessionUpdateError) {
+            console.error('❌ Session update error:', sessionUpdateError)
+        } else {
+            console.log('✅ Session updated to processing status')
+        }
+
         try {
             await submitQuestionnaireToEmed(data.userId, data.cartItems)
         } catch (emedError) {
@@ -76,7 +97,7 @@ export async function createOrderFromConsultationPayment(
         }
 
         console.log('✅ Order created successfully:', order.id)
-        return { success: true, orderId: order.id }
+        return { success: true, orderId: order.id, sessionId: data.sessionId }
 
     } catch (error) {
         console.error('❌ Error creating order:', error)

@@ -14,6 +14,20 @@ export async function submitQuestionnaireToEmed(userId: string, cartItems: any[]
         return
     }
 
+    // Get user profile to access emed_patient_id
+    const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('emed_patient_id')
+        .eq('id', userId)
+        .single()
+
+    if (profileError || !profile?.emed_patient_id) {
+        console.warn('⚠️ No emed_patient_id found for user:', userId)
+        return
+    }
+
+    const emed_patient_id = profile.emed_patient_id
+
     for (const healthVertical of healthVerticals) {
         try {
             console.log(`📋 Processing questionnaire for ${healthVertical}`)
@@ -56,15 +70,56 @@ export async function submitQuestionnaireToEmed(userId: string, cartItems: any[]
                 continue
             }
 
+            console.log('🔍 DEBUG: User responses before photo extraction:', JSON.stringify(userResponse.responses, null, 2))
             const photos = await extractPhotosFromResponses(userResponse.responses, supabase)
+            console.log('📸 DEBUG: Extracted photos:', photos.length, 'photos found')
             
-            const verticalCartItems = cartItems.filter(item => 
-                item.health_vertical_slug === healthVertical
-            )
+            // Convert photos to base64 data for emed using Supabase download (handles RLS correctly)
+            const photosWithData = await Promise.all(photos.map(async (photo, index) => {
+                try {
+                    // Extract the storage path from the URL or use the original supabasePath if available
+                    const storagePath = photo.supabasePath || photo.url.split('/').pop()
+                    console.log(`📸 DEBUG: Downloading image ${index + 1}/${photos.length} from storage path:`, storagePath)
+                    
+                    const { data, error } = await supabase.storage
+                        .from(process.env.SUPABASE_QUESTIONNAIRE_BUCKET!)
+                        .download(storagePath)
+                    
+                    if (error) {
+                        throw new Error(`Supabase storage error: ${error.message}`)
+                    }
+                    
+                    if (!data) {
+                        throw new Error('No data received from storage')
+                    }
+                    
+                    const buffer = await data.arrayBuffer()
+                    const base64 = Buffer.from(buffer).toString('base64')
+                    
+                    console.log(`📸 DEBUG: Converted image ${index + 1} to base64, size: ${Math.round(base64.length * 0.75 / 1024)}KB`)
+                    
+                    return {
+                        ...photo,
+                        dataBase64: base64,
+                        size: buffer.byteLength
+                    }
+                } catch (error) {
+                    console.error(`📸 ERROR: Failed to download image ${index + 1}:`, error)
+                    return null
+                }
+            }))
+            
+            const validPhotos = photosWithData.filter(photo => photo !== null)
+            console.log('📸 DEBUG: Successfully converted', validPhotos.length, 'photos to base64')
+            
+            // Get cart items for this specific health vertical
+            const verticalCartItems = await getCartItemsForHealthVertical(cartItems, healthVertical, supabase)
 
+            console.log(`🛒 Found ${verticalCartItems.length} cart items for ${healthVertical}`)
+            
             const result = await medplumService.saveQuestionnaireAndCart(
-                userId,
-                photos,
+                emed_patient_id,
+                validPhotos,
                 {
                     quizResponses: userResponse.responses,
                     questions: questions
@@ -115,42 +170,92 @@ async function getHealthVerticalsFromCart(cartItems: any[]): Promise<string[]> {
     return verticals.length > 0 ? verticals : ['hair-loss']
 }
 
+async function getCartItemsForHealthVertical(cartItems: any[], healthVertical: string, supabase: any): Promise<any[]> {
+    const productIds = cartItems.map(item => item.product_id)
+    
+    const { data: productMetadata, error } = await supabase
+        .from('product_metadata')
+        .select(`
+            genie_product_id,
+            health_verticals!inner(slug)
+        `)
+        .in('genie_product_id', productIds)
+        .eq('health_verticals.slug', healthVertical)
+    
+    if (error || !productMetadata) {
+        console.error('Error fetching product metadata for health vertical:', error)
+        return []
+    }
+    
+    const healthVerticalProductIds = new Set(
+        productMetadata.map((item: any) => item.genie_product_id)
+    )
+    
+    return cartItems.filter(item => healthVerticalProductIds.has(item.product_id))
+}
+
 async function extractPhotosFromResponses(responses: Record<string, any>, supabase: any): Promise<any[]> {
     const photos: any[] = []
     
+    console.log('📸 DEBUG: Starting photo extraction from responses...')
+    console.log('📸 DEBUG: Total response entries:', Object.keys(responses).length)
+    
     for (const [questionId, response] of Object.entries(responses)) {
+        console.log(`📸 DEBUG: Processing questionId: ${questionId}, response type: ${typeof response}, value:`, response)
+        
         if (Array.isArray(response)) {
+            console.log(`📸 DEBUG: Found array response with ${response.length} items`)
             for (const [index, item] of response.entries()) {
-                if (typeof item === 'string' && item.includes('storage/')) {
+                console.log(`📸 DEBUG: Array item ${index}: type=${typeof item}, value=${item}`)
+                
+                // Handle image_reference objects
+                if (typeof item === 'object' && item !== null && item.type === 'image_reference' && item.supabasePath) {
+                    console.log(`📸 DEBUG: Found image_reference object with supabasePath: ${item.supabasePath}`)
                     const { data } = supabase.storage
                         .from(process.env.SUPABASE_QUESTIONNAIRE_BUCKET!)
-                        .getPublicUrl(item)
+                        .getPublicUrl(item.supabasePath)
                     
+                    console.log(`📸 DEBUG: Generated public URL for image_reference:`, data?.publicUrl)
                     if (data?.publicUrl) {
-                        photos.push({
+                        const photo = {
                             questionId: questionId,
                             description: `${questionId}_${index}`,
                             url: data.publicUrl,
-                            contentType: 'image/jpeg'
-                        })
+                            contentType: item.metadata?.fileType || 'image/jpeg',
+                            originalName: item.metadata?.name,
+                            imageId: item.imageId,
+                            supabasePath: item.supabasePath
+                        }
+                        photos.push(photo)
+                        console.log(`📸 DEBUG: Added photo from image_reference:`, photo)
                     }
                 }
             }
-        } else if (typeof response === 'string' && response.includes('storage/')) {
+        } else if (typeof response === 'object' && response !== null && response.type === 'image_reference' && response.supabasePath) {
+            console.log(`📸 DEBUG: Found image_reference object with supabasePath: ${response.supabasePath}`)
             const { data } = supabase.storage
                 .from(process.env.SUPABASE_QUESTIONNAIRE_BUCKET!)
-                .getPublicUrl(response)
+                .getPublicUrl(response.supabasePath)
             
+            console.log(`📸 DEBUG: Generated public URL for image_reference:`, data?.publicUrl)
             if (data?.publicUrl) {
-                photos.push({
+                const photo = {
                     questionId: questionId,
                     description: questionId,
                     url: data.publicUrl,
-                    contentType: 'image/jpeg'
-                })
+                    contentType: response.metadata?.fileType || 'image/jpeg',
+                    originalName: response.metadata?.name,
+                    imageId: response.imageId,
+                    supabasePath: response.supabasePath
+                }
+                photos.push(photo)
+                console.log(`📸 DEBUG: Added photo from image_reference:`, photo)
             }
+        } else {
+            console.log(`📸 DEBUG: Response does not match photo criteria - type: ${typeof response}, is image_reference: ${typeof response === 'object' && response !== null && response.type === 'image_reference'}`)
         }
     }
     
+    console.log(`📸 DEBUG: Photo extraction complete. Total photos found: ${photos.length}`)
     return photos
 }

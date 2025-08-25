@@ -59,6 +59,22 @@ export default function ProcessingPage({ params }: { params: Promise<{ sessionId
                 setPaymentStatus('success')
                 setStatusMessage('Consultation payment successful! Your order is being reviewed by our medical team.')
                 
+                // Update session to completed status since consultation flow is done
+                try {
+                  await supabase
+                    .from('checkout_sessions')
+                    .update({
+                      status: 'completed',
+                      current_step: 'processing', // Keep processing step but mark as completed
+                      completed_at: new Date().toISOString()
+                    })
+                    .eq('session_token', sessionId)
+                  
+                  console.log('✅ Session updated to completed status for consultation')
+                } catch (error) {
+                  console.error('❌ Failed to update session status:', error)
+                }
+                
                 // Redirect to success page after 3 seconds
                 setTimeout(() => {
                   router.push(`/checkout/${sessionId}/complete?order=${order.id}&type=consultation`)

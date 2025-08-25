@@ -4,7 +4,7 @@ import { useCheckoutSession } from '@/contexts/checkout-session-context'
 import { CheckoutProgressIndicator } from '@/components/checkout/checkout-progress-indicator'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { CheckCircleIcon } from '@heroicons/react/24/solid'
+import { CheckCircle } from 'lucide-react'
 
 export default function CompletePage({ params }: { params: Promise<{ sessionId: string }> }) {
   const { session, isLoading, error } = useCheckoutSession()
@@ -20,7 +20,7 @@ export default function CompletePage({ params }: { params: Promise<{ sessionId: 
     if (!session || isLoading) return
 
     // Redirect if session is not completed
-    if (session.status !== 'completed' || session.current_step !== 'complete') {
+    if (session.status !== 'completed') {
       if (sessionId) {
         router.replace(`/checkout/${sessionId}/${session.current_step}`)
       }
@@ -58,14 +58,14 @@ export default function CompletePage({ params }: { params: Promise<{ sessionId: 
       <div className="neomorphic-container p-8 text-center">
         {/* Success Icon */}
         <div className="mb-6">
-          <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-orange-500 rounded-full mx-auto"></div>
         </div>
 
         {/* Success Message */}
-        <h1 className="text-3xl font-bold text-neutral-800 mb-2">Order Confirmed!</h1>
+        <h1 className="text-3xl font-bold text-neutral-800 mb-2">Consultation Payment Confirmed!</h1>
         <p className="text-lg text-neutral-600 mb-6">
-          Thank you for your purchase. Your order has been successfully placed.
+          Thank you! Your consultation payment has been processed and your order is now pending physician review.
         </p>
 
         {/* Order Details */}
@@ -128,10 +128,11 @@ export default function CompletePage({ params }: { params: Promise<{ sessionId: 
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
           <h4 className="font-semibold text-blue-800 mb-2">What happens next?</h4>
           <div className="text-sm text-blue-700 space-y-1 text-left">
-            <p>• You'll receive an order confirmation email shortly</p>
-            <p>• Our medical team will review your order</p>
-            <p>• Once approved, your order will be processed and shipped</p>
-            <p>• You'll receive tracking information via email</p>
+            <p>• You'll receive a consultation confirmation email shortly</p>
+            <p>• Our medical team will review your questionnaire and order</p>
+            <p>• Once approved, you'll be charged for the products separately</p>
+            <p>• After product payment, your order will be processed and shipped</p>
+            <p>• You can track your order status in your dashboard</p>
           </div>
         </div>
 

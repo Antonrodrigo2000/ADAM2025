@@ -294,6 +294,8 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
                 isValidatingConsultation={isValidatingConsultation}
                 consultationValidation={consultationValidation}
                 onPayNow={handlePayNow}
+                sessionId={sessionId}
+                userId={user?.id}
             />
         </div>
     )

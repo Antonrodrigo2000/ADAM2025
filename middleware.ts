@@ -71,10 +71,16 @@ async function handleCheckoutSession(
       return redirectToNewCheckout(request, 'Session expired')
     }
 
-    // Check if session is not active
-    if (session.status !== 'active') {
+    // Check if session is not active (but allow completed sessions for completion pages)
+    if (session.status !== 'active' && session.status !== 'completed') {
       console.warn('Session not active:', sessionToken, session.status)
       return redirectToNewCheckout(request, 'Session no longer active')
+    }
+    
+    // For completed sessions, only allow access to completion page
+    if (session.status === 'completed' && requestedStep !== 'complete') {
+      console.log('Completed session accessing non-complete page, redirecting to complete')
+      return redirectToStep(request, sessionToken, 'complete')
     }
 
     // Validate step progression and redirect if needed

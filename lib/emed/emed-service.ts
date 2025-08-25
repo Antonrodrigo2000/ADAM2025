@@ -7,7 +7,7 @@ import {
     buildQuestionnaireResponse,
     buildQuestionnaireInputFromDatabase
 } from './fhir-builders'
-import { createMedplumClient } from '@/lib/medplum/client'
+import { MedplumClient } from '@medplum/core'
 
 export interface MedplumResponse {
     success: boolean
@@ -25,15 +25,25 @@ export interface MedplumResponse {
 }
 
 export class MedplumService {
+    private client: MedplumClient
+
+    constructor() {
+        this.client = new MedplumClient({
+            clientId: process.env.MEDPLUM_CLIENT_ID,
+            clientSecret: process.env.MEDPLUM_CLIENT_SECRET,
+            baseUrl: process.env.MEDPLUM_BASE_URL,
+        })
+
+        console.log('Medplum client initialized successfully')
+    }
 
     /**
      * Find existing patient by NIC or email
      */
     async findPatientByNicOrEmail(nic: string, email: string): Promise<Patient | undefined> {
         try {
-            const medplum = await createMedplumClient();
 
-            const nicSearch = await medplum.search('Patient', {
+            const nicSearch = await this.client.search('Patient', {
                 identifier: `http://fhir.health.gov.lk/ips/identifier/nic|${nic}`,
             })
 
@@ -41,7 +51,7 @@ export class MedplumService {
                 return nicSearch.entry[0].resource as Patient
             }
 
-            const emailSearch = await medplum.search('Patient', {
+            const emailSearch = await this.client.search('Patient', {
                 telecom: `email|${email}`,
             })
 
@@ -58,10 +68,8 @@ export class MedplumService {
      * Create new patient
      */
     async createPatient(patientData: PatientInput): Promise<string> {
-        const medplum = await createMedplumClient();
-
         const patientResource = buildPatientResource(patientData)
-        const createdPatient = await medplum.createResource(patientResource)
+        const createdPatient = await this.client.createResource(patientResource)
 
         return createdPatient.id
     }
@@ -70,10 +78,8 @@ export class MedplumService {
      * Update existing patient using PATCH
      */
     async updatePatient(patientData: PatientInput, existingPatient: Patient): Promise<void> {
-        const medplum = await createMedplumClient();
-
         const patchOperations = buildPatientPatch(patientData, existingPatient)
-        await medplum.patchResource('Patient', existingPatient.id!, patchOperations)
+        await this.client.patchResource('Patient', existingPatient.id!, patchOperations)
     }
 
 
@@ -84,10 +90,8 @@ export class MedplumService {
         photo: PhotoInput,
         patientRef: string
     ): Promise<string> {
-        const medplum = await createMedplumClient();
-
         const binaryResource = buildBinaryResource(photo, patientRef)
-        const createdBinary = await medplum.createResource(binaryResource)
+        const createdBinary = await this.client.createResource(binaryResource)
 
         return createdBinary.id
     }
@@ -100,10 +104,10 @@ export class MedplumService {
         patientRef: string,
         answers: any[]
     ): Promise<string> {
-        const medplum = await createMedplumClient();
-
         const questionnaireResponse = buildQuestionnaireResponse(questionnaireId, patientRef, answers)
-        const createdQuestionnaireResponse = await medplum.createResource(questionnaireResponse)
+        console.log("CREATED QUESTIONARE RESPONSE", JSON.stringify(questionnaireResponse))
+
+        const createdQuestionnaireResponse = await this.client.createResource(questionnaireResponse)
 
         return createdQuestionnaireResponse.id!
     }
@@ -136,10 +140,10 @@ export class MedplumService {
 
             // Build questionnaire input using database questions with proper linkId and text
             // Determine health vertical from questions or use provided parameter
-            const detectedHealthVertical = healthVertical || 
+            const detectedHealthVertical = healthVertical ||
                 this.detectHealthVerticalFromQuestions(questionnaireData.questions) ||
                 'hair-loss' // fallback
-            
+
             const questionnaireInput = buildQuestionnaireInputFromDatabase(
                 questionnaireData.quizResponses,
                 questionnaireData.questions,
@@ -175,10 +179,8 @@ export class MedplumService {
      * Test connection to Medplum server
      */
     async testConnection(): Promise<boolean> {
-        const medplum = await createMedplumClient();
-
         try {
-            await medplum.searchResources('Patient', { _count: '1' })
+            await this.client.searchResources('Patient', { _count: '1' })
             return true
         } catch (error) {
             return false
@@ -193,13 +195,13 @@ export class MedplumService {
      */
     private detectHealthVerticalFromQuestions(questions: any[]): string | null {
         if (!questions || questions.length === 0) return null
-        
+
         // Check if questions have health vertical info from join
         const firstQuestion = questions[0]
         if (firstQuestion?.questionnaires?.health_verticals?.slug) {
             return firstQuestion.questionnaires.health_verticals.slug
         }
-        
+
         return null
     }
 
@@ -212,5 +214,9 @@ export class MedplumService {
         }
     }
 }
+
+// ============================================================================
+// SINGLETON INSTANCE
+// ============================================================================
 
 export const medplumService = new MedplumService()

@@ -47,9 +47,11 @@ export async function handlePaymentConfirmed(supabase: any, data: GenieTransacti
             console.log('🏥 Consultation payment confirmed, creating order')
 
             const parts = data.localId.split('_')
+            console.log('🔍 DEBUG: Parsing localId parts:', { localId: data.localId, parts })
             if (parts.length >= 3) {
                 const userId = parts[1]
-                const sessionId = parts[2]
+                const sessionId = parts.slice(2).join('_') // Rejoin remaining parts to preserve session ID
+                console.log('🔍 DEBUG: Extracted session info:', { userId, sessionId })
 
                 const { data: session } = await supabase
                     .from('checkout_sessions')
@@ -78,6 +80,7 @@ export async function handlePaymentConfirmed(supabase: any, data: GenieTransacti
 
                     if (orderResult.success) {
                         console.log('Order created:', orderResult.orderId)
+                        console.log('✅ Consultation payment flow completed - session ready for redirect to completion page')
                     } else {
                         console.error('Order creation failed:', orderResult.error)
                     }
