@@ -1,6 +1,5 @@
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { GenieTransactionWebhook } from './types'
-import { createOrderFromConsultationPayment } from './order-creation'
 
 export async function handleTransactionWebhook(data: GenieTransactionWebhook): Promise<void> {
     console.log('Transaction state changed:', data.transactionId, data.state)
@@ -43,65 +42,83 @@ export async function handleTransactionWebhook(data: GenieTransactionWebhook): P
 
 export async function handlePaymentConfirmed(supabase: any, data: GenieTransactionWebhook): Promise<void> {
     try {
-        if (data.localId?.startsWith('consul_')) {
-            console.log('🏥 Consultation payment confirmed, creating order')
-
-            const parts = data.localId.split('_')
-            console.log('🔍 DEBUG: Parsing localId parts:', { localId: data.localId, parts })
-            if (parts.length >= 3) {
-                const userId = parts[1]
-                const sessionId = parts.slice(2).join('_') // Rejoin remaining parts to preserve session ID
-                console.log('🔍 DEBUG: Extracted session info:', { userId, sessionId })
-
-                const { data: session } = await supabase
-                    .from('checkout_sessions')
-                    .select('*')
-                    .eq('session_token', sessionId)
-                    .eq('user_id', userId)
-                    .single()
-
-                if (session) {
-                    console.log('📦 Found checkout session, creating order')
-
-                    const orderResult = await createOrderFromConsultationPayment(supabase, {
-                        userId: session.user_id,
-                        cartItems: session.cart_items,
-                        paymentMethodId: session.payment_method_id,
-                        deliveryAddress: session.shipping_address,
-                        consultationTransactionId: data.transactionId,
-                        sessionId: session.session_token,
-                        paymentMetadata: {
-                            confirmed_at: new Date().toISOString(),
-                            amount: data.amount,
-                            currency: data.currency,
-                            provider: data.provider
-                        }
-                    })
-
-                    if (orderResult.success) {
-                        console.log('Order created:', orderResult.orderId)
-                        console.log('✅ Consultation payment flow completed - session ready for redirect to completion page')
-                    } else {
-                        console.error('Order creation failed:', orderResult.error)
-                    }
-                } else {
-                    console.error('Session not found for:', { userId, sessionId })
-                }
-            }
+        // Direct order correlation using order ID as localId
+        if (!data.localId) {
+            console.error('❌ No localId found in webhook data')
             return
         }
 
-        const { data: consultationOrder } = await supabase
+        console.log('🏥 Payment confirmed, looking up order:', data.localId)
+
+        // Find order by ID
+        const { data: order } = await supabase
             .from('orders')
-            .select('*')
-            .eq('consultation_payment_id', data.transactionId)
+            .select('*, order_items(*)')
+            .eq('id', data.localId)
+            .eq('status', 'payment_pending')
             .single()
 
-        if (consultationOrder) {
-            console.log('Updating existing consultation order:', consultationOrder.id)
+        if (!order) {
+            console.error('❌ No pending order found for ID:', data.localId)
+            return
+        }
 
-            const { error } = await supabase.rpc('confirm_consultation_payment', {
-                genie_trans_id: data.transactionId,
+        console.log('📦 Found pending order, confirming payment for', order.payment_flow_type, 'flow')
+
+        // Handle different flow types
+        let updateData: any = {
+            updated_at: new Date().toISOString(),
+            payment_metadata: {
+                confirmed_at: new Date().toISOString(),
+                amount: data.amount,
+                currency: data.currency,
+                provider: data.provider
+            }
+        }
+
+        if (order.payment_flow_type === 'consultation_first') {
+            // Consultation flow: payment success → physician review
+            updateData = {
+                ...updateData,
+                consultation_payment_id: data.transactionId,
+                consultation_status: 'paid',
+                payment_status: 'consultation_paid',
+                status: 'physician_review'
+            }
+        } else {
+            // Full upfront flow: payment success → processing (ready to ship)
+            updateData = {
+                ...updateData,
+                genie_transaction_id: data.transactionId,
+                payment_status: 'confirmed',
+                status: 'processing'
+            }
+        }
+
+        const { error: updateError } = await supabase
+            .from('orders')
+            .update(updateData)
+            .eq('id', order.id)
+
+        if (updateError) {
+            console.error('❌ Error updating order:', updateError)
+            return
+        }
+
+        // Create payment phase record
+        const phaseType = order.payment_flow_type === 'consultation_first' ? 'consultation' : 'products'
+        await supabase
+            .from('order_payment_phases')
+            .insert({
+                order_id: order.id,
+                phase_type: phaseType,
+                phase_status: 'completed',
+                genie_transaction_id: data.transactionId,
+                payment_method_id: order.payment_method_id,
+                amount: data.amount || 0,
+                currency: data.currency || 'LKR',
+                initiated_at: new Date().toISOString(),
+                completed_at: new Date().toISOString(),
                 payment_metadata: {
                     confirmed_at: new Date().toISOString(),
                     amount: data.amount,
@@ -110,50 +127,33 @@ export async function handlePaymentConfirmed(supabase: any, data: GenieTransacti
                 }
             })
 
-            if (!error) {
-                console.log('Consultation payment confirmed')
+        // Update checkout session status if exists
+        if (order.session_id) {
+            await supabase
+                .from('checkout_sessions')
+                .update({
+                    status: 'active',
+                    current_step: 'processing',
+                    updated_at: new Date().toISOString()
+                })
+                .eq('session_token', order.session_id)
+                .eq('user_id', order.user_id)
+        }
+
+        console.log(`✅ ${order.payment_flow_type} payment confirmed for order:`, order.id, `amount: ${data.amount} ${data.currency}`)
+
+        // Submit emed questionnaire only for consultation flow after payment success
+        if (order.payment_flow_type === 'consultation_first') {
+            try {
+                const { submitQuestionnaireToEmed } = await import('./emed-questionnaire')
+                await submitQuestionnaireToEmed(order.user_id, order.cart_snapshot || [])
+                console.log('✅ Emed questionnaire submitted for consultation order')
+            } catch (emedError) {
+                console.error('❌ Emed submission failed (order still confirmed):', emedError)
             }
-            return
+        } else {
+            console.log('ℹ️ Upfront payment - no emed questionnaire submission needed')
         }
-
-        const { data: productOrder } = await supabase
-            .from('orders')
-            .select('*')
-            .eq('product_payment_id', data.transactionId)
-            .single()
-
-        if (productOrder) {
-            console.log('Confirming product payment for order:', productOrder.id)
-
-            await supabase
-                .from('order_payment_phases')
-                .update({
-                    phase_status: 'completed',
-                    completed_at: new Date().toISOString(),
-                    payment_metadata: {
-                        confirmed_at: new Date().toISOString(),
-                        amount: data.amount,
-                        currency: data.currency,
-                        provider: data.provider
-                    }
-                })
-                .eq('genie_transaction_id', data.transactionId)
-                .eq('phase_type', 'products')
-
-            await supabase
-                .from('orders')
-                .update({
-                    product_payment_status: 'paid',
-                    payment_status: 'fully_paid',
-                    status: 'processing'
-                })
-                .eq('id', productOrder.id)
-
-            console.log('Product payment confirmed')
-            return
-        }
-
-        console.log('No order found for transaction:', data.transactionId)
 
     } catch (error) {
         console.error('Error handling payment confirmation:', error)
@@ -162,36 +162,25 @@ export async function handlePaymentConfirmed(supabase: any, data: GenieTransacti
 
 export async function handlePaymentVoided(supabase: any, data: GenieTransactionWebhook): Promise<void> {
     try {
-        console.log('Payment voided - cleaning up records')
+        console.log('Payment voided - marking order as failed')
 
-        await supabase
-            .from('order_payment_phases')
-            .update({
-                phase_status: 'failed',
-                error_details: 'Payment was voided by gateway',
-                failed_at: new Date().toISOString()
-            })
-            .eq('genie_transaction_id', data.transactionId)
+        if (!data.localId) {
+            console.error('❌ No localId found in webhook data')
+            return
+        }
 
         await supabase
             .from('orders')
             .update({
                 consultation_status: 'failed',
                 payment_status: 'voided',
-                status: 'cancelled'
+                status: 'payment_failed',
+                updated_at: new Date().toISOString()
             })
-            .eq('consultation_payment_id', data.transactionId)
+            .eq('id', data.localId)
+            .eq('status', 'payment_pending')
 
-        await supabase
-            .from('orders')
-            .update({
-                product_payment_status: 'failed',
-                payment_status: 'voided',
-                status: 'cancelled'
-            })
-            .eq('product_payment_id', data.transactionId)
-
-        console.log('Payment voided - orders cancelled')
+        console.log('✅ Payment voided - order marked as failed')
 
     } catch (error) {
         console.error('Error handling payment void:', error)
@@ -200,34 +189,25 @@ export async function handlePaymentVoided(supabase: any, data: GenieTransactionW
 
 export async function handlePaymentCancelled(supabase: any, data: GenieTransactionWebhook): Promise<void> {
     try {
-        await supabase
-            .from('order_payment_phases')
-            .update({
-                phase_status: 'cancelled',
-                error_details: 'Payment was cancelled',
-                failed_at: new Date().toISOString()
-            })
-            .eq('genie_transaction_id', data.transactionId)
+        console.log('Payment cancelled - marking order as cancelled')
+
+        if (!data.localId) {
+            console.error('❌ No localId found in webhook data')
+            return
+        }
 
         await supabase
             .from('orders')
             .update({
                 consultation_status: 'cancelled',
                 payment_status: 'cancelled',
-                status: 'cancelled'
+                status: 'cancelled',
+                updated_at: new Date().toISOString()
             })
-            .eq('consultation_payment_id', data.transactionId)
+            .eq('id', data.localId)
+            .eq('status', 'payment_pending')
 
-        await supabase
-            .from('orders')
-            .update({
-                product_payment_status: 'cancelled',
-                payment_status: 'cancelled',
-                status: 'cancelled'
-            })
-            .eq('product_payment_id', data.transactionId)
-
-        console.log('Payment cancelled - orders cancelled')
+        console.log('✅ Payment cancelled - order marked as cancelled')
 
     } catch (error) {
         console.error('Error handling payment cancellation:', error)
@@ -236,34 +216,25 @@ export async function handlePaymentCancelled(supabase: any, data: GenieTransacti
 
 export async function handlePaymentFailed(supabase: any, data: GenieTransactionWebhook): Promise<void> {
     try {
-        await supabase
-            .from('order_payment_phases')
-            .update({
-                phase_status: 'failed',
-                error_details: 'Payment failed at gateway',
-                failed_at: new Date().toISOString()
-            })
-            .eq('genie_transaction_id', data.transactionId)
+        console.log('Payment failed - marking order as failed')
+
+        if (!data.localId) {
+            console.error('❌ No localId found in webhook data')
+            return
+        }
 
         await supabase
             .from('orders')
             .update({
                 consultation_status: 'failed',
                 payment_status: 'failed',
-                status: 'payment_failed'
+                status: 'payment_failed',
+                updated_at: new Date().toISOString()
             })
-            .eq('consultation_payment_id', data.transactionId)
+            .eq('id', data.localId)
+            .eq('status', 'payment_pending')
 
-        await supabase
-            .from('orders')
-            .update({
-                product_payment_status: 'failed',
-                payment_status: 'failed',
-                status: 'payment_failed'
-            })
-            .eq('product_payment_id', data.transactionId)
-
-        console.log('Payment failed - orders marked as failed')
+        console.log('✅ Payment failed - order marked as failed')
 
     } catch (error) {
         console.error('Error handling payment failure:', error)

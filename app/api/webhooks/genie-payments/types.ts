@@ -25,12 +25,3 @@ export interface GenieTransactionWebhook extends GenieWebhookData {
     localId?: string
 }
 
-export interface ConsultationOrderData {
-    userId: string
-    cartItems: any[]
-    paymentMethodId: string
-    deliveryAddress: any
-    consultationTransactionId: string
-    paymentMetadata: any
-    sessionId: string
-}

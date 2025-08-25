@@ -24,8 +24,8 @@ export function DashboardLayout({ children, user, onSignOut, theme = 'light' }: 
       <Sidebar theme={theme} onSignOut={onSignOut} />
       
       {/* Main Content Area */}
-      <main className="md:pl-64 pt-16">
-        <div className="container mx-auto p-6">
+      <main className="md:pl-64 pt-2">
+        <div className="container mx-auto px-6 py-4">
           {children}
         </div>
       </main>

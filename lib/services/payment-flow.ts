@@ -31,7 +31,7 @@ export interface CartItemWithConsultation {
     health_vertical_slug?: string
 }
 
-export class ConsultationPaymentFlowService {
+export class PaymentFlowService {
 
     /**
      * Analyze cart and determine payment flow type
@@ -79,9 +79,9 @@ export class ConsultationPaymentFlowService {
     }
 
     /**
-     * Create consultation-first payment flow
+     * Create payment flow (supports both consultation_first and full_upfront)
      */
-    static async createConsultationPayment(
+    static async createPayment(
         userId: string,
         cartItems: CartItemWithConsultation[],
         paymentMethodId: string,
@@ -90,20 +90,44 @@ export class ConsultationPaymentFlowService {
     ): Promise<ConsultationPaymentResult> {
 
         try {
-            console.log('🏥 Starting consultation payment flow for user:', userId)
-
             // Analyze payment flow
             const analysis = await this.analyzePaymentFlow(cartItems)
+            
+            console.log(`🏥 Starting ${analysis.flowType} payment flow for user:`, userId)
 
-            if (analysis.flowType !== 'consultation_first') {
-                return {
-                    success: false,
-                    error: 'Cart does not require consultation payment flow'
-                }
+            if (analysis.flowType === 'consultation_first') {
+                return await this.createConsultationFirstPayment(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis)
+            } else {
+                return await this.createFullUpfrontPayment(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis)
             }
 
-            // DON'T create order in database yet - only create after consultation payment succeeds
-            console.log('🏥 Starting consultation payment (order will be saved after payment confirmation)')
+        } catch (error) {
+            console.error('❌ Error in payment flow:', error)
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Payment flow failed'
+            }
+        }
+    }
+
+    /**
+     * Create consultation-first payment flow (consultation product only)
+     */
+    private static async createConsultationFirstPayment(
+        userId: string,
+        cartItems: CartItemWithConsultation[],
+        paymentMethodId: string,
+        deliveryAddress: any,
+        sessionId: string | undefined,
+        analysis: PaymentFlowAnalysis
+    ): Promise<ConsultationPaymentResult> {
+
+        try {
+            console.log('🏥 Creating consultation-first payment flow')
+
+            // Create order first with payment_pending status
+            const order = await this.createPendingOrder(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis)
+            console.log('📦 Created pending order:', order.id)
 
             // Create Genie transaction for consultation product only
             const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
@@ -127,9 +151,8 @@ export class ConsultationPaymentFlowService {
 
             console.log('💳 Creating Genie transaction for consultation product:', consultationProductId)
 
-            // Create transaction with consultation product only
-            // Use simple localId format: consul_<userId>_<sessionId>
-            const localId = `consul_${userId}_${sessionId || 'no_session'}`
+            // Use order ID as localId for direct correlation
+            const localId = order.id
             const transactionResult = await GeniePaymentService.createTransactionWithProducts(
                 customerResult.customerId,
                 [{ id: consultationProductId, quantity: 1 }], // Consultation as a product
@@ -164,10 +187,11 @@ export class ConsultationPaymentFlowService {
                 }
             }
 
-            console.log('✅ Consultation payment initiated - order will be created when payment confirms')
+            console.log('✅ Consultation payment initiated - order created, awaiting payment confirmation')
 
             return {
                 success: true,
+                orderId: order.id,
                 transactionId: transactionResult.transaction.id,
                 redirectUrl
             }
@@ -182,142 +206,177 @@ export class ConsultationPaymentFlowService {
     }
 
     /**
-     * Create order in database for consultation flow
+     * Create full upfront payment flow (all products at once)
      */
-    private static async createConsultationOrder(
+    private static async createFullUpfrontPayment(
         userId: string,
         cartItems: CartItemWithConsultation[],
-        analysis: PaymentFlowAnalysis,
         paymentMethodId: string,
-        deliveryAddress: any
-    ): Promise<{ success: boolean; orderId?: string; error?: string }> {
+        deliveryAddress: any,
+        sessionId: string | undefined,
+        analysis: PaymentFlowAnalysis
+    ): Promise<ConsultationPaymentResult> {
 
         try {
-            // This would integrate with your order creation service
-            // For now, I'll outline the structure
+            console.log('💳 Creating full upfront payment flow')
 
-            const orderData = {
-                user_id: userId,
-                payment_flow_type: 'consultation_first',
-                total_amount: analysis.grandTotal,
-                consultation_fee_total: analysis.consultationFeeTotal,
-                payment_method_id: paymentMethodId,
-                delivery_address: deliveryAddress,
-                status: 'pending',
-                consultation_status: 'pending',
-                payment_status: 'consultation_pending'
+            // Create order first with payment_pending status
+            const order = await this.createPendingOrder(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis)
+            console.log('📦 Created pending order:', order.id)
+
+            // Create Genie transaction for all cart products
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+            const redirectUrl = sessionId
+                ? `${baseUrl}/checkout/${sessionId}/processing?type=upfront`
+                : `${baseUrl}/checkout/upfront-success`
+            const webhookUrl = `${baseUrl}/api/webhooks/genie-payments`
+
+            // Get user's Genie customer ID
+            const { customerResult } = await this.getUserGenieCustomer(userId)
+            if (!customerResult.success || !customerResult.customerId) {
+                return {
+                    success: false,
+                    error: 'User does not have Genie customer ID'
+                }
             }
 
-            // Call your order creation API
-            const response = await fetch('/api/orders', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...orderData,
-                    items: cartItems.map(item => ({
-                        product_id: item.product_id,
-                        quantity: item.quantity,
-                        unit_price: item.price,
-                        total_price: item.price * item.quantity
-                    }))
-                })
-            })
+            console.log('💳 Creating Genie transaction for all cart products')
 
-            if (!response.ok) {
-                throw new Error(`Order creation failed: ${response.status}`)
+            // Create transaction with all cart products
+            const genieProducts = cartItems.map(item => ({
+                id: item.product_id,
+                quantity: item.quantity
+            }))
+
+            // Use order ID as localId for direct correlation
+            const localId = order.id
+            const transactionResult = await GeniePaymentService.createTransactionWithProducts(
+                customerResult.customerId,
+                genieProducts,
+                webhookUrl,
+                redirectUrl,
+                localId,
+                `customer_${userId}`
+            )
+
+            console.log('Transaction result:', transactionResult)
+
+            if (!transactionResult.success || !transactionResult.transaction) {
+                return {
+                    success: false,
+                    error: transactionResult.error || 'Failed to create payment transaction'
+                }
             }
 
-            const result = await response.json()
+            console.log('🔄 Created Genie upfront transaction:', transactionResult.transaction.id)
+
+            // Charge the stored token for all products
+            const chargeResult = await GeniePaymentService.chargeStoredToken(
+                customerResult.customerId,
+                transactionResult.transaction.id,
+                paymentMethodId
+            )
+
+            if (!chargeResult.success) {
+                return {
+                    success: false,
+                    error: chargeResult.error || 'Failed to charge payment method'
+                }
+            }
+
+            console.log('✅ Full upfront payment initiated - order created, awaiting payment confirmation')
+
             return {
                 success: true,
-                orderId: result.orderId
+                orderId: order.id,
+                transactionId: transactionResult.transaction.id,
+                redirectUrl
             }
 
         } catch (error) {
+            console.error('❌ Error in full upfront payment flow:', error)
             return {
                 success: false,
-                error: error instanceof Error ? error.message : 'Failed to create order'
+                error: error instanceof Error ? error.message : 'Full upfront payment failed'
             }
         }
     }
 
+
     /**
-     * Link Genie transaction to order and create payment phase
+     * Create pending order in database before payment
      */
-    private static async linkTransactionToOrder(
-        orderId: string,
-        transactionId: string,
-        paymentMethodId: string
-    ): Promise<void> {
+    private static async createPendingOrder(
+        userId: string,
+        cartItems: CartItemWithConsultation[],
+        paymentMethodId: string,
+        deliveryAddress: any,
+        sessionId: string | undefined,
+        analysis: PaymentFlowAnalysis
+    ): Promise<any> {
+        const supabase = await createClient()
 
-        try {
-            const response = await fetch('/api/orders/link-transaction', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    orderId,
-                    transactionId,
-                    paymentMethodId,
-                    phaseType: 'consultation'
-                })
+        // Calculate total amount from cart items
+        const totalAmount = cartItems.reduce((total, item) => {
+            return total + (item.price * item.quantity)
+        }, 0)
+
+        // Create order with payment_pending status
+        const { data: order, error: orderError } = await supabase
+            .from('orders')
+            .insert({
+                user_id: userId,
+                status: 'payment_pending',
+                payment_flow_type: analysis.flowType,
+                consultation_status: analysis.flowType === 'consultation_first' ? 'pending' : null,
+                payment_status: 'pending',
+                total_amount: totalAmount,
+                consultation_fee_total: 0, // Consultation is now a product, not a separate fee
+                payment_method_id: paymentMethodId,
+                delivery_address: deliveryAddress || (analysis.flowType === 'consultation_first' ? {
+                    type: 'consultation_pending',
+                    note: 'Address will be collected after physician approval'
+                } : deliveryAddress),
+                session_id: sessionId,
+                cart_snapshot: cartItems,
+                metadata: {
+                    flow_analysis: analysis,
+                    created_via: 'payment_flow_service'
+                }
             })
+            .select()
+            .single()
 
-            if (!response.ok) {
-                throw new Error(`Failed to link transaction to order: ${response.status}`)
+        if (orderError) {
+            console.error('❌ Order creation error:', orderError)
+            throw new Error(`Failed to create order: ${orderError.message}`)
+        }
+
+        // Create order items from cart snapshot
+        if (cartItems.length > 0) {
+            const orderItemsData = cartItems.map(item => ({
+                order_id: order.id,
+                product_id: item.product_id,
+                quantity: item.quantity,
+                unit_price: item.price,
+                total_price: item.price * item.quantity
+            }))
+
+            const { error: itemsError } = await supabase
+                .from('order_items')
+                .insert(orderItemsData)
+
+            if (itemsError) {
+                console.error('❌ Order items creation error:', itemsError)
+                // Cleanup: delete the order if items creation fails
+                await supabase.from('orders').delete().eq('id', order.id)
+                throw new Error(`Failed to create order items: ${itemsError.message}`)
             }
-
-        } catch (error) {
-            console.error('Error linking transaction to order:', error)
-            throw error
         }
+
+        return order
     }
 
-    /**
-     * Cancel order if payment setup fails
-     */
-    private static async cancelOrder(orderId: string, reason: string): Promise<void> {
-        try {
-            await fetch(`/api/orders/${orderId}/cancel`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reason })
-            })
-        } catch (error) {
-            console.error('Error cancelling order:', error)
-        }
-    }
-
-    /**
-     * Get user's Genie customer ID
-     */
-    // private static async getUserGenieCustomer(userId: string): Promise<{
-    //   customerResult: { success: boolean; customerId?: string; error?: string }
-    // }> {
-    //   // This would fetch from your user profile
-    //   // Placeholder implementation
-    //   try {
-    //     const response = await fetch(`/api/users/${userId}/genie-customer`)
-    //     if (!response.ok) {
-    //       throw new Error('Failed to get Genie customer ID')
-    //     }
-
-    //     const data = await response.json()
-    //     console.log('Retrieved Genie customer ID:', data)
-    //     return {
-    //       customerResult: {
-    //         success: true,
-    //         customerId: data.genieCustomerId
-    //       }
-    //     }
-    //   } catch (error) {
-    //     return {
-    //       customerResult: {
-    //         success: false,
-    //         error: error instanceof Error ? error.message : 'Failed to get customer'
-    //       }
-    //     }
-    //   }
-    // }
     private static async getUserGenieCustomer(userId: string) {
         try {
             const supabase = await createClient()
