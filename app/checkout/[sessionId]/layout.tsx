@@ -1,5 +1,5 @@
 import { CheckoutSessionProvider } from '@/contexts/checkout-session-context'
-import { Header } from '@/components/layout/header'
+import { CheckoutHeader } from '@/components/layout/checkout-header'
 import { Suspense } from 'react'
 
 interface CheckoutLayoutProps {
@@ -12,11 +12,11 @@ export default async function CheckoutLayout({ children, params }: CheckoutLayou
 
   return (
     <div className="min-h-screen bg-neutral-100">
-      {/* Header */}
-      <Header variant="light" />
+      {/* Checkout Header */}
+      <CheckoutHeader variant="light" />
       
       {/* Main Content */}
-      <div className="container mx-auto px-3 py-5 pt-24">
+      <div className="container mx-auto px-3 py-5 pt-20">
         <CheckoutSessionProvider sessionToken={sessionId}>
           <Suspense fallback={<CheckoutLoadingSkeleton />}>
             {children}

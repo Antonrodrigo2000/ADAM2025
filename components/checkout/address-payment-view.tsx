@@ -53,6 +53,7 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
     const [paymentCards, setPaymentCards] = useState<PaymentCard[]>([])
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null)
     const [isLoadingPayments, setIsLoadingPayments] = useState(true)
+    const [isAddingCard, setIsAddingCard] = useState(false)
     const [consultationValidation, setConsultationValidation] = useState<ConsultationValidationResult>({
         isValid: true,
         missingHealthVerticals: [],
@@ -98,9 +99,13 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
 
                 setPaymentCards(formattedCards)
 
-                // Auto-select default payment method
+                // Auto-select default payment method if:
+                // 1. None is currently selected, OR
+                // 2. Currently selected card no longer exists (e.g., after adding new default card)
                 const defaultMethod = formattedCards.find((card: { isDefault: any }) => card.isDefault)
-                if (defaultMethod) {
+                const currentSelectionExists = selectedPaymentMethod && formattedCards.some((card: PaymentCard) => card.id === selectedPaymentMethod)
+                
+                if (defaultMethod && (!selectedPaymentMethod || !currentSelectionExists)) {
                     setSelectedPaymentMethod(defaultMethod.id)
                 }
             } else {
@@ -111,7 +116,7 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
         } finally {
             setIsLoadingPayments(false)
         }
-    }, [user])
+    }, [user, selectedPaymentMethod])
 
     // Load payment methods from API on component mount
     useEffect(() => {
@@ -122,6 +127,7 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
     useEffect(() => {
         const handleFocus = () => {
             if (user) {
+                setIsAddingCard(false) // Reset loading state when user returns
                 loadPaymentMethods()
             }
         }
@@ -227,6 +233,7 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
     const handleAddCard = async () => {
         if (!user) return
 
+        setIsAddingCard(true)
         try {
             const url = sessionId
                 ? `/api/payment-methods/add-card?sessionId=${sessionId}`
@@ -250,6 +257,7 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
             }
         } catch (error) {
             console.error('Error initiating add card flow:', error)
+            setIsAddingCard(false)
             // You could show a toast notification here
         }
     }
@@ -278,6 +286,7 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
                 onSelectPaymentMethod={setSelectedPaymentMethod}
                 onAddCard={handleAddCard}
                 isLoadingPayments={isLoadingPayments}
+                isAddingCard={isAddingCard}
                 user={user}
             />
 

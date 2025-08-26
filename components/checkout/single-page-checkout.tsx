@@ -74,7 +74,16 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
     const [checkoutCompleted, setCheckoutCompleted] = useState(false)
     const [errors, setErrors] = useState<ValidationErrors>({})
     const { state: cartState, actions: cartActions } = useCart()
-    const { state: quizState } = useQuiz()
+    
+    // Safely use quiz context - it may not be available for unauthenticated checkout
+    let quizState = null
+    try {
+        const quizContext = useQuiz()
+        quizState = quizContext?.state
+    } catch (error) {
+        // QuizProvider not available - continue without quiz data
+        console.log('Quiz context not available for checkout')
+    }
 
     const [formData, setFormData] = useState<FormData>({
         email: "",
@@ -219,7 +228,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                 postcode: formData.postcode,
                 country: 'Sri Lanka',
             },
-            quizResponses: quizState.answers, // Send as-is, server handles images
+            quizResponses: quizState?.answers || {}, // Send as-is, server handles images
             agreedToTerms: formData.agreeToTerms,
             agreedToMarketing: !formData.marketingOptOut,
         })
@@ -247,7 +256,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                 marketingOptOut: formData.marketingOptOut,
                 cartItems: cartState.items,
                 cartTotal: cartState.total,
-                quizResponses: quizState.answers, // Send as-is, server handles images
+                quizResponses: quizState?.answers || {}, // Send as-is, server handles images
             }),
         })
 
@@ -337,7 +346,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Create Account Section */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                     <div className="flex items-center mb-6">
                         <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold mr-3">
                             1
@@ -412,7 +421,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                         </div>
 
                         {/* Legal Names */}
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="legalFirstName" className="text-sm font-medium" theme="light">Legal first name</Label>
                                 <Input
@@ -447,7 +456,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                         </p>
 
                         {/* NIC and Date of Birth */}
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="nic" className="text-sm font-medium" theme="light">NIC Number</Label>
                                 <Input
@@ -480,7 +489,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                         </div>
 
                         {/* Phone Number and Sex */}
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="phoneNumber" className="text-sm font-medium" theme="light">Phone number</Label>
                                 <Input
@@ -519,7 +528,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                 </div>
 
                 {/* Delivery Address Section */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                     <div className="flex items-center mb-6">
                         <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold mr-3">
                             2
@@ -536,7 +545,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
 
                     <div className="space-y-4">
                         {/* Postcode and City */}
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="postcode" className="text-sm font-medium" theme="light">Postcode</Label>
                                 <Input
@@ -650,7 +659,7 @@ export function SinglePageCheckout({ onComplete, sessionId }: SinglePageCheckout
                 </div>
 
                 {/* Submit Button */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                     <Button
                         type="submit"
                         disabled={isSubmitting || cartState.items.length === 0}

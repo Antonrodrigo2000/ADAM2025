@@ -105,8 +105,8 @@ export function EnhancedCheckout({ user, isAuthenticated }: EnhancedCheckoutProp
             <Header variant="light" />
 
             {/* Main Content - with top padding for fixed header */}
-            <div className="container mx-auto px-3 py-5 pt-24">
-                <div className="grid lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5 pt-24">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-5 max-w-6xl mx-auto">
                     {/* Left side - Checkout Flow */}
                     <div className="lg:col-span-2 space-y-5">
                         {error && (

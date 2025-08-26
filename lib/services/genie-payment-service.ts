@@ -1,3 +1,5 @@
+import { createClient } from '@/lib/supabase/server'
+
 interface GenieCustomer {
     name: string
     email: string
@@ -17,7 +19,7 @@ interface GenieTransaction {
     tokenizationDetails?: {
         tokenize: boolean
         paymentType: 'UNSCHEDULED' | 'RECURRING'
-        recurringFrequency?: 'UNSCHEDULED' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY' | 'AD-HOC'
+        recurringFrequency?: 'UNSCHEDULED' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY' | 'AD_HOC'
     }
     addCardToVault?: boolean
     provider?: string
@@ -122,8 +124,8 @@ export class GeniePaymentService {
                 provider: 'card_payments',
                 tokenizationDetails: {
                     tokenize: true,
-                    paymentType: 'UNSCHEDULED',
-                    recurringFrequency: 'AD-HOC'
+                    paymentType: 'RECURRING',
+                    recurringFrequency: 'AD_HOC'
                 },
                 paymentPortalExperience: {
                     externalWebsiteTermsAccepted: true,
@@ -238,7 +240,7 @@ export class GeniePaymentService {
     static async chargeStoredToken(
         customerId: string,
         transactionId: string,
-        tokenId?: string
+        paymentMethodId?: string
     ): Promise<{ success: boolean; error?: string }> {
         try {
             const chargeData: any = {
@@ -246,9 +248,24 @@ export class GeniePaymentService {
                 transactionId,
             }
 
-            // Add tokenId if specified, otherwise default token will be used
-            if (tokenId) {
-                chargeData.tokenId = tokenId
+            // Pull genie_token_id from Supabase using paymentMethodId
+            if (paymentMethodId) {
+                const supabase = await createClient()
+                const { data: paymentMethod, error } = await supabase
+                    .from('user_payment_methods')
+                    .select('gateway_metadata')
+                    .eq('id', paymentMethodId)
+                    .single()
+
+                if (error || !paymentMethod) {
+                    console.error('Failed to fetch payment method:', error)
+                    return { success: false, error: 'Payment method not found' }
+                }
+
+                const genieTokenId = paymentMethod.gateway_metadata?.genie_token_id
+                if (genieTokenId) {
+                    chargeData.tokenId = genieTokenId
+                }
             }
 
             const response = await fetch(`${this.BASE_URL}/public-customers/charge`, {
@@ -268,7 +285,15 @@ export class GeniePaymentService {
                 return { success: false, error: `Failed to charge token: ${response.status} - ${errorText}` }
             }
 
-            return { success: true }
+            const responseData = await response.json()
+            console.log('✅ Successfully charged stored token - Transaction ID:', responseData.id, 'State:', responseData.state)
+            return {
+                success: true,
+                transactionId: responseData.id,
+                state: responseData.state,
+                amount: responseData.amount,
+                currency: responseData.currency
+            }
         } catch (error) {
             console.error('Error charging stored token:', error)
             return { success: false, error: 'Network error charging token' }
@@ -305,7 +330,15 @@ export class GeniePaymentService {
                         numberOfItems: product.quantity
                     }))
                 },
-                sendCustomerEmailReceipt: true
+                sendCustomerEmailReceipt: true,
+                // addCardToVault: false,
+                // provider: 'card_payments',
+                tokenizationDetails: {
+                    tokenize: false,
+                    paymentType: 'RECURRING',
+                    recurringFrequency: 'AD_HOC'
+                },
+                //allowRetry: true
             }
 
             console.log('📦 Creating order-based transaction - Genie will calculate amount from products')

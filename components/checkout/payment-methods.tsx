@@ -21,6 +21,7 @@ interface PaymentMethodsProps {
     onSelectPaymentMethod: (id: string) => void
     onAddCard: () => void
     isLoadingPayments: boolean
+    isAddingCard?: boolean
     user: any
 }
 
@@ -30,6 +31,7 @@ export function PaymentMethods({
     onSelectPaymentMethod, 
     onAddCard, 
     isLoadingPayments, 
+    isAddingCard = false,
     user 
 }: PaymentMethodsProps) {
     const hasCards = paymentCards.length > 0
@@ -50,10 +52,10 @@ export function PaymentMethods({
                         size="sm" 
                         className="text-sm"
                         onClick={onAddCard}
-                        disabled={!user}
+                        disabled={!user || isAddingCard}
                     >
                         <Plus className="w-4 h-4 mr-2" />
-                        Add Card
+                        {isAddingCard ? 'Adding...' : 'Add Card'}
                     </Button>
                 )}
             </div>
@@ -119,11 +121,11 @@ export function PaymentMethods({
                                 size="sm"
                                 onClick={onAddCard}
                                 variant={"default"}
-                                disabled={!user}
+                                disabled={!user || isAddingCard}
                                 className="px-6 bg-orange-500 hover:bg-orange-600 text-white"
                             >
                                 <Plus className="w-4 h-4 mr-2" />
-                                Add Payment Method
+                                {isAddingCard ? 'Adding...' : 'Add Payment Method'}
                             </Button>
                         </div>
                     </>

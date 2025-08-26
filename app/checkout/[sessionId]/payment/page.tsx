@@ -138,10 +138,14 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
 
     setIsProcessing(true)
     try {
-      // Update session to processing step
+      // Immediately navigate to processing page for better UX
+      const processingUrl = `/checkout/${sessionId}/processing`
+      router.push(processingUrl)
+
+      // Update session to processing step (in background)
       await progressToStep('processing')
 
-      // Call payment API
+      // Call payment API (in background)
       const response = await fetch('/api/checkout/address-payment/process-payment', {
         method: 'POST',
         headers: {
@@ -158,11 +162,12 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
 
       const result = await response.json()
 
-      if (result.success) {
-        // Navigate to processing page
-        router.push(`/checkout/${sessionId}/processing`)
-      } else {
-        throw new Error(result.error || 'Payment processing failed')
+      if (result.success && result.redirect_url) {
+        // Payment API succeeded - update the processing page URL with proper query params
+        router.replace(result.redirect_url)
+      } else if (!result.success) {
+        // If payment fails, redirect back to payment page with error
+        router.push(`/checkout/${sessionId}/payment?error=${encodeURIComponent(result.error || 'Payment failed')}`)
       }
     } catch (error) {
       console.error('Payment error:', error)

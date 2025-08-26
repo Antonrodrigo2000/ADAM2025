@@ -1,20 +1,15 @@
 "use client"
 
 import React from "react"
-import { X } from 'lucide-react'
-import { useCart } from '@/contexts/cart-context'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { CartItem } from './cart-item'
-import { CartSummary } from './cart-summary'
-import { EmptyCart } from './empty-cart'
+import { useRouter } from "next/navigation"
+import { useCart } from "@/contexts/cart-context"
+import { CartPageHeader } from "./cart-page-header"
+import { CartItem } from "./cart-item"
+import { CartSummary } from "./cart-summary"
+import { EmptyCartPage } from "./empty-cart-page"
 
-interface CartSidebarProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
+export function CartContent() {
+  const router = useRouter()
   const { state, actions } = useCart()
   const [isCheckingOut, setIsCheckingOut] = React.useState(false)
 
@@ -55,7 +50,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
         },
         body: JSON.stringify({
           cart_items: cartItems,
-          source: 'cart_sidebar',
+          source: 'cart_page',
         }),
       })
 
@@ -67,51 +62,58 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       } else {
         console.error('Failed to create checkout session:', data.error)
         // Fallback to old checkout flow
-        window.location.href = '/checkout'
+        router.push('/checkout')
       }
     } catch (error) {
       console.error('Checkout error:', error)
       setIsCheckingOut(false)
       // Fallback to old checkout flow
-      window.location.href = '/checkout'
+      router.push('/checkout')
     }
   }
 
-  return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-md flex flex-col">
-        <SheetHeader className="border-b border-gray-200 pb-4 pt-6 px-6">
-          <SheetTitle className="text-left">
-            Shopping Cart ({state.items.length})
-          </SheetTitle>
-        </SheetHeader>
+  const handleContinueShopping = () => {
+    router.push('/products')
+  }
 
+  // Empty cart state
+  if (state.items.length === 0) {
+    return <EmptyCartPage />
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 md:py-12">
+      <CartPageHeader itemCount={state.items.length} />
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
-        <div className="flex-1 px-6 py-6 overflow-y-auto">
-          {state.items.length === 0 ? (
-            <EmptyCart />
-          ) : (
-            <div className="space-y-6">
-              {state.items.map((item) => (
-                <CartItem
-                  key={item.id}
-                  item={item}
-                  onQuantityChange={handleQuantityChange}
-                  onRemove={handleRemoveItem}
-                />
-              ))}
+        <div className="lg:col-span-2 space-y-6">
+          {state.items.map((item) => (
+            <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-6">
+              <CartItem
+                item={item}
+                onQuantityChange={handleQuantityChange}
+                onRemove={handleRemoveItem}
+              />
             </div>
-          )}
+          ))}
         </div>
 
-        {/* Cart Summary & Checkout */}
-        <CartSummary
-          items={state.items}
-          onCheckout={handleCheckout}
-          onContinueShopping={onClose}
-          isLoading={isCheckingOut}
-        />
-      </SheetContent>
-    </Sheet>
+        {/* Cart Summary */}
+        <div className="lg:col-span-1">
+          <div className="bg-white border border-gray-200 rounded-lg sticky top-24">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-xl font-semibold text-gray-900">Order Summary</h3>
+            </div>
+            <CartSummary
+              items={state.items}
+              onCheckout={handleCheckout}
+              onContinueShopping={handleContinueShopping}
+              isLoading={isCheckingOut}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

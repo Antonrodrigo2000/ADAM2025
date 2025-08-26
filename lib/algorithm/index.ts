@@ -11,11 +11,11 @@ export { algorithmRegistry, getRecommendations, validateResponses } from './regi
 // Import and register all algorithms
 import { algorithmRegistry } from './registry'
 import { hairLossAlgorithm } from './hair-loss-algorithm'
-import { erectileDysfunctionAlgorithm } from './erectile-dysfunction-algorithm'
+import { sexualHealthAlgorithm } from './sexual-health-algorithm'
 
 // Register all algorithms
 algorithmRegistry.register(hairLossAlgorithm)
-algorithmRegistry.register(erectileDysfunctionAlgorithm)
+algorithmRegistry.register(sexualHealthAlgorithm)
 
 console.log('🔬 Initialized algorithm registry with health verticals:', algorithmRegistry.getRegisteredVerticals())
 

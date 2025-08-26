@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     console.log('💰 Creating transaction for approved products (amount calculated by Genie)')
 
     // Create Genie transaction with specific products
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const webhookUrl = `${baseUrl}/api/webhooks/genie-payments`
 
     const transactionResult = await GeniePaymentService.createTransactionWithProducts(
