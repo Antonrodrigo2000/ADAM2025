@@ -1,90 +1,59 @@
-import { compressImage, getCompressionInfo, getOptimalCompressionOptions, needsCompression } from '@/helpers/image-compressor'
-import { createClient } from '../supabase/client'
-
-const BUCKET_NAME = process.env.NEXT_PUBLIC_SUPABASE_QUESTIONNAIRE_BUCKET!
+import { getBrowserSessionId } from '../utils/browser-session'
 
 export async function uploadImageToSupabase(
-    sessionId: string,
     questionId: string,
-    imageData: string | File
+    imageData: string | File | { name: string, size: number, type: string, data: string },
+    userId?: string,
+    browserSessionId?: string
 ): Promise<string> {
-    const supabase = createClient()
+    try {
+        // Convert various formats to File
+        let fileToUpload: File
+        
+        if (typeof imageData === 'string' && imageData.startsWith('data:')) {
+            // Base64 data URL
+            fileToUpload = base64ToFile(imageData, 'image.png')
+        } else if (imageData instanceof File) {
+            // Already a File object
+            fileToUpload = imageData
+        } else if (typeof imageData === 'object' && imageData !== null && 'data' in imageData && 'name' in imageData) {
+            // Quiz component format: { name, size, type, data }
+            fileToUpload = base64ToFile((imageData as any).data, (imageData as any).name)
+        } else {
+            console.error('Invalid image data format:', typeof imageData, imageData)
+            throw new Error('Invalid image data format')
+        }
 
-    const imageId = `${sessionId}_${questionId}_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
-    const fileName = `${imageId}.${getFileExtension(imageData)}`
+        // Get session ID for anonymous users
+        const sessionId = browserSessionId || (!userId ? getBrowserSessionId() : undefined)
 
-    let fileToUpload: File
+        // Create form data for API request
+        const formData = new FormData()
+        formData.append('file', fileToUpload)
+        formData.append('questionId', questionId)
+        if (sessionId) {
+            formData.append('browserSessionId', sessionId)
+        }
 
-    if (typeof imageData === 'string' && imageData.startsWith('data:')) {
-        fileToUpload = base64ToFile(imageData, fileName)
-    } else if (imageData instanceof File) {
-        fileToUpload = new File([imageData], fileName, { type: imageData.type })
-    } else {
-        throw new Error('Invalid image data format')
-    }
-
-    // Compress file if needed
-    if (needsCompression(fileToUpload, 100 * 1024)) {
-        // Get optimal compression options based on original size
-        const options = getOptimalCompressionOptions(fileToUpload.size, 100 * 1024);
-        const compressionResult = await compressImage(fileToUpload, options);
-        fileToUpload = compressionResult.file;
-        console.log('Compressed image:', getCompressionInfo(compressionResult.originalSize, compressionResult.compressedSize));
-    }
-
-    // Try to upload to the bucket
-    const { data, error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .upload(fileName, fileToUpload, {
-            cacheControl: '3600',
-            upsert: false
+        // Upload via server-side API (handles encryption securely)
+        const response = await fetch('/api/images/upload', {
+            method: 'POST',
+            body: formData
         })
 
-    if (error) {
-        // If bucket doesn't exist, try to create it first
-        if (error.message.includes('Bucket not found')) {
-            console.warn('bucket not found, attempting to create it...')
+        const result = await response.json()
 
-            const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
-                public: true,
-                allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'],
-                fileSizeLimit: 10485760 // 10MB
-            })
-
-            if (createError) {
-                console.error('Failed to create bucket:', createError)
-                throw new Error(`Failed to create bucket: ${createError.message}. Please create the '${BUCKET_NAME}' bucket manually in Supabase Dashboard.`)
-            }
-
-            // Retry upload after creating bucket
-            const { data: retryData, error: retryError } = await supabase.storage
-                .from(BUCKET_NAME)
-                .upload(fileName, fileToUpload, {
-                    cacheControl: '3600',
-                    upsert: false
-                })
-
-            if (retryError) {
-                console.error('Failed to upload after creating bucket:', retryError)
-                throw new Error(`Failed to upload image after creating bucket: ${retryError.message}. You may need to set up storage policies manually.`)
-            }
-
-            return retryData.path
+        if (!response.ok) {
+            throw new Error(result.error || 'Upload failed')
         }
 
-        // Handle other common errors
-        if (error.message.includes('The resource was not found')) {
-            throw new Error(`Storage bucket '${BUCKET_NAME}' not found. Please create it in Supabase Dashboard.`)
-        }
+        console.log('✅ Image uploaded successfully:', result.supabasePath)
+        return result.supabasePath
 
-        if (error.message.includes('insufficient_privilege') || error.message.includes('access denied')) {
-            throw new Error(`Access denied to storage bucket. Please check your storage policies for the '${BUCKET_NAME}' bucket.`)
-        }
-
-        throw new Error(`Failed to upload image: ${error.message}`)
+    } catch (error) {
+        console.error('❌ Upload failed:', error)
+        throw error
     }
-
-    return data.path
 }
 
 function getFileExtension(imageData: string | File): string {

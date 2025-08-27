@@ -1,5 +1,6 @@
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { medplumService } from '@/lib/emed/emed-service'
+import { getDecryptedImageAsBase64FromSupabase } from '@/lib/storage/encrypted-image-retrieval'
 
 export async function submitQuestionnaireToEmed(userId: string, cartItems: any[]): Promise<void> {
     console.log('📋 Submitting questionnaire to emed for user:', userId)
@@ -74,37 +75,25 @@ export async function submitQuestionnaireToEmed(userId: string, cartItems: any[]
             const photos = await extractPhotosFromResponses(userResponse.responses, supabase)
             console.log('📸 DEBUG: Extracted photos:', photos.length, 'photos found')
             
-            // Convert photos to base64 data for emed using Supabase download (handles RLS correctly)
+            // Convert encrypted photos to base64 data for emed using decryption service
             const photosWithData = await Promise.all(photos.map(async (photo, index) => {
                 try {
                     // Extract the storage path from the URL or use the original supabasePath if available
                     const storagePath = photo.supabasePath || photo.url.split('/').pop()
-                    console.log(`📸 DEBUG: Downloading image ${index + 1}/${photos.length} from storage path:`, storagePath)
+                    console.log(`📸 DEBUG: Downloading and decrypting image ${index + 1}/${photos.length} from storage path:`, storagePath)
                     
-                    const { data, error } = await supabase.storage
-                        .from(process.env.SUPABASE_QUESTIONNAIRE_BUCKET!)
-                        .download(storagePath)
+                    // Download and decrypt the image using the dedicated service
+                    const base64 = await getDecryptedImageAsBase64FromSupabase(storagePath)
                     
-                    if (error) {
-                        throw new Error(`Supabase storage error: ${error.message}`)
-                    }
-                    
-                    if (!data) {
-                        throw new Error('No data received from storage')
-                    }
-                    
-                    const buffer = await data.arrayBuffer()
-                    const base64 = Buffer.from(buffer).toString('base64')
-                    
-                    console.log(`📸 DEBUG: Converted image ${index + 1} to base64, size: ${Math.round(base64.length * 0.75 / 1024)}KB`)
+                    console.log(`📸 DEBUG: Decrypted and converted image ${index + 1} to base64, size: ${Math.round(base64.length * 0.75 / 1024)}KB`)
                     
                     return {
                         ...photo,
                         dataBase64: base64,
-                        size: buffer.byteLength
+                        size: Buffer.from(base64, 'base64').length
                     }
                 } catch (error) {
-                    console.error(`📸 ERROR: Failed to download image ${index + 1}:`, error)
+                    console.error(`📸 ERROR: Failed to download/decrypt image ${index + 1}:`, error)
                     return null
                 }
             }))

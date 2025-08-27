@@ -145,11 +145,11 @@ async function processAnswerValue(
     try {
         // Handle single image
         if (typeof value === 'string' && value.startsWith('data:image/')) {
-            const result = await supabaseImageStorage.storeImage(sessionId, questionId, value)
+            const result = await supabaseImageStorage.storeImage(questionId, value, undefined, sessionId)
             return { type: 'image_reference', imageId: result.imageId, supabasePath: result.supabasePath }
 
         } else if (value instanceof File && value.type.startsWith('image/')) {
-            const result = await supabaseImageStorage.storeImage(sessionId, questionId, value)
+            const result = await supabaseImageStorage.storeImage(questionId, value, undefined, sessionId)
             return { type: 'image_reference', imageId: result.imageId, supabasePath: result.supabasePath, metadata: { name: value.name, size: value.size, fileType: value.type } }
 
         } else if (value && typeof value === 'object' &&
@@ -158,7 +158,7 @@ async function processAnswerValue(
             typeof value.data === 'string' && value.data.startsWith('data:image/')) {
 
             // Handle file object from QuestionCard - store the base64 data
-            const result = await supabaseImageStorage.storeImage(sessionId, questionId, value.data)
+            const result = await supabaseImageStorage.storeImage(questionId, value.data, undefined, sessionId)
             const resultWithMetadata = {
                 type: 'image_reference',
                 imageId: result.imageId,
@@ -178,13 +178,13 @@ async function processAnswerValue(
                             item.name && item.size && item.type && item.data &&
                             typeof item.type === 'string' && item.type.startsWith('image/') &&
                             typeof item.data === 'string' && item.data.startsWith('data:image/')) {
-                            const result = await supabaseImageStorage.storeImage(sessionId, `${questionId}_${index}`, item.data)
+                            const result = await supabaseImageStorage.storeImage(`${questionId}_${index}`, item.data, undefined, sessionId)
                             const resultWithMetadata = { type: 'image_reference', imageId: result.imageId, supabasePath: result.supabasePath, metadata: { name: item.name, size: item.size, fileType: item.type } }
                             
                             return resultWithMetadata
                         } else {
                             // Handle other image types (base64 strings, File objects)
-                            const result = await supabaseImageStorage.storeImage(sessionId, `${questionId}_${index}`, item)
+                            const result = await supabaseImageStorage.storeImage(`${questionId}_${index}`, item, undefined, sessionId)
                             return { type: 'image_reference', imageId: result.imageId, supabasePath: result.supabasePath }
                         }
                     }

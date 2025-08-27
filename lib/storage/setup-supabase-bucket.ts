@@ -21,7 +21,7 @@ export async function createTempImagesBucket(): Promise<{ success: boolean; mess
     
     // Create the bucket
     const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
-      public: true,
+      public: false, // Private bucket with RLS policies
       allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'],
       fileSizeLimit: 10485760 // 10MB
     })

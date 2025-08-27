@@ -1,6 +1,7 @@
 'use client'
 
 import { useCheckoutSession } from '@/contexts/checkout-session-context'
+import { QuizProvider } from '@/contexts/quiz-context'
 import { SinglePageCheckout } from '@/components/checkout/single-page-checkout'
 import { CheckoutProgressIndicator } from '@/components/checkout/checkout-progress-indicator'
 import { SessionOrderSummary } from '@/components/checkout/session-order-summary'
@@ -24,6 +25,17 @@ export default function InformationPage({ params }: { params: Promise<{ sessionI
       router.replace(`/checkout/${sessionId}/payment`)
     }
   }, [session?.user_id, sessionId, router])
+
+  // Extract health vertical from session cart items
+  const getHealthVerticalFromSession = (session: any): string => {
+    if (!session?.cart_items || session.cart_items.length === 0) {
+      return 'hair-loss' // Default fallback
+    }
+    
+    // Get the first health vertical from cart items
+    const healthVertical = session.cart_items.find((item: any) => item.health_vertical_slug)?.health_vertical_slug
+    return healthVertical || 'hair-loss' // Fallback to hair-loss if not found
+  }
 
   const handleSignupComplete = async (result: any) => {
     if (result.success) {
@@ -65,30 +77,34 @@ export default function InformationPage({ params }: { params: Promise<{ sessionI
     )
   }
 
+  const healthVertical = getHealthVerticalFromSession(session)
+
   return (
-    <div className="grid lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
-      {/* Left side - Information Collection */}
-      <div className="lg:col-span-2 space-y-5">
-        <CheckoutProgressIndicator 
-          currentStep="information" 
-          isAuthenticated={!!session.user_id} 
-        />
+    <QuizProvider healthVertical={healthVertical}>
+      <div className="grid lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
+        {/* Left side - Information Collection */}
+        <div className="lg:col-span-2 space-y-5">
+          <CheckoutProgressIndicator 
+            currentStep="information" 
+            isAuthenticated={!!session.user_id} 
+          />
 
 
-        {/* Signup Form */}
-        <SinglePageCheckout 
-          sessionId={sessionId}
-          onComplete={handleSignupComplete}
-        />
-      </div>
+          {/* Signup Form */}
+          <SinglePageCheckout 
+            sessionId={sessionId}
+            onComplete={handleSignupComplete}
+          />
+        </div>
 
-      {/* Right side - Order Summary */}
-      <div className="lg:col-span-1">
-        <div className="lg:sticky lg:top-5">
-          <SessionOrderSummary session={session} />
+        {/* Right side - Order Summary */}
+        <div className="lg:col-span-1">
+          <div className="lg:sticky lg:top-5">
+            <SessionOrderSummary session={session} />
+          </div>
         </div>
       </div>
-    </div>
+    </QuizProvider>
   )
 }
 

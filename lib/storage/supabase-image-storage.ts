@@ -24,11 +24,11 @@ interface ImageData {
 }
 
 class SupabaseImageStorageService {
-    async storeImage(sessionId: string, questionId: string, imageData: string | File): Promise<{ imageId: string, supabasePath: string }> {
+    async storeImage(questionId: string, imageData: string | File, userId?: string, browserSessionId?: string): Promise<{ imageId: string, supabasePath: string }> {
         try {
-            const supabasePath = await uploadImageToSupabase(sessionId, questionId, imageData)
+            const supabasePath = await uploadImageToSupabase(questionId, imageData, userId, browserSessionId)
 
-            const imageId = `${sessionId}_${questionId}_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
+            const imageId = `${questionId}_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
 
             let metadata: { name?: string; size?: number; fileType?: string } | undefined
             if (imageData instanceof File) {
@@ -39,7 +39,7 @@ class SupabaseImageStorageService {
                 }
             }
 
-            storeImageReference(sessionId, questionId, imageId, supabasePath, metadata)
+            storeImageReference(browserSessionId || 'direct', questionId, imageId, supabasePath, metadata)
 
             return { imageId, supabasePath }
         } catch (error) {
@@ -129,12 +129,12 @@ class SupabaseImageStorageService {
         }
     }
 
-    async deleteImagesBySession(sessionId: string): Promise<void> {
+    async deleteImagesBySession(sessionId: string, userId?: string): Promise<void> {
         try {
             const references = removeSessionImageReferences(sessionId)
 
             if (references.length > 0) {
-                await deleteImagesBySessionFromSupabase(sessionId)
+                await deleteImagesBySessionFromSupabase(sessionId, userId)
             }
         } catch (error) {
             throw new Error(`Failed to delete session images: ${error}`)

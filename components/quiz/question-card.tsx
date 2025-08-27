@@ -4,6 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { Upload, X } from "lucide-react"
 import type { Question } from "@/data/types/question"
+import { compressImage } from "@/helpers/image-compressor"
 
 interface QuestionCardProps {
     question: Question
@@ -20,28 +21,49 @@ export function QuestionCard({ question, value, onChange, error }: QuestionCardP
 
         const fileArray = Array.from(files)
 
-        // Convert files to base64 for localStorage compatibility
+        // Compress and convert files to base64 for localStorage compatibility
         const fileDataPromises = fileArray.map(async (file) => {
-            return new Promise<{ name: string, size: number, type: string, data: string }>((resolve, reject) => {
-                const reader = new FileReader()
-                reader.onload = () => {
-                    resolve({
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        data: reader.result as string
-                    })
+            try {
+                // Compress the image first (client-side)
+                const compressionResult = await compressImage(file, {
+                    targetSize: 100 * 1024, // 100KB target
+                    quality: 0.8,
+                    maxWidth: 1920,
+                    maxHeight: 1080
+                })
+
+                // Use the compressed file's data URL directly
+                return {
+                    name: file.name,
+                    size: compressionResult.compressedSize,
+                    type: compressionResult.file.type,
+                    data: compressionResult.dataUrl
                 }
-                reader.onerror = reject
-                reader.readAsDataURL(file)
-            })
+            } catch (error) {
+                console.error('Compression failed, using original file:', error)
+                
+                // Fallback to original file if compression fails
+                return new Promise<{ name: string, size: number, type: string, data: string }>((resolve, reject) => {
+                    const reader = new FileReader()
+                    reader.onload = () => {
+                        resolve({
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            data: reader.result as string
+                        })
+                    }
+                    reader.onerror = reject
+                    reader.readAsDataURL(file)
+                })
+            }
         })
 
         try {
             const fileDataArray = await Promise.all(fileDataPromises)
             onChange(fileDataArray)
         } catch (error) {
-            console.error('Error converting files to base64:', error)
+            console.error('Error processing files:', error)
         }
     }
 
