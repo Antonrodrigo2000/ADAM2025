@@ -333,10 +333,12 @@ export class PaymentFlowService {
                 total_amount: totalAmount,
                 consultation_fee_total: 0, // Consultation is now a product, not a separate fee
                 payment_method_id: paymentMethodId,
-                delivery_address: deliveryAddress || (analysis.flowType === 'consultation_first' ? {
-                    type: 'consultation_pending',
-                    note: 'Address will be collected after physician approval'
-                } : deliveryAddress),
+                delivery_address: deliveryAddress || {
+                    type: analysis.flowType === 'consultation_first' ? 'consultation_pending' : 'address_required',
+                    note: analysis.flowType === 'consultation_first' 
+                        ? 'Address will be collected after physician approval'
+                        : 'Address will be collected separately'
+                },
                 session_id: sessionId,
                 cart_snapshot: cartItems,
                 metadata: {

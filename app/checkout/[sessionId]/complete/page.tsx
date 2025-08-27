@@ -70,6 +70,8 @@ export default function CompletePage({ params }: { params: Promise<{ sessionId: 
       <div className="mt-6">
         <CompletionSuccess
           sessionToken={session.session_token}
+          cartItems={session.cart_items}
+          cartTotal={session.cart_total}
           onDashboard={() => router.push('/dashboard')}
           onContinueShopping={() => router.push('/products')}
         />
