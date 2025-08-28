@@ -4,9 +4,10 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/utils/style/utils"
-import { ShoppingCart } from "lucide-react"
+import { ShoppingCart, User } from "lucide-react"
 import { useCart } from "@/contexts/cart-context"
 import { CartSidebar } from "@/components/cart/cart-sidebar"
+import { createClient } from "@/lib/supabase/client"
 
 interface HeaderProps {
   variant?: "default" | "dark" | "light"
@@ -15,15 +16,46 @@ interface HeaderProps {
 export function Header({ variant = "default" }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const { state } = useCart()
+  const supabase = createClient()
 
   useEffect(() => {
+    let ticking = false
+    
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20)
+          ticking = false
+        })
+        ticking = true
+      }
     }
-    window.addEventListener("scroll", handleScroll)
+    
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  useEffect(() => {
+    // Get initial user
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      setLoading(false)
+    }
+    
+    getUser()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase.auth])
 
   const isDark = variant === "dark"
   const isLight = variant === "light"
@@ -42,60 +74,123 @@ export function Header({ variant = "default" }: HeaderProps) {
               : "bg-transparent",
       )}
     >
-      <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-        <Link
-          href="/"
-          className={cn(
-            "text-2xl font-extrabold font-logo tracking-tighter uppercase",
-            isDark || isLight ? "text-black" : "text-white",
-          )}
-        >
-          ADAM
-        </Link>
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+      <div className="container mx-auto flex h-20 items-center px-4 md:px-6">
+        <div className="flex items-center space-x-8">
           <Link
-            href="/products/minoxidil-5-solution"
-            className={cn("hover:text-blue-600 transition-colors", isDark || isLight ? "text-gray-700" : "text-white")}
+            href="/"
+            className={cn(
+              "text-2xl font-extrabold font-logo tracking-tighter uppercase",
+              isDark || isLight ? "text-black" : "text-white",
+            )}
+          >
+            ADAM
+          </Link>
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+          <Link
+            href="/questionnaire/hair-loss"
+            className={cn(
+              "relative px-4 py-2 rounded-full transition-all duration-300 hover:scale-105",
+              isDark || isLight 
+                ? "text-gray-700 hover:text-primary hover:bg-primary/10" 
+                : "text-white/90 hover:text-white hover:bg-white/20"
+            )}
           >
             Hair Loss
           </Link>
           <Link
-            href="/products/minoxidil-finasteride-combination-spray"
-            className={cn("hover:text-blue-600 transition-colors", isDark || isLight ? "text-gray-700" : "text-white")}
+            href="/products"
+            className={cn(
+              "relative px-4 py-2 rounded-full transition-all duration-300 hover:scale-105",
+              isDark || isLight 
+                ? "text-gray-700 hover:text-primary hover:bg-primary/10" 
+                : "text-white/90 hover:text-white hover:bg-white/20"
+            )}
           >
-            Skincare
+            Products
           </Link>
-          <Link
-            href="#sexual-health"
-            className={cn("hover:text-blue-600 transition-colors", isDark || isLight ? "text-gray-700" : "text-white")}
+          {/* <Link
+            href="#how-it-works"
+            className={cn(
+              "relative px-4 py-2 rounded-full transition-all duration-300 hover:scale-105",
+              isDark || isLight 
+                ? "text-gray-700 hover:text-primary hover:bg-primary/10" 
+                : "text-white/90 hover:text-white hover:bg-white/20"
+            )}
+            onClick={(e) => {
+              e.preventDefault()
+              document.querySelector('#how-it-works')?.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+              })
+            }}
           >
-            Sexual Health
-          </Link>
-        </nav>
-        <div className="flex items-center space-x-4">
+            How It Works
+          </Link> */}
+          </nav>
+        </div>
+        
+        <div className="flex items-center space-x-4 ml-auto">
           {/* Cart Button */}
           <button
             onClick={() => setIsCartOpen(true)}
             className={cn(
-              "relative p-2 rounded-full transition-colors",
+              "relative p-2.5 rounded-full transition-all duration-300 hover:scale-105",
               isDark || isLight 
-                ? "text-gray-700 hover:text-blue-600 hover:bg-gray-100" 
-                : "text-white hover:text-blue-400 hover:bg-white/10"
+                ? "text-gray-700 hover:text-primary hover:bg-primary/10" 
+                : "text-white/90 hover:text-white hover:bg-white/20"
             )}
           >
-            <ShoppingCart className="h-6 w-6" />
+            <ShoppingCart className="h-5 w-5" />
             {cartItemCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+              <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                 {cartItemCount > 99 ? '99+' : cartItemCount}
               </span>
             )}
           </button>
           
-          {/* Get Started Button - only show if cart is empty */}
-          {cartItemCount === 0 && (
-            <Button asChild variant={isDark || isLight ? "default" : "ghost"} className="rounded-full">
-              <Link href="/auth">Get Started</Link>
-            </Button>
+          {/* Auth Buttons */}
+          {!loading && (
+            <>
+              {user ? (
+                /* Profile Button for logged-in users */
+                <Link 
+                  href="/dashboard"
+                  className={cn(
+                    "relative w-10 h-10 rounded-full border-2 border-primary bg-primary/10 flex items-center justify-center transition-all duration-300 hover:scale-105 hover:bg-primary/20 hover:border-primary/60",
+                    isDark || isLight 
+                      ? "text-primary" 
+                      : "text-white bg-white/10 border-white/30 hover:bg-white/20 hover:border-white/50"
+                  )}
+                >
+                  <User className="h-5 w-5" />
+                </Link>
+              ) : (
+                /* Login & Signup for non-logged-in users */
+                <>
+                  <Button 
+                    asChild 
+                    variant="ghost" 
+                    size="sm"
+                    className={cn(
+                      "rounded-full px-4 py-2 font-medium transition-all duration-300 hover:scale-105",
+                      isDark || isLight 
+                        ? "text-gray-700 hover:text-primary hover:bg-primary/10" 
+                        : "text-white/90 hover:text-white hover:bg-white/20"
+                    )}
+                  >
+                    <Link href="/login">Login</Link>
+                  </Button>
+                  
+                  <Button 
+                    asChild 
+                    size="sm"
+                    className="rounded-full px-6 py-2 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  >
+                    <Link href="/signup">Get Started</Link>
+                  </Button>
+                </>
+              )}
+            </>
           )}
         </div>
       </div>

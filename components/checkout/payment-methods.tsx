@@ -38,26 +38,29 @@ export function PaymentMethods({
 
     return (
         <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                    <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold mr-3">
-                        2
+            <div className="mb-6">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div className="flex items-center min-w-0">
+                        <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold mr-3 flex-shrink-0">
+                            2
+                        </div>
+                        <h2 className="text-lg md:text-xl font-semibold text-neutral-800 truncate">Payment method</h2>
                     </div>
-                    <h2 className="text-xl font-semibold text-neutral-800">Payment method</h2>
+                    {/* Add Card button - responsive positioning */}
+                    {hasCards && (
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-sm flex-shrink-0"
+                            onClick={onAddCard}
+                            disabled={!user || isAddingCard}
+                        >
+                            <Plus className="w-4 h-4 mr-1 md:mr-2" />
+                            <span className="hidden sm:inline">{isAddingCard ? 'Adding...' : 'Add Card'}</span>
+                            <span className="sm:hidden">{isAddingCard ? 'Adding...' : 'Add'}</span>
+                        </Button>
+                    )}
                 </div>
-                {/* Top-right Add Card button - only shown when cards exist */}
-                {hasCards && (
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="text-sm"
-                        onClick={onAddCard}
-                        disabled={!user || isAddingCard}
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        {isAddingCard ? 'Adding...' : 'Add Card'}
-                    </Button>
-                )}
             </div>
 
             <div className="space-y-4">
