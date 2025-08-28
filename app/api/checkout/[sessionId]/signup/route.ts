@@ -7,7 +7,7 @@ import { updateCheckoutSession } from './services/session-update'
 import { logCheckoutEvent } from './services/event-logging'
 import { saveQuestionnaireResponses } from './services/questionnaire-saving'
 import { createGenieCustomer, buildGenieCustomerData } from './services/genie-customer-creation'
-import { ImageMigrationService } from '@/lib/services/image-migration-service'
+import { ApplicationImageMigration, type ApplicationMigrationResult } from '@/lib/services/application-image-migration'
 
 // POST /api/checkout/[sessionId]/signup - Create new user and integrate with eMed
 export async function POST(
@@ -84,29 +84,29 @@ export async function POST(
     const genieResult = await createGenieCustomer(genieCustomerData)
     // Continue even if Genie customer creation fails - don't break the signup flow
 
-    // Step 3: Migrate anonymous images to user folder if any exist
-    let imageMigrationResult = { success: true, migratedCount: 0, updatedResponsesCount: 0 }
+    // Step 3: Save questionnaire responses from localStorage if available
+    const questionnaireResult = await saveQuestionnaireResponses(userResult.userId, body)
+    // Continue even if questionnaire saving fails - don't break the signup flow
+
+    // Step 4: Migrate anonymous images to user folder if any exist (AFTER questionnaire responses are saved)
+    let imageMigrationResult: ApplicationMigrationResult = { success: true, storageFilesMigrated: 0, storageFailures: 0, databasePathsUpdated: 0 }
     if (body.questionnaireData?.sessionId) {
       try {
         console.log(`🔄 Migrating images for user ${userResult.userId} from session ${body.questionnaireData.sessionId}`)
-        imageMigrationResult = await ImageMigrationService.migrateAnonymousImagesToUser(
+        imageMigrationResult = await ApplicationImageMigration.migrateAnonymousImages(
           userResult.userId,
           body.questionnaireData.sessionId
         )
         if (imageMigrationResult.success) {
-          console.log(`✅ Image migration successful: ${imageMigrationResult.migratedCount} images migrated`)
+          console.log(`✅ Image migration successful: ${imageMigrationResult.storageFilesMigrated} files migrated, ${imageMigrationResult.databasePathsUpdated} database paths updated`)
         } else {
-          console.warn(`⚠️ Image migration partially failed or no images to migrate`)
+          console.warn(`⚠️ Image migration failed: ${imageMigrationResult.error || 'Unknown error'}`)
         }
       } catch (error) {
         console.error('❌ Image migration failed:', error)
         // Continue with signup even if migration fails
       }
     }
-
-    // Step 4: Save questionnaire responses from localStorage if available
-    const questionnaireResult = await saveQuestionnaireResponses(userResult.userId, body)
-    // Continue even if questionnaire saving fails - don't break the signup flow
 
     // Step 5: eMed Integration - Create patient and get patient ID
     const emedResult = await handleEmedIntegration(userResult.userId, body)
@@ -143,9 +143,9 @@ export async function POST(
       genie_integration_success: genieResult.success,
       questionnaire_saved: questionnaireResult.success,
       questionnaire_health_vertical: body.questionnaireData?.healthVertical,
-      images_migrated: imageMigrationResult.migratedCount,
+      images_migrated: imageMigrationResult.storageFilesMigrated,
       images_migration_success: imageMigrationResult.success,
-      responses_updated: imageMigrationResult.updatedResponsesCount,
+      responses_updated: imageMigrationResult.databasePathsUpdated,
       is_new_user: true,
       ip_address: request.headers.get('x-forwarded-for') || '0.0.0.0',
       user_agent: request.headers.get('user-agent') || ''

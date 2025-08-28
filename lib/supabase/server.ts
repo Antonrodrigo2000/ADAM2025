@@ -31,8 +31,20 @@ export async function createClient() {
 // Service role client for admin operations (bypasses RLS)
 export function createServiceRoleClient() {
     const { createClient } = require('@supabase/supabase-js')
-    return createClient(
+    
+    // Create client with service role key - this should automatically bypass RLS
+    const client = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+            auth: {
+                persistSession: false,
+                autoRefreshToken: false,
+                detectSessionInUrl: false,
+            }
+        }
     )
+
+    console.log('🔧 SERVICE ROLE: Created client with service role key (should bypass RLS automatically)')
+    return client
 }
