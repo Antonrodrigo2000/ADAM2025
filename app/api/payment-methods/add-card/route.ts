@@ -48,13 +48,13 @@ export async function POST(request: NextRequest) {
 
       // Create Genie customer
       const customerData = {
-        name: `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'Customer',
+        name: `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim(),
         email: authUser.user.email,
         billingEmail: authUser.user.email,
-        billingAddress1: userProfile.address?.street || '123 Main Street',
-        billingCity: userProfile.address?.city || 'Colombo',
-        billingCountry: userProfile.address?.country || 'LK',
-        billingPostCode: userProfile.address?.postcode || '00100'
+        billingAddress1: userProfile.address?.street,
+        billingCity: userProfile.address?.city,
+        billingCountry: userProfile.address?.country,
+        billingPostCode: userProfile.address?.postcode
       }
 
       const customerResult = await GeniePaymentService.createCustomer(customerData)
