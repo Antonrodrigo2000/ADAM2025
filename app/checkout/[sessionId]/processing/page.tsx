@@ -23,7 +23,7 @@ export default function ProcessingPage({ params }: { params: Promise<{ sessionId
     params.then(({ sessionId: id }) => setSessionId(id))
   }, [params])
 
-  const type = searchParams.get('type') // 'consultation' or 'products'
+  const type = searchParams.get('type') // 'consultation' or 'upfront'
   const transactionId = searchParams.get('tx')
 
   useEffect(() => {
@@ -119,85 +119,89 @@ export default function ProcessingPage({ params }: { params: Promise<{ sessionId
           // Start polling after a short delay
           setTimeout(pollForOrder, 2000)
 
-        } else if (type === 'products') {
-          // Check for product payment confirmation
-          setStatusMessage('Processing product payment...')
+        } else if (type === 'upfront') {
+          // Check for upfront payment confirmation via webhook
+          setStatusMessage('Processing upfront payment...')
           
           let attempts = 0
-          const maxAttempts = 30
+          const maxAttempts = 30 // 30 seconds timeout
           
-          const pollForProductPayment = async (): Promise<void> => {
+          const pollForUpfrontPayment = async (): Promise<void> => {
             attempts++
-            console.log(`🔍 Polling for product payment, attempt ${attempts}/${maxAttempts}`)
+            console.log(`🔍 Polling for upfront payment confirmation, attempt ${attempts}/${maxAttempts}`)
 
-            // Look for order with product payment ID
+            // Look for order with matching genie_transaction_id (set by webhook)
             const { data: order, error } = await supabase
               .from('orders')
-              .select('id, status, product_payment_status, payment_status')
-              .eq('product_payment_id', transactionId)
+              .select('id, status, payment_status, genie_transaction_id, payment_flow_type')
+              .eq('genie_transaction_id', transactionId)
+              .eq('payment_flow_type', 'full_upfront')
               .single()
 
+            if (error) {
+              console.log('❌ Query error:', error)
+            }
+
             if (order) {
-              console.log('✅ Product payment order found:', order)
+              console.log('✅ Upfront payment order found:', order)
               setOrderId(order.id)
               
-              if (order.product_payment_status === 'paid' || order.payment_status === 'fully_paid') {
+              if (order.payment_status === 'confirmed' && order.status === 'processing') {
                 setPaymentStatus('success')
-                setStatusMessage('Payment successful! Your order is being processed.')
+                setStatusMessage('Payment successful! Your order is being processed and will be shipped soon.')
+                
+                // Update session to completed status
+                try {
+                  await supabase
+                    .from('checkout_sessions')
+                    .update({
+                      status: 'completed',
+                      current_step: 'processing',
+                      completed_at: new Date().toISOString()
+                    })
+                    .eq('session_token', sessionId)
+                  
+                  console.log('✅ Session updated to completed status for upfront payment')
+                } catch (error) {
+                  console.error('❌ Failed to update session status:', error)
+                }
                 
                 // Redirect to success page after 3 seconds
                 setTimeout(() => {
-                  router.push(`/checkout/${sessionId}/complete?order=${order.id}&type=complete`)
+                  router.push(`/checkout/${sessionId}/complete?order=${order.id}&type=upfront`)
                 }, 3000)
                 return
-              } else if (order.product_payment_status === 'failed') {
+              } else if (order.status === 'payment_failed' || order.payment_status === 'failed') {
                 setPaymentStatus('failed')
-                setStatusMessage('Product payment failed. Please try again.')
-                setProcessingError('Product payment failed')
+                setStatusMessage('Upfront payment failed. Please try again.')
+                setProcessingError('Upfront payment failed')
+                return
+              } else if (order.status === 'cancelled' || order.payment_status === 'cancelled') {
+                setPaymentStatus('failed')
+                setStatusMessage('Payment was cancelled. Please try again.')
+                setProcessingError('Payment cancelled')
                 return
               }
             }
 
             if (attempts < maxAttempts) {
-              setTimeout(pollForProductPayment, 1000)
+              setTimeout(pollForUpfrontPayment, 1000) // Poll every second
             } else {
               setPaymentStatus('failed')
               setStatusMessage('Payment processing timeout. Please contact support if your payment was charged.')
-              setProcessingError('Payment processing timeout')
+              setProcessingError('Payment processing timeout - webhook may have failed')
             }
           }
 
-          setTimeout(pollForProductPayment, 2000)
+          // Start polling after a short delay
+          setTimeout(pollForUpfrontPayment, 2000)
 
         } else {
-          // Fallback to legacy processing logic
-          setStatusMessage('Processing your order...')
-          
-          // Wait a bit to show processing state
-          await new Promise(resolve => setTimeout(resolve, 3000))
-
-          // Complete the session
-          const response = await fetch(`/api/checkout/${sessionId}/complete`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              payment_intent_id: `pi_${Date.now()}`,
-              order_id: `order_${Date.now()}`,
-            }),
-          })
-
-          const result = await response.json()
-
-          if (result.success) {
-            setPaymentStatus('success')
-            setTimeout(() => {
-              router.push(`/checkout/${sessionId}/complete`)
-            }, 2000)
-          } else {
-            throw new Error(result.error || 'Payment completion failed')
-          }
+          // Unknown payment type - show error
+          console.error('❌ Unknown payment type:', type, 'Expected: consultation or upfront')
+          setPaymentStatus('failed')
+          setStatusMessage('Invalid payment type. Please contact support.')
+          setProcessingError(`Unknown payment type: ${type}`)
         }
 
       } catch (error) {
@@ -278,6 +282,7 @@ export default function ProcessingPage({ params }: { params: Promise<{ sessionId
           orderId={orderId ?? undefined}
           transactionId={transactionId ?? undefined}
         />
+
       </div>
     </div>
   )
