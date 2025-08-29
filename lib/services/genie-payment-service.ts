@@ -241,7 +241,7 @@ export class GeniePaymentService {
         customerId: string,
         transactionId: string,
         paymentMethodId?: string
-    ): Promise<{ success: boolean; error?: string }> {
+    ): Promise<{ success: boolean; error?: string; transactionId?: string; state?: string; amount?: number; currency?: string }> {
         try {
             const chargeData: any = {
                 customerId,
