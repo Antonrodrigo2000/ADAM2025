@@ -2,7 +2,7 @@ import { createServiceRoleClient } from '@/lib/supabase/server'
 import { medplumService } from '@/lib/emed/emed-service'
 import { getDecryptedImageAsBase64FromSupabase } from '@/lib/storage/encrypted-image-retrieval'
 
-export async function submitQuestionnaireToEmed(userId: string, cartItems: any[]): Promise<void> {
+export async function submitQuestionnaireToEmed(userId: string, cartItems: any[], orderId?: string): Promise<void> {
     console.log('📋 Submitting questionnaire to emed for user:', userId)
 
     const supabase = createServiceRoleClient()
@@ -119,7 +119,8 @@ export async function submitQuestionnaireToEmed(userId: string, cartItems: any[]
                     price: item.price,
                     productName: item.productName
                 })),
-                healthVertical
+                healthVertical,
+                orderId
             )
 
             if (result.success) {

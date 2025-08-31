@@ -46,9 +46,10 @@ interface AddressPaymentViewProps {
     sessionId?: string
     onPayNow: (addressId?: string, paymentMethodId?: string) => void
     isProcessing?: boolean
+    consentComponent?: React.ReactNode
 }
 
-export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, isProcessing = false }: AddressPaymentViewProps) {
+export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, isProcessing = false, consentComponent }: AddressPaymentViewProps) {
     const [userAddress, setUserAddress] = useState<Address | null>(null)
     const [paymentCards, setPaymentCards] = useState<PaymentCard[]>([])
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null)
@@ -294,6 +295,9 @@ export function AddressPaymentView({ user, cartItems = [], sessionId, onPayNow, 
             {consultationValidation.requiresConsultation && !consultationValidation.isValid && (
                 <ConsultationWarning missingHealthVerticals={consultationValidation.missingHealthVerticals} />
             )}
+
+            {/* Consent Checkboxes - Right above Pay Now button */}
+            {consentComponent}
 
             {/* Payment Action Section */}
             <PaymentAction

@@ -32,7 +32,7 @@ export function CartContent() {
       const cartItems = state.items.map(item => ({
         product_id: item.productId,
         quantity: item.quantity,
-        price: item.totalPrice,
+        price: item.price,
         productName: item.productName,
         variantName: item.variantName,
         image: item.image,
@@ -40,6 +40,8 @@ export function CartContent() {
         months: item.months,
         consultationRequired: item.consultationRequired,
         consultationFee: item.consultationFee,
+        product_type: item.product_type,
+        is_adhoc_quantity: item.is_adhoc_quantity,
       }))
 
       // Create checkout session

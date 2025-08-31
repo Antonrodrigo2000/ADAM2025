@@ -14,6 +14,8 @@ interface CreateSessionRequest {
     months?: number
     consultationRequired?: boolean
     consultationFee?: number
+    product_type?: 'normal' | 'consultation_required' | 'consultation_adhoc'
+    is_adhoc_quantity?: boolean
   }>
   source?: string
   marketing_source?: string

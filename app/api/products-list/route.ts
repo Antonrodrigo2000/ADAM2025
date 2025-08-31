@@ -167,6 +167,8 @@ export async function GET(request: NextRequest) {
                 dosage: productMetadata?.dosage || '',
                 consultation_fee: productMetadata?.consultation_fee || 2000,
                 consultation_required: productMetadata?.consultation_required || false,
+                product_type: productMetadata?.product_type || 'normal',
+                is_adhoc_quantity: productMetadata?.is_adhoc_quantity || false,
                 health_vertical_id: productMetadata?.health_vertical_id || '',
                 health_vertical: productMetadata?.health_verticals ? {
                     name: productMetadata.health_verticals.name,

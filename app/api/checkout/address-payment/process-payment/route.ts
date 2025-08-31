@@ -6,7 +6,7 @@ import { PaymentFlowService } from '@/lib/services/payment-flow'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { sessionId, paymentMethodId, cartItems } = body
+    const { sessionId, paymentMethodId, cartItems, consents } = body
 
     // Get authenticated user
     const user = await getServerUser()
@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
       effectiveCartItems,
       paymentMethodId,
       session.shipping_address || session.customer_info?.address,
-      sessionId
+      sessionId,
+      consents
     )
 
     if (!paymentResult.success) {

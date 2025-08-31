@@ -37,6 +37,8 @@ interface ProductCardProps {
     review_count: number
     consultation_required: boolean
     consultation_fee: number
+    product_type: 'normal' | 'consultation_required' | 'consultation_adhoc'
+    is_adhoc_quantity: boolean
     active_ingredient: string
     dosage: string
     benefits: string[]
@@ -72,7 +74,9 @@ export function ProductCard({ product, isRecommended }: ProductCardProps) {
         monthlyPrice: product.price,
         totalPrice: product.price,
         consultationFee: product.consultation_fee,
-        consultationRequired: product.consultation_required
+        consultationRequired: product.consultation_required,
+        product_type: product.product_type,
+        is_adhoc_quantity: product.is_adhoc_quantity
       })
     } catch (error) {
       console.error('Failed to add to cart:', error)

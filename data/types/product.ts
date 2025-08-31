@@ -8,6 +8,8 @@ export interface Product {
   price: number
   consultation_fee: number
   consultation_required: boolean
+  product_type?: 'normal' | 'consultation_required' | 'consultation_adhoc'
+  is_adhoc_quantity?: boolean
   health_vertical_id: string
   health_vertical: {
     name: string

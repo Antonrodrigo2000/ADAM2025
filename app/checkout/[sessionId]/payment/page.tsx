@@ -5,6 +5,8 @@ import { AddressPaymentView } from '@/components/checkout/address-payment-view'
 import { CheckoutProgressIndicator } from '@/components/checkout/checkout-progress-indicator'
 import { SessionOrderSummary } from '@/components/checkout/session-order-summary'
 import { ConsultationPaymentWarning } from '@/components/checkout/consultation-payment-warning'
+import { ConsentWarning } from '@/components/checkout/consent-warning'
+import { AdhocPricingTable } from '@/components/checkout/adhoc-pricing-table'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -17,6 +19,7 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
   const [sessionId, setSessionId] = useState<string>('')
   const [showCardAddedMessage, setShowCardAddedMessage] = useState(false)
   const [customerInfo, setCustomerInfo] = useState<any>(null)
+  const [consentValid, setConsentValid] = useState(true)
 
   // Extract sessionId from params
   useEffect(() => {
@@ -132,9 +135,20 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
 
   // Check if any items require consultation
   const hasConsultationItems = session?.cart_items.some(item => item.consultationRequired) || false
+  
+  // Check if any items have adhoc pricing
+  const hasAdhocItems = session?.cart_items.some(item => 
+    (item as any).product_type === 'consultation_adhoc' || (item as any).is_adhoc_quantity
+  ) || false
 
   const handlePayNow = async (addressId?: string, paymentMethodId?: string) => {
     if (!session) return
+
+    // Check consent validation before proceeding
+    if (!consentValid) {
+      alert('Please confirm all required consents before proceeding.')
+      return
+    }
 
     setIsProcessing(true)
     try {
@@ -157,6 +171,11 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
           paymentMethodId,
           cartItems: session.cart_items,
           cartTotal: session.cart_total,
+          consents: {
+            normalProductsConsent: true, // We validate this is true before allowing payment
+            consultationConsent: session.cart_items.some(item => item.consultationRequired),
+            adhocPricingConsent: false // Will be true when we have adhoc products
+          }
         }),
       })
 
@@ -227,6 +246,9 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
         {/* Consultation Payment Warning */}
         <ConsultationPaymentWarning hasConsultationItems={hasConsultationItems} />
 
+        {/* Adhoc Pricing Table */}
+        <AdhocPricingTable hasAdhocProducts={hasAdhocItems} />
+
         {/* Customer Info Summary (from information step or database) */}
         {(customerInfo || (session.customer_info && session.customer_info.first_name)) && (
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -275,6 +297,27 @@ export default function PaymentPage({ params }: { params: Promise<{ sessionId: s
           sessionId={sessionId}
           onPayNow={handlePayNow}
           isProcessing={isProcessing}
+          consentComponent={
+            <ConsentWarning 
+              cartItems={session.cart_items.map(item => ({
+                id: item.product_id,
+                productId: item.product_id,
+                variantId: item.product_id,
+                productName: item.productName || '',
+                variantName: item.productName || '',
+                price: item.price,
+                quantity: item.quantity,
+                months: 1,
+                monthlyPrice: item.price,
+                totalPrice: item.price * item.quantity,
+                consultationFee: item.consultationFee || 0,
+                consultationRequired: item.consultationRequired || false,
+                product_type: (item as any).product_type || 'normal',
+                is_adhoc_quantity: (item as any).is_adhoc_quantity || false
+              }))}
+              onConsentChange={setConsentValid}
+            />
+          }
         />
       </div>
 

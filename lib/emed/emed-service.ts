@@ -120,7 +120,8 @@ export class MedplumService {
         photos: PhotoInput[],
         questionnaireData: { quizResponses: Record<string, any>; questions: any[] },
         cartItems: any[],
-        healthVertical?: string
+        healthVertical?: string,
+        orderId?: string
     ): Promise<MedplumResponse> {
         try {
             const binaryIds: string[] = []
@@ -151,7 +152,8 @@ export class MedplumService {
                 detectedHealthVertical,
                 cartItems,
                 process.env.EMED_ADAM_HEALTH_ORGANIZATION_ID,
-                patientId // Use patientId as customerId
+                patientId, // Use patientId as customerId
+                orderId
             )
 
             // Create QuestionnaireResponse with patient reference

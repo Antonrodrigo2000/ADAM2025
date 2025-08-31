@@ -282,7 +282,8 @@ export function buildQuestionnaireResponse(
         item: answers.map(answer => ({
             linkId: answer.linkId,
             text: answer.text, // Add question text
-            answer: answer.answer
+            answer: answer.answer,
+            ...(answer.item && { item: answer.item }) // Include nested items if present
         })),
     }
 
@@ -302,7 +303,8 @@ export function buildQuestionnaireInputFromDatabase(
     assessmentType: string,
     cartItems?: any[],
     organizationId?: string,
-    customerId?: string
+    customerId?: string,
+    orderId?: string
 ): QuestionnaireInput {
 
     const questionnaireId = getEmedHealthVerticleId(assessmentType)
@@ -318,6 +320,15 @@ export function buildQuestionnaireInputFromDatabase(
     })
 
     const answers: any[] = []
+
+    // Add order ID as the first item if provided
+    if (orderId) {
+        answers.push({
+            linkId: "orderId",
+            text: "Order ID for this assessment",
+            answer: [{ valueString: orderId }]
+        })
+    }
 
     // Convert each quiz response to FHIR format using question_property as linkId
     Object.entries(quizResponses).forEach(([questionId, response]) => {
@@ -375,17 +386,34 @@ export function buildQuestionnaireInputFromDatabase(
         }
     })
 
-    // Add cart items as a single questionnaire item
+    // Add cart items grouped by product with quantities
     if (cartItems && cartItems.length > 0) {
+        // Group cart items by productId and sum quantities
+        const groupedItems = cartItems.reduce((acc, item) => {
+            const key = item.productId
+            if (acc[key]) {
+                acc[key].quantity += item.quantity
+            } else {
+                acc[key] = {
+                    productId: item.productId,
+                    productName: item.productName,
+                    quantity: item.quantity
+                }
+            }
+            return acc
+        }, {} as Record<string, { productId: string; productName: string; quantity: number }>)
+
         const cartAnswer: any = {
             linkId: "selectedProducts",
             text: 'Selected products for purchase',
-            answer: cartItems.map(item => ({
-                valueCoding:{
-                    system: "https://api.emed.lk/adamhealth/products",
-                    code: item.productId,
-                    display: item.productName
-                }
+            item: Object.values(groupedItems).map((item: any) => ({
+                linkId: item.productId,
+                text: item.productName,
+                answer: [{
+                    valueQuantity: {
+                        value: item.quantity
+                    }
+                }]
             }))
         }
         answers.push(cartAnswer)

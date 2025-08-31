@@ -156,6 +156,8 @@ export async function GET(request: NextRequest) {
                 dosage: metadata?.dosage || '',
                 consultation_fee: metadata?.consultation_fee || 2000,
                 consultation_required: metadata?.consultation_required || false,
+                product_type: metadata?.product_type || 'normal',
+                is_adhoc_quantity: metadata?.is_adhoc_quantity || false,
                 health_vertical_id: metadata?.health_vertical_id || '',
                 health_vertical: metadata?.health_verticals ? {
                     name: metadata.health_verticals.name,

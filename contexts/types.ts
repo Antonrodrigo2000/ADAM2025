@@ -41,6 +41,9 @@ export interface CartItem {
   consultationRequired: boolean
   requiresQuestionnaire?: boolean // Whether this product requires questionnaire completion
   health_vertical_slug?: string // Health vertical slug (e.g., hair-loss)
+  // Product type and consent fields
+  product_type?: 'normal' | 'consultation_required' | 'consultation_adhoc'
+  is_adhoc_quantity?: boolean
   subscription?: {
     frequency: string
     isActive: boolean

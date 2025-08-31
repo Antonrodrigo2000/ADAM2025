@@ -86,7 +86,12 @@ export class PaymentFlowService {
         cartItems: CartItemWithConsultation[],
         paymentMethodId: string,
         deliveryAddress: any,
-        sessionId?: string
+        sessionId?: string,
+        consents?: {
+            normalProductsConsent?: boolean
+            consultationConsent?: boolean
+            adhocPricingConsent?: boolean
+        }
     ): Promise<ConsultationPaymentResult> {
 
         try {
@@ -96,9 +101,9 @@ export class PaymentFlowService {
             console.log(`🏥 Starting ${analysis.flowType} payment flow for user:`, userId)
 
             if (analysis.flowType === 'consultation_first') {
-                return await this.createConsultationFirstPayment(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis)
+                return await this.createConsultationFirstPayment(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis, consents)
             } else {
-                return await this.createFullUpfrontPayment(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis)
+                return await this.createFullUpfrontPayment(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis, consents)
             }
 
         } catch (error) {
@@ -119,14 +124,19 @@ export class PaymentFlowService {
         paymentMethodId: string,
         deliveryAddress: any,
         sessionId: string | undefined,
-        analysis: PaymentFlowAnalysis
+        analysis: PaymentFlowAnalysis,
+        consents?: {
+            normalProductsConsent?: boolean
+            consultationConsent?: boolean
+            adhocPricingConsent?: boolean
+        }
     ): Promise<ConsultationPaymentResult> {
 
         try {
             console.log('🏥 Creating consultation-first payment flow')
 
             // Create order first with payment_pending status
-            const order = await this.createPendingOrder(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis)
+            const order = await this.createPendingOrder(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis, consents)
             console.log('📦 Created pending order:', order.id)
 
             // Create Genie transaction for consultation product only
@@ -214,14 +224,19 @@ export class PaymentFlowService {
         paymentMethodId: string,
         deliveryAddress: any,
         sessionId: string | undefined,
-        analysis: PaymentFlowAnalysis
+        analysis: PaymentFlowAnalysis,
+        consents?: {
+            normalProductsConsent?: boolean
+            consultationConsent?: boolean
+            adhocPricingConsent?: boolean
+        }
     ): Promise<ConsultationPaymentResult> {
 
         try {
             console.log('💳 Creating full upfront payment flow')
 
             // Create order first with payment_pending status
-            const order = await this.createPendingOrder(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis)
+            const order = await this.createPendingOrder(userId, cartItems, paymentMethodId, deliveryAddress, sessionId, analysis, consents)
             console.log('📦 Created pending order:', order.id)
 
             // Create Genie transaction for all cart products
@@ -312,7 +327,12 @@ export class PaymentFlowService {
         paymentMethodId: string,
         deliveryAddress: any,
         sessionId: string | undefined,
-        analysis: PaymentFlowAnalysis
+        analysis: PaymentFlowAnalysis,
+        consents?: {
+            normalProductsConsent?: boolean
+            consultationConsent?: boolean
+            adhocPricingConsent?: boolean
+        }
     ): Promise<any> {
         const supabase = await createClient()
 
@@ -341,6 +361,9 @@ export class PaymentFlowService {
                 },
                 session_id: sessionId,
                 cart_snapshot: cartItems,
+                normal_products_consent: consents?.normalProductsConsent || false,
+                consultation_consent: consents?.consultationConsent || false,
+                adhoc_pricing_consent: consents?.adhocPricingConsent || false,
                 metadata: {
                     flow_analysis: analysis,
                     created_via: 'payment_flow_service'

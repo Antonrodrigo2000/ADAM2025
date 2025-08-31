@@ -36,6 +36,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 totalPrice: totalPrice,
                 consultationFee: 1000,
                 consultationRequired: product.consultation_required,
+                product_type: product.product_type,
+                is_adhoc_quantity: product.is_adhoc_quantity,
                 health_vertical_slug: product.health_vertical.slug,
                 image: product.images?.[0]?.url || '',
             })
@@ -109,7 +111,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                     <Separator />
                     <div className="flex justify-between items-center">
                         <span className="font-semibold text-gray-900">Total:</span>
-                        <span className="text-xl font-bold text-blue-600">LKR {(totalPrice + (product.prescription_required ? 1000 : 0)).toLocaleString()}</span>
+                        <span className="text-xl font-bold text-blue-600">LKR {(totalPrice + (product.consultation_required ? 1000 : 0)).toLocaleString()}</span>
                     </div>
                 </CardContent>
             </Card>

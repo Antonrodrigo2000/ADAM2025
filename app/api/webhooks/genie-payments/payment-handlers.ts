@@ -146,7 +146,7 @@ export async function handlePaymentConfirmed(supabase: any, data: GenieTransacti
         if (order.payment_flow_type === 'consultation_first') {
             try {
                 const { submitQuestionnaireToEmed } = await import('./emed-questionnaire')
-                await submitQuestionnaireToEmed(order.user_id, order.cart_snapshot || [])
+                await submitQuestionnaireToEmed(order.user_id, order.cart_snapshot || [], order.id)
                 console.log('✅ Emed questionnaire submitted for consultation order')
             } catch (emedError) {
                 console.error('❌ Emed submission failed (order still confirmed):', emedError)

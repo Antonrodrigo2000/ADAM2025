@@ -19,6 +19,8 @@ interface CheckoutSession {
     months?: number
     consultationRequired?: boolean
     consultationFee?: number
+    product_type?: 'normal' | 'consultation_required' | 'consultation_adhoc'
+    is_adhoc_quantity?: boolean
   }>
   cart_total: number
   customer_info?: any
