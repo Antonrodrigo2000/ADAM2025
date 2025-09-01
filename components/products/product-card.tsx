@@ -2,12 +2,13 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ShoppingCart, CheckCircle, Clock } from "lucide-react"
 import { useCart } from "@/contexts/cart-context"
+import { validateHealthVerticalCompatibility } from "@/lib/utils/cart-validation"
+import { ConsultationConflictModal } from "@/components/cart/consultation-conflict-modal"
 
 interface ProductCardProps {
   product: {
@@ -50,42 +51,64 @@ interface ProductCardProps {
 export function ProductCard({ product, isRecommended }: ProductCardProps) {
   const [imageLoading, setImageLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
-  const { actions } = useCart()
+  const [showConflictModal, setShowConflictModal] = useState(false)
+  const [validationResult, setValidationResult] = useState<any>(null)
+  const { actions, state } = useCart()
 
   const primaryImage = product.primary_image || product.images?.[0]?.url
   const hasDiscount = product.originalPrice > product.price
+
+  const addToCartDirectly = () => {
+    actions.addItem({
+      productId: product.id,
+      variantId: `${product.id}-standard`,
+      productName: product.name,
+      variantName: "Standard",
+      price: product.price,
+      originalPrice: product.originalPrice,
+      quantity: 1,
+      subscription: undefined,
+      selectedOptions: undefined,
+      image: primaryImage || "/placeholder-product.png",
+      months: 1,
+      monthlyPrice: product.price,
+      totalPrice: product.price,
+      consultationFee: product.consultation_fee,
+      consultationRequired: product.consultation_required,
+      product_type: product.product_type,
+      is_adhoc_quantity: product.is_adhoc_quantity,
+      health_vertical_slug: product.health_vertical?.slug
+    })
+  }
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault() // Prevent navigation when clicking the button
     
     try {
-      actions.addItem({
-        productId: product.id,
-        variantId: `${product.id}-standard`,
-        productName: product.name,
-        variantName: "Standard",
-        price: product.price,
-        originalPrice: product.originalPrice,
-        quantity: 1,
-        subscription: undefined,
-        selectedOptions: undefined,
-        image: primaryImage || "/placeholder-product.png",
-        months: 1,
-        monthlyPrice: product.price,
-        totalPrice: product.price,
-        consultationFee: product.consultation_fee,
+      // Validate health vertical compatibility
+      const validation = validateHealthVerticalCompatibility(state.items, {
         consultationRequired: product.consultation_required,
-        product_type: product.product_type,
-        is_adhoc_quantity: product.is_adhoc_quantity
+        health_vertical_slug: product.health_vertical?.slug
       })
+
+      if (!validation.isValid) {
+        // Show conflict modal
+        setValidationResult(validation)
+        setShowConflictModal(true)
+        return
+      }
+
+      // No conflict, add directly
+      addToCartDirectly()
     } catch (error) {
       console.error('Failed to add to cart:', error)
     }
   }
 
   return (
+    <>
     <Card className="group hover:shadow-lg transition-all duration-300 border-border/50 hover:border-border overflow-hidden h-full flex flex-col">
-      <Link href={`/products/${product.id}`} className="block flex-1">
+      <a href={`/products/${product.id}`} className="block flex-1">
         <CardContent className="p-0 h-full flex flex-col">
           {/* Image */}
           <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
@@ -184,7 +207,7 @@ export function ProductCard({ product, isRecommended }: ProductCardProps) {
             </div>
           </div>
         </CardContent>
-      </Link>
+      </a>
 
       {/* Action Button - Outside Link to prevent navigation when clicking */}
       <div className="p-4 pt-0">
@@ -199,5 +222,16 @@ export function ProductCard({ product, isRecommended }: ProductCardProps) {
         </Button>
       </div>
     </Card>
+
+    {/* Consultation Conflict Modal */}
+    <ConsultationConflictModal
+      isOpen={showConflictModal}
+      onClose={() => setShowConflictModal(false)}
+      currentVertical={validationResult?.currentVertical || ''}
+      conflictingVertical={validationResult?.conflictingVertical || ''}
+      productName={product.name}
+      onProceedWithClear={addToCartDirectly}
+    />
+    </>
   )
 }

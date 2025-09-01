@@ -91,7 +91,7 @@ export function ProductDetailPage({ product, isRecommended = false }: ProductDet
             {/* Related Products */}
             <div className="bg-white">
                 <div className="container mx-auto px-4 py-12">
-                    <RelatedProducts />
+                    <RelatedProducts currentProduct={product} />
                 </div>
             </div>
         </div>

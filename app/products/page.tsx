@@ -4,6 +4,7 @@ import { Suspense, use } from "react"
 import { ProductsListing } from "@/components/products/products-listing"
 import { ProductsHeader } from "@/components/products/products-header"
 import { Header } from "@/components/layout/header"
+import { Footer } from "@/components/layout/footer"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 interface ProductsPageProps {
@@ -44,6 +45,9 @@ export default function ProductsPage({ searchParams }: ProductsPageProps) {
           isRecommended={params.recommended === 'true'}
         />
       </Suspense>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }

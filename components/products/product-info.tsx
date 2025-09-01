@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import type { Product } from "@/data/types/product"
 import { useCart } from "@/contexts/cart-context"
+import { validateHealthVerticalCompatibility } from "@/lib/utils/cart-validation"
+import { ConsultationConflictModal } from "@/components/cart/consultation-conflict-modal"
 
 interface ProductInfoProps {
     product: Product
@@ -16,32 +18,52 @@ interface ProductInfoProps {
 export function ProductInfo({ product }: ProductInfoProps) {
     const [quantity, setQuantity] = useState(1)
     const [isAddingToCart, setIsAddingToCart] = useState(false)
-    const { actions } = useCart()
+    const [showConflictModal, setShowConflictModal] = useState(false)
+    const [validationResult, setValidationResult] = useState<any>(null)
+    const { actions, state } = useCart()
 
     const totalPrice = product.price * quantity
+
+    const addToCartDirectly = () => {
+        actions.addItem({
+            productId: product.id,
+            variantId: `${product.id}-standard`,
+            productName: product.name,
+            variantName: "Standard",
+            price: product.price,
+            monthlyPrice: product.price,
+            quantity: quantity,
+            months: 1,
+            totalPrice: totalPrice,
+            consultationFee: product.consultation_fee || 1000,
+            consultationRequired: product.consultation_required,
+            product_type: product.product_type,
+            is_adhoc_quantity: product.is_adhoc_quantity,
+            health_vertical_slug: product.health_vertical.slug,
+            image: product.images?.[0]?.url || '',
+        })
+    }
 
     const handleAddToCart = async () => {
         setIsAddingToCart(true)
 
         try {
-            actions.addItem({
-                productId: product.id,
-                variantId: `${product.id}-standard`,
-                productName: product.name,
-                variantName: "Standard",
-                price: product.price,
-                monthlyPrice: product.price,
-                quantity: quantity,
-                months: 1,
-                totalPrice: totalPrice,
-                consultationFee: 1000,
+            // Validate health vertical compatibility
+            const validation = validateHealthVerticalCompatibility(state.items, {
                 consultationRequired: product.consultation_required,
-                product_type: product.product_type,
-                is_adhoc_quantity: product.is_adhoc_quantity,
-                health_vertical_slug: product.health_vertical.slug,
-                image: product.images?.[0]?.url || '',
+                health_vertical_slug: product.health_vertical.slug
             })
 
+            if (!validation.isValid) {
+                // Show conflict modal
+                setValidationResult(validation)
+                setShowConflictModal(true)
+                setIsAddingToCart(false)
+                return
+            }
+
+            // No conflict, add directly
+            addToCartDirectly()
         } catch (error) {
             console.error('Failed to add to cart:', error)
         } finally {
@@ -50,6 +72,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
     }
 
     return (
+        <>
         <div className="space-y-6">
             {/* Product Title & Category */}
             <div className="space-y-4">
@@ -171,5 +194,16 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 </CardContent>
             </Card>
         </div>
+
+        {/* Consultation Conflict Modal */}
+        <ConsultationConflictModal
+            isOpen={showConflictModal}
+            onClose={() => setShowConflictModal(false)}
+            currentVertical={validationResult?.currentVertical || ''}
+            conflictingVertical={validationResult?.conflictingVertical || ''}
+            productName={product.name}
+            onProceedWithClear={addToCartDirectly}
+        />
+        </>
     )
 }

@@ -94,6 +94,15 @@
   .will-change-opacity {
     will-change: opacity;
   }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .animated-gradient {

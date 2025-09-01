@@ -40,7 +40,7 @@ export function DoctorReviewSection() {
             <Badge variant="secondary" className="mb-4 bg-primary/10 text-primary border-primary/20">
               How It Works
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-extrabold font-logo tracking-tighter mb-6 text-gray-900">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-gray-900">
               Simple, Professional Care
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
@@ -80,7 +80,7 @@ export function DoctorReviewSection() {
 
           {/* CTA Section */}
           <div className="bg-white rounded-2xl p-8 md:p-12 text-center shadow-sm border border-gray-200">
-            <h3 className="text-3xl font-extrabold font-logo tracking-tighter mb-4 text-gray-900">
+            <h3 className="text-3xl font-bold tracking-tight mb-4 text-gray-900">
               Ready to Get Started?
             </h3>
             <p className="text-xl mb-8 text-gray-600 max-w-xl mx-auto">

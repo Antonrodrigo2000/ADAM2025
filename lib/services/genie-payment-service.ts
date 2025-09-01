@@ -129,7 +129,7 @@ export class GeniePaymentService {
                 },
                 paymentPortalExperience: {
                     externalWebsiteTermsAccepted: true,
-                    externalWebsiteTermsUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://yourdomain.com'}/terms`,
+                    externalWebsiteTermsUrl: `${process.env.NEXT_PUBLIC_APP_URL}/terms`,
                     skipCustomerForm: true,
                     skipProviderSelection: true,
                     hideTermsAndConditions: true,
@@ -137,6 +137,8 @@ export class GeniePaymentService {
                 webhook: webhookUrl,
                 redirectUrl: redirectUrl
             }
+
+            console.log('Creating add card transaction with data:', JSON.stringify(transactionData, null, 2))
 
             const response = await fetch(`${this.BASE_URL}/public/v2/transactions`, {
                 method: 'POST',
@@ -152,6 +154,7 @@ export class GeniePaymentService {
             }
 
             const result = await response.json()
+            console.log('genie transaction response', JSON.stringify(result, null, 2))
             return { success: true, transaction: result }
         } catch (error) {
             console.error('Error creating add card transaction:', error)
